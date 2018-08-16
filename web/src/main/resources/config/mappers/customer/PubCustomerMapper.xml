@@ -1,0 +1,1030 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- pub_customer表:客户管理模块 -->
+<mapper namespace="com.company.common.dao.PubCustomerDao">
+	<!--返回MAP-->		
+	<resultMap id="PubCustomerResult" type="PubCustomer">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="sex" property="sex" />
+		<result column="vocation" property="vocation" />
+		<result column="birthday" property="birthday" />
+		<result column="nationality" property="nationality" />
+		<result column="native_place" property="nativePlace" />
+		<result column="cert_type" property="certType" />
+		<result column="cert_number" property="certNumber" />
+		<result column="cert_valid_time" property="certValidTime" />
+		<result column="mobile" property="mobile" />
+		<result column="fixed_phone" property="fixedPhone" />
+		<result column="email" property="email" />
+		<result column="area_id" property="areaId" />
+		<result column="live_address" property="liveAddress" />
+		<result column="household_address" property="householdAddress" />
+		<result column="education" property="education" />
+		<result column="work_status" property="workStatus" />
+		<result column="company" property="company" />
+		<result column="company_addr" property="companyAddr" />
+		<result column="company_pro" property="companyPro" />
+		<result column="company_phone" property="companyPhone" />
+		<result column="position" property="position" />
+		<result column="work_life" property="workLife" />
+		<result column="years_income" property="yearsIncome" />
+		<result column="type" property="type" />
+		<result column="credit_score" property="creditScore" />
+		<result column="marry_status" property="marryStatus" />
+		<result column="remark" property="remark" />
+		<result column="status" property="status" />
+		<result column="loans" property="loans" />
+		<result column="refusings" property="refusings" />
+		<result column="repayment_status" property="repaymentStatus" />
+		<result column="uuid" property="uuid" />
+		<result column="creator" property="creator" />
+		<result column="creator_name" property="creatorName" />
+		<result column="is_local_house" property="isLocalHouse" />
+		<result column="live_state" property="liveState" />
+		<result column="other_case" property="otherCase" />
+		<result column="live_zip_code" property="liveZipCode" />
+		<result column="household_zip_code" property="householdZipCode" />
+		<result column="company_zip_code" property="companyZipCode" />
+		<result column="department" property="department" />
+		<result column="in_time" property="inTime" />
+		<result column="customer_manager" property="customerManager" />
+		<result column="risk_level" property="riskLevel" />
+		<result column="photo_id" property="photoId" />
+		<result column="car_status" property="carStatus" />
+		<result column="rd_householdaddressid" property="rdHouseholdaddressid" />
+		<result column="rd_householddetailaddress" property="rdHouseholddetailaddress" />
+		<result column="healthy" property="healthy" />
+		<result column="spouse_iskown" property="spouseIskown" />
+		<result column="is_have_children" property="isHaveChildren" />
+		<result column="emergency_contact_number" property="emergencyContactNumber" />
+		<result column="is_self_support" property="isSelfSupport" />
+		<result column="create_time" property="createTime" />
+		<result column="salesman" property="salesman" />
+		<result column="age" property="age" />
+		<result column="children_num" property="childrenNum" />
+		<result column="feed_num" property="feedNum" />
+		<result column="household_area_id" property="householdAreaId" />
+		<result column="family_month_expenses" property="familyMonthExpenses" />
+		<result column="live_time" property="liveTime" />
+		<result column="come_city_date" property="comeCityDate" />
+		<result column="weixin" property="weixin" />
+		<result column="weibo" property="weibo" />
+		<result column="qq" property="qq" />
+		<result column="customer_source" property="customerSource" />
+		<result column="position_type" property="positionType" />
+		<result column="position_level" property="positionLevel" />
+		<result column="position_industry" property="positionIndustry" />
+		<result column="last_company" property="lastCompany" />
+		<result column="wages_type" property="wagesType" />
+		<result column="salary" property="salary" />
+		<result column="other_in" property="otherIn" />
+		<result column="grant_day" property="grantDay" />
+		<result column="management_type" property="managementType" />
+		<result column="management_name" property="managementName" />
+		<result column="company_build_time" property="companyBuildTime" />
+		<result column="share_scale" property="shareScale" />
+		<result column="employee_num" property="employeeNum" />
+		<result column="management_addr_type" property="managementAddrType" />
+		<result column="company_area_id" property="companyAreaId" />
+		<result column="team_manager" property="teamManager" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			name,
+			sex,
+			vocation,
+			birthday,
+			nationality,
+			native_place,
+			cert_type,
+			cert_number,
+			cert_valid_time,
+			mobile,
+			fixed_phone,
+			email,
+			area_id,
+			live_address,
+			household_address,
+			education,
+			work_status,
+			company,
+			company_addr,
+			company_pro,
+			company_phone,
+			position,
+			work_life,
+			years_income,
+			type,
+			credit_score,
+			marry_status,
+			remark,
+			status,
+			loans,
+			refusings,
+			repayment_status,
+			uuid,
+			creator,
+			creator_name,
+			is_local_house,
+			live_state,
+			other_case,
+			live_zip_code,
+			household_zip_code,
+			company_zip_code,
+			department,
+			in_time,
+			customer_manager,
+			risk_level,
+			photo_id,
+			car_status,
+			rd_householdaddressid,
+			rd_householddetailaddress,
+			healthy,
+			spouse_iskown,
+			is_have_children,
+			emergency_contact_number,
+			is_self_support,
+			create_time,
+			salesman,
+			age,
+			children_num,
+			feed_num,
+			household_area_id,
+			family_month_expenses,
+			live_time,
+			come_city_date,
+			weixin,
+			weibo,
+			qq,
+			customer_source,
+			position_type,
+			position_level,
+			position_industry,
+			last_company,
+			wages_type,
+			salary,
+			other_in,
+			grant_day,
+			management_type,
+			management_name,
+			company_build_time,
+			share_scale,
+			employee_num,
+			management_addr_type,
+			company_area_id,
+			team_manager			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="name !='' and name !=null">
+            	and name = #{name}
+            </if>
+            <if test="sex !='' and sex !=null">
+            	and sex = #{sex}
+            </if>
+            <if test="vocation !='' and vocation !=null">
+            	and vocation = #{vocation}
+            </if>
+            <if test="birthday !='' and birthday !=null">
+            	and birthday = #{birthday}
+            </if>
+            <if test="nationality !='' and nationality !=null">
+            	and nationality = #{nationality}
+            </if>
+            <if test="nativePlace !='' and nativePlace !=null">
+            	and native_place = #{nativePlace}
+            </if>
+            <if test="certType !='' and certType !=null">
+            	and cert_type = #{certType}
+            </if>
+            <if test="certNumber !='' and certNumber !=null">
+            	and cert_number = #{certNumber}
+            </if>
+            <if test="certValidTime !='' and certValidTime !=null">
+            	and cert_valid_time = #{certValidTime}
+            </if>
+            <if test="mobile !='' and mobile !=null">
+            	and mobile = #{mobile}
+            </if>
+            <if test="fixedPhone !='' and fixedPhone !=null">
+            	and fixed_phone = #{fixedPhone}
+            </if>
+            <if test="email !='' and email !=null">
+            	and email = #{email}
+            </if>
+            <if test="areaId !='' and areaId !=null">
+            	and area_id = #{areaId}
+            </if>
+            <if test="liveAddress !='' and liveAddress !=null">
+            	and live_address = #{liveAddress}
+            </if>
+            <if test="householdAddress !='' and householdAddress !=null">
+            	and household_address = #{householdAddress}
+            </if>
+            <if test="education !='' and education !=null">
+            	and education = #{education}
+            </if>
+            <if test="workStatus !='' and workStatus !=null">
+            	and work_status = #{workStatus}
+            </if>
+            <if test="company !='' and company !=null">
+            	and company = #{company}
+            </if>
+            <if test="companyAddr !='' and companyAddr !=null">
+            	and company_addr = #{companyAddr}
+            </if>
+            <if test="companyPro !='' and companyPro !=null">
+            	and company_pro = #{companyPro}
+            </if>
+            <if test="companyPhone !='' and companyPhone !=null">
+            	and company_phone = #{companyPhone}
+            </if>
+            <if test="position !='' and position !=null">
+            	and position = #{position}
+            </if>
+            <if test="workLife !='' and workLife !=null">
+            	and work_life = #{workLife}
+            </if>
+            <if test="yearsIncome !='' and yearsIncome !=null">
+            	and years_income = #{yearsIncome}
+            </if>
+            <if test="type !='' and type !=null">
+            	and type = #{type}
+            </if>
+            <if test="creditScore !='' and creditScore !=null">
+            	and credit_score = #{creditScore}
+            </if>
+            <if test="marryStatus !='' and marryStatus !=null">
+            	and marry_status = #{marryStatus}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+            <if test="status !='' and status !=null">
+            	and status = #{status}
+            </if>
+            <if test="loans !='' and loans !=null">
+            	and loans = #{loans}
+            </if>
+            <if test="refusings !='' and refusings !=null">
+            	and refusings = #{refusings}
+            </if>
+            <if test="repaymentStatus !='' and repaymentStatus !=null">
+            	and repayment_status = #{repaymentStatus}
+            </if>
+            <if test="uuid !='' and uuid !=null">
+            	and uuid = #{uuid}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="creatorName !='' and creatorName !=null">
+            	and creator_name = #{creatorName}
+            </if>
+            <if test="isLocalHouse !='' and isLocalHouse !=null">
+            	and is_local_house = #{isLocalHouse}
+            </if>
+            <if test="liveState !='' and liveState !=null">
+            	and live_state = #{liveState}
+            </if>
+            <if test="otherCase !='' and otherCase !=null">
+            	and other_case = #{otherCase}
+            </if>
+            <if test="liveZipCode !='' and liveZipCode !=null">
+            	and live_zip_code = #{liveZipCode}
+            </if>
+            <if test="householdZipCode !='' and householdZipCode !=null">
+            	and household_zip_code = #{householdZipCode}
+            </if>
+            <if test="companyZipCode !='' and companyZipCode !=null">
+            	and company_zip_code = #{companyZipCode}
+            </if>
+            <if test="department !='' and department !=null">
+            	and department = #{department}
+            </if>
+            <if test="inTime !='' and inTime !=null">
+            	and in_time = #{inTime}
+            </if>
+            <if test="customerManager !='' and customerManager !=null">
+            	and customer_manager = #{customerManager}
+            </if>
+            <if test="riskLevel !='' and riskLevel !=null">
+            	and risk_level = #{riskLevel}
+            </if>
+            <if test="photoId !='' and photoId !=null">
+            	and photo_id = #{photoId}
+            </if>
+            <if test="carStatus !='' and carStatus !=null">
+            	and car_status = #{carStatus}
+            </if>
+            <if test="rdHouseholdaddressid !='' and rdHouseholdaddressid !=null">
+            	and rd_householdaddressid = #{rdHouseholdaddressid}
+            </if>
+            <if test="rdHouseholddetailaddress !='' and rdHouseholddetailaddress !=null">
+            	and rd_householddetailaddress = #{rdHouseholddetailaddress}
+            </if>
+            <if test="healthy !='' and healthy !=null">
+            	and healthy = #{healthy}
+            </if>
+            <if test="spouseIskown !='' and spouseIskown !=null">
+            	and spouse_iskown = #{spouseIskown}
+            </if>
+            <if test="isHaveChildren !='' and isHaveChildren !=null">
+            	and is_have_children = #{isHaveChildren}
+            </if>
+            <if test="emergencyContactNumber !='' and emergencyContactNumber !=null">
+            	and emergency_contact_number = #{emergencyContactNumber}
+            </if>
+            <if test="isSelfSupport !='' and isSelfSupport !=null">
+            	and is_self_support = #{isSelfSupport}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="salesman !='' and salesman !=null">
+            	and salesman = #{salesman}
+            </if>
+            <if test="age !='' and age !=null">
+            	and age = #{age}
+            </if>
+            <if test="childrenNum !='' and childrenNum !=null">
+            	and children_num = #{childrenNum}
+            </if>
+            <if test="feedNum !='' and feedNum !=null">
+            	and feed_num = #{feedNum}
+            </if>
+            <if test="householdAreaId !='' and householdAreaId !=null">
+            	and household_area_id = #{householdAreaId}
+            </if>
+            <if test="familyMonthExpenses !='' and familyMonthExpenses !=null">
+            	and family_month_expenses = #{familyMonthExpenses}
+            </if>
+            <if test="liveTime !='' and liveTime !=null">
+            	and live_time = #{liveTime}
+            </if>
+            <if test="comeCityDate !='' and comeCityDate !=null">
+            	and come_city_date = #{comeCityDate}
+            </if>
+            <if test="weixin !='' and weixin !=null">
+            	and weixin = #{weixin}
+            </if>
+            <if test="weibo !='' and weibo !=null">
+            	and weibo = #{weibo}
+            </if>
+            <if test="qq !='' and qq !=null">
+            	and qq = #{qq}
+            </if>
+            <if test="customerSource !='' and customerSource !=null">
+            	and customer_source = #{customerSource}
+            </if>
+            <if test="positionType !='' and positionType !=null">
+            	and position_type = #{positionType}
+            </if>
+            <if test="positionLevel !='' and positionLevel !=null">
+            	and position_level = #{positionLevel}
+            </if>
+            <if test="positionIndustry !='' and positionIndustry !=null">
+            	and position_industry = #{positionIndustry}
+            </if>
+            <if test="lastCompany !='' and lastCompany !=null">
+            	and last_company = #{lastCompany}
+            </if>
+            <if test="wagesType !='' and wagesType !=null">
+            	and wages_type = #{wagesType}
+            </if>
+            <if test="salary !='' and salary !=null">
+            	and salary = #{salary}
+            </if>
+            <if test="otherIn !='' and otherIn !=null">
+            	and other_in = #{otherIn}
+            </if>
+            <if test="grantDay !='' and grantDay !=null">
+            	and grant_day = #{grantDay}
+            </if>
+            <if test="managementType !='' and managementType !=null">
+            	and management_type = #{managementType}
+            </if>
+            <if test="managementName !='' and managementName !=null">
+            	and management_name = #{managementName}
+            </if>
+            <if test="companyBuildTime !='' and companyBuildTime !=null">
+            	and company_build_time = #{companyBuildTime}
+            </if>
+            <if test="shareScale !='' and shareScale !=null">
+            	and share_scale = #{shareScale}
+            </if>
+            <if test="employeeNum !='' and employeeNum !=null">
+            	and employee_num = #{employeeNum}
+            </if>
+            <if test="managementAddrType !='' and managementAddrType !=null">
+            	and management_addr_type = #{managementAddrType}
+            </if>
+            <if test="companyAreaId !='' and companyAreaId !=null">
+            	and company_area_id = #{companyAreaId}
+            </if>
+            <if test="teamManager !='' and teamManager !=null">
+            	and team_manager = #{teamManager}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="name != null">		
+	    		name = #{name},		
+	    	</if>
+	    	<if test="sex != null">		
+	    		sex = #{sex},		
+	    	</if>
+	    	<if test="vocation != null">		
+	    		vocation = #{vocation},		
+	    	</if>
+	    	<if test="birthday != null">		
+	    		birthday = #{birthday},		
+	    	</if>
+	    	<if test="nationality != null">		
+	    		nationality = #{nationality},		
+	    	</if>
+	    	<if test="nativePlace != null">		
+	    		native_place = #{nativePlace},		
+	    	</if>
+	    	<if test="certType != null">		
+	    		cert_type = #{certType},		
+	    	</if>
+	    	<if test="certNumber != null">		
+	    		cert_number = #{certNumber},		
+	    	</if>
+	    	<if test="certValidTime != null">		
+	    		cert_valid_time = #{certValidTime},		
+	    	</if>
+	    	<if test="mobile != null">		
+	    		mobile = #{mobile},		
+	    	</if>
+	    	<if test="fixedPhone != null">		
+	    		fixed_phone = #{fixedPhone},		
+	    	</if>
+	    	<if test="email != null">		
+	    		email = #{email},		
+	    	</if>
+	    	<if test="areaId != null">		
+	    		area_id = #{areaId},		
+	    	</if>
+	    	<if test="liveAddress != null">		
+	    		live_address = #{liveAddress},		
+	    	</if>
+	    	<if test="householdAddress != null">		
+	    		household_address = #{householdAddress},		
+	    	</if>
+	    	<if test="education != null">		
+	    		education = #{education},		
+	    	</if>
+	    	<if test="workStatus != null">		
+	    		work_status = #{workStatus},		
+	    	</if>
+	    	<if test="company != null">		
+	    		company = #{company},		
+	    	</if>
+	    	<if test="companyAddr != null">		
+	    		company_addr = #{companyAddr},		
+	    	</if>
+	    	<if test="companyPro != null">		
+	    		company_pro = #{companyPro},		
+	    	</if>
+	    	<if test="companyPhone != null">		
+	    		company_phone = #{companyPhone},		
+	    	</if>
+	    	<if test="position != null">		
+	    		position = #{position},		
+	    	</if>
+	    	<if test="workLife != null">		
+	    		work_life = #{workLife},		
+	    	</if>
+	    	<if test="yearsIncome != null">		
+	    		years_income = #{yearsIncome},		
+	    	</if>
+	    	<if test="type != null">		
+	    		type = #{type},		
+	    	</if>
+	    	<if test="creditScore != null">		
+	    		credit_score = #{creditScore},		
+	    	</if>
+	    	<if test="marryStatus != null">		
+	    		marry_status = #{marryStatus},		
+	    	</if>
+	    	<if test="remark != null">		
+	    		remark = #{remark},		
+	    	</if>
+	    	<if test="status != null">		
+	    		status = #{status},		
+	    	</if>
+	    	<if test="loans != null">		
+	    		loans = #{loans},		
+	    	</if>
+	    	<if test="refusings != null">		
+	    		refusings = #{refusings},		
+	    	</if>
+	    	<if test="repaymentStatus != null">		
+	    		repayment_status = #{repaymentStatus},		
+	    	</if>
+	    	<if test="uuid != null">		
+	    		uuid = #{uuid},		
+	    	</if>
+	    	<if test="creatorName != null">		
+	    		creator_name = #{creatorName},		
+	    	</if>
+	    	<if test="isLocalHouse != null">		
+	    		is_local_house = #{isLocalHouse},		
+	    	</if>
+	    	<if test="liveState != null">		
+	    		live_state = #{liveState},		
+	    	</if>
+	    	<if test="otherCase != null">		
+	    		other_case = #{otherCase},		
+	    	</if>
+	    	<if test="liveZipCode != null">		
+	    		live_zip_code = #{liveZipCode},		
+	    	</if>
+	    	<if test="householdZipCode != null">		
+	    		household_zip_code = #{householdZipCode},		
+	    	</if>
+	    	<if test="companyZipCode != null">		
+	    		company_zip_code = #{companyZipCode},		
+	    	</if>
+	    	<if test="department != null">		
+	    		department = #{department},		
+	    	</if>
+	    	<if test="inTime != null">		
+	    		in_time = #{inTime},		
+	    	</if>
+	    	<if test="customerManager != null">		
+	    		customer_manager = #{customerManager},		
+	    	</if>
+	    	<if test="riskLevel != null">		
+	    		risk_level = #{riskLevel},		
+	    	</if>
+	    	<if test="photoId != null">		
+	    		photo_id = #{photoId},		
+	    	</if>
+	    	<if test="carStatus != null">		
+	    		car_status = #{carStatus},		
+	    	</if>
+	    	<if test="rdHouseholdaddressid != null">		
+	    		rd_householdaddressid = #{rdHouseholdaddressid},		
+	    	</if>
+	    	<if test="rdHouseholddetailaddress != null">		
+	    		rd_householddetailaddress = #{rdHouseholddetailaddress},		
+	    	</if>
+	    	<if test="healthy != null">		
+	    		healthy = #{healthy},		
+	    	</if>
+	    	<if test="spouseIskown != null">		
+	    		spouse_iskown = #{spouseIskown},		
+	    	</if>
+	    	<if test="isHaveChildren != null">		
+	    		is_have_children = #{isHaveChildren},		
+	    	</if>
+	    	<if test="emergencyContactNumber != null">		
+	    		emergency_contact_number = #{emergencyContactNumber},		
+	    	</if>
+	    	<if test="isSelfSupport != null">		
+	    		is_self_support = #{isSelfSupport},		
+	    	</if>
+	    	<if test="salesman != null">		
+	    		salesman = #{salesman},		
+	    	</if>
+	    	<if test="age != null">		
+	    		age = #{age},		
+	    	</if>
+	    	<if test="childrenNum != null">		
+	    		children_num = #{childrenNum},		
+	    	</if>
+	    	<if test="feedNum != null">		
+	    		feed_num = #{feedNum},		
+	    	</if>
+	    	<if test="householdAreaId != null">		
+	    		household_area_id = #{householdAreaId},		
+	    	</if>
+	    	<if test="familyMonthExpenses != null">		
+	    		family_month_expenses = #{familyMonthExpenses},		
+	    	</if>
+	    	<if test="liveTime != null">		
+	    		live_time = #{liveTime},		
+	    	</if>
+	    	<if test="comeCityDate != null">		
+	    		come_city_date = #{comeCityDate},		
+	    	</if>
+	    	<if test="weixin != null">		
+	    		weixin = #{weixin},		
+	    	</if>
+	    	<if test="weibo != null">		
+	    		weibo = #{weibo},		
+	    	</if>
+	    	<if test="qq != null">		
+	    		qq = #{qq},		
+	    	</if>
+	    	<if test="customerSource != null">		
+	    		customer_source = #{customerSource},		
+	    	</if>
+	    	<if test="positionType != null">		
+	    		position_type = #{positionType},		
+	    	</if>
+	    	<if test="positionLevel != null">		
+	    		position_level = #{positionLevel},		
+	    	</if>
+	    	<if test="positionIndustry != null">		
+	    		position_industry = #{positionIndustry},		
+	    	</if>
+	    	<if test="lastCompany != null">		
+	    		last_company = #{lastCompany},		
+	    	</if>
+	    	<if test="wagesType != null">		
+	    		wages_type = #{wagesType},		
+	    	</if>
+	    	<if test="salary != null">		
+	    		salary = #{salary},		
+	    	</if>
+	    	<if test="otherIn != null">		
+	    		other_in = #{otherIn},		
+	    	</if>
+	    	<if test="grantDay != null">		
+	    		grant_day = #{grantDay},		
+	    	</if>
+	    	<if test="managementType != null">		
+	    		management_type = #{managementType},		
+	    	</if>
+	    	<if test="managementName != null">		
+	    		management_name = #{managementName},		
+	    	</if>
+	    	<if test="companyBuildTime != null">		
+	    		company_build_time = #{companyBuildTime},		
+	    	</if>
+	    	<if test="shareScale != null">		
+	    		share_scale = #{shareScale},		
+	    	</if>
+	    	<if test="employeeNum != null">		
+	    		employee_num = #{employeeNum},		
+	    	</if>
+	    	<if test="managementAddrType != null">		
+	    		management_addr_type = #{managementAddrType},		
+	    	</if>
+	    	<if test="companyAreaId != null">		
+	    		company_area_id = #{companyAreaId},		
+	    	</if>
+	    	<if test="teamManager != null">		
+	    		team_manager = #{teamManager},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="PubCustomer">
+		insert into pub_customer(
+        	name,
+        	sex,
+        	vocation,
+        	birthday,
+        	nationality,
+        	native_place,
+        	cert_type,
+        	cert_number,
+        	cert_valid_time,
+        	mobile,
+        	fixed_phone,
+        	email,
+        	area_id,
+        	live_address,
+        	household_address,
+        	education,
+        	work_status,
+        	company,
+        	company_addr,
+        	company_pro,
+        	company_phone,
+        	position,
+        	work_life,
+        	years_income,
+        	type,
+        	credit_score,
+        	marry_status,
+        	remark,
+        	status,
+        	loans,
+        	refusings,
+        	repayment_status,
+        	uuid,
+        	creator,
+        	creator_name,
+        	is_local_house,
+        	live_state,
+        	other_case,
+        	live_zip_code,
+        	household_zip_code,
+        	company_zip_code,
+        	department,
+        	in_time,
+        	customer_manager,
+        	risk_level,
+        	photo_id,
+        	car_status,
+        	rd_householdaddressid,
+        	rd_householddetailaddress,
+        	healthy,
+        	spouse_iskown,
+        	is_have_children,
+        	emergency_contact_number,
+        	is_self_support,
+        	create_time,
+        	salesman,
+        	age,
+        	children_num,
+        	feed_num,
+        	household_area_id,
+        	family_month_expenses,
+        	live_time,
+        	come_city_date,
+        	weixin,
+        	weibo,
+        	qq,
+        	customer_source,
+        	position_type,
+        	position_level,
+        	position_industry,
+        	last_company,
+        	wages_type,
+        	salary,
+        	other_in,
+        	grant_day,
+        	management_type,
+        	management_name,
+        	company_build_time,
+        	share_scale,
+        	employee_num,
+        	management_addr_type,
+        	company_area_id,
+        	team_manager			
+        )values(
+        	#{name},
+        	#{sex},
+        	#{vocation},
+        	#{birthday},
+        	#{nationality},
+        	#{nativePlace},
+        	#{certType},
+        	#{certNumber},
+        	#{certValidTime},
+        	#{mobile},
+        	#{fixedPhone},
+        	#{email},
+        	#{areaId},
+        	#{liveAddress},
+        	#{householdAddress},
+        	#{education},
+        	#{workStatus},
+        	#{company},
+        	#{companyAddr},
+        	#{companyPro},
+        	#{companyPhone},
+        	#{position},
+        	#{workLife},
+        	#{yearsIncome},
+        	#{type},
+        	#{creditScore},
+        	#{marryStatus},
+        	#{remark},
+        	#{status},
+        	#{loans},
+        	#{refusings},
+        	#{repaymentStatus},
+        	#{uuid},
+        	#{creator},
+        	#{creatorName},
+        	#{isLocalHouse},
+        	#{liveState},
+        	#{otherCase},
+        	#{liveZipCode},
+        	#{householdZipCode},
+        	#{companyZipCode},
+        	#{department},
+        	#{inTime},
+        	#{customerManager},
+        	#{riskLevel},
+        	#{photoId},
+        	#{carStatus},
+        	#{rdHouseholdaddressid},
+        	#{rdHouseholddetailaddress},
+        	#{healthy},
+        	#{spouseIskown},
+        	#{isHaveChildren},
+        	#{emergencyContactNumber},
+        	#{isSelfSupport},
+        	#{createTime},
+        	#{salesman},
+        	#{age},
+        	#{childrenNum},
+        	#{feedNum},
+        	#{householdAreaId},
+        	#{familyMonthExpenses},
+        	#{liveTime},
+        	#{comeCityDate},
+        	#{weixin},
+        	#{weibo},
+        	#{qq},
+        	#{customerSource},
+        	#{positionType},
+        	#{positionLevel},
+        	#{positionIndustry},
+        	#{lastCompany},
+        	#{wagesType},
+        	#{salary},
+        	#{otherIn},
+        	#{grantDay},
+        	#{managementType},
+        	#{managementName},
+        	#{companyBuildTime},
+        	#{shareScale},
+        	#{employeeNum},
+        	#{managementAddrType},
+        	#{companyAreaId},
+        	#{teamManager}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="PubCustomer">
+        update pub_customer
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="PubCustomerResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from pub_customer
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="PubCustomerResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from pub_customer
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="PubCustomerResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from pub_customer
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from pub_customer
+        where
+        id  = #{id}
+    </delete>
+    
+    <select id="getCustomerListByMap" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		select 
+		cus.id as id,
+		cus.name as name,
+		cus.cert_number as certNumber,
+		cus.mobile as mobile,
+		cus.loans as loans,
+		cus.status as status,
+		cus.salesman as salsman,
+		cons.status as processStatus,
+		sd.item_value as processStatusName,
+		cons.process_instance_id as processInstanceId
+		from pub_customer cus 
+		LEFT JOIN pl_consult cons on cons.customer_id= cus.id
+		LEFT JOIN sys_dict_detail sd on sd.item_code=cons.status and sd.parent_id=23
+		<include refid="searchByPo"/>	
+		
+group by id
+		order by id desc
+	</select>
+
+	<select id="getCustomerListByCreator" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		select
+		cus.id as id,
+		cus.name as name,
+		cus.cert_number as certNumber,
+		cus.mobile as mobile,
+		cus.loans as loans,
+		cus.status as status,
+		cus.salesman as salsman
+		from pub_customer cus
+		<include refid="searchByPo"/>
+
+		group by id
+		order by id desc
+	</select>
+
+	<select id="getCustomerByProcessInstanceId" resultMap="PubCustomerResult" parameterType="java.util.HashMap">
+		select 
+		cus.id as id,
+			cus.name as name,
+			cus.sex,
+			cus.vocation,
+			cus.birthday,
+			cus.nationality,
+			cus.native_place,
+			cus.cert_type,
+			cus.cert_number,
+			cus.cert_valid_time,
+			cus.mobile,
+			cus.fixed_phone,
+			cus.email,
+			cus.area_id,
+			cus.live_address,
+			cus.household_address,
+			cus.education,
+			cus.work_status,
+			cus.company,
+			cus.company_addr,
+			cus.company_pro,
+			cus.company_phone,
+			cus.position,
+			cus.work_life,
+			cus.years_income,
+			cus.type,
+			cus.credit_score,
+			cus.marry_status,
+			cus.remark,
+			cus.status,
+			cus.loans,
+			cus.refusings,
+			cus.repayment_status,
+			cus.uuid,
+			cus.creator,
+			cus.creator_name,
+			cus.is_local_house,
+			cus.live_state,
+			cus.other_case,
+			cus.live_zip_code,
+			cus.household_zip_code,
+			cus.company_zip_code,
+			cus.department,
+			cus.in_time,
+			cus.customer_manager,
+			cus.risk_level,
+			cus.photo_id,
+			cus.car_status,
+			cus.rd_householdaddressid,
+			cus.rd_householddetailaddress,
+			cus.healthy,
+			cus.spouse_iskown,
+			cus.is_have_children,
+			cus.emergency_contact_number,
+			cus.is_self_support,
+			cus.create_time,
+			cus.salesman,
+			cus.age,
+			cus.children_num,
+			cus.feed_num,
+			cus.household_area_id,
+			cus.family_month_expenses,
+			cus.live_time,
+			cus.come_city_date,
+			cus.weixin,
+			cus.weibo,
+			cus.qq,
+			cus.customer_source,
+			cus.position_type,
+			cus.position_level,
+			cus.position_industry,
+			cus.last_company,
+			cus.wages_type,
+			cus.salary,
+			cus.other_in,
+			cus.grant_day,
+			cus.management_type,
+			cus.management_name,
+			cus.company_build_time,
+			cus.share_scale,
+			cus.employee_num,
+			cus.management_addr_type,
+			cus.company_area_id,
+			cus.team_manager	
+		from pub_customer 
+		cus INNER JOIN pl_consult cons on cons.customer_id= cus.id where cons.process_instance_id=#{processInstanceId}
+	</select>
+</mapper>

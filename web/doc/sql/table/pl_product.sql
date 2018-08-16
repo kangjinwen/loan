@@ -1,0 +1,1 @@
+alter table pl_product add `ahead_repay_rate`  decimal(10,4) DEFAULT '0.0000' COMMENT '提前还款罚息费率'

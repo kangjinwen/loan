@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- hous_person_type表:新增人员类型模块 -->
+<mapper namespace="com.company.modules.instance.dao.HousPersonTypeDao">
+	<!--返回MAP-->		
+	<resultMap id="HousPersonTypeResult" type="HousPersonType">
+		<id column="id" property="id" />
+		<result column="creator" property="creator" />
+		<result column="create_time" property="createTime" />
+		<result column="modifier" property="modifier" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="remark" property="remark" />
+		<result column="type" property="type" />
+		<result column="person_name" property="personName" />
+		<result column="person_number" property="personNumber" />
+		<result column="person_phone" property="personPhone" />
+		<result column="consult_id" property="consultId" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			creator,
+			create_time,
+			modifier,
+			modify_time,
+			process_instance_id,
+			remark,
+			type,
+			person_name,
+			person_number,
+			person_phone,
+			consult_id			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="modifier !='' and modifier !=null">
+            	and modifier = #{modifier}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and modify_time = #{modifyTime}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+            <if test="type !='' and type !=null">
+            	and type = #{type}
+            </if>
+            <if test="personName !='' and personName !=null">
+            	and person_name = #{personName}
+            </if>
+            <if test="personNumber !='' and personNumber !=null">
+            	and person_number = #{personNumber}
+            </if>
+            <if test="personPhone !='' and personPhone !=null">
+            	and person_phone = #{personPhone}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="modifier != null">		
+	    		modifier = #{modifier},		
+	    	</if>
+	    	<if test="modifyTime != null">		
+	    		modify_time = #{modifyTime},		
+	    	</if>
+	    	<if test="processInstanceId != null">		
+	    		process_instance_id = #{processInstanceId},		
+	    	</if>
+	    	<if test="remark != null">		
+	    		remark = #{remark},		
+	    	</if>
+	    	<if test="type != null">		
+	    		type = #{type},		
+	    	</if>
+	    	<if test="personName != null">		
+	    		person_name = #{personName},		
+	    	</if>
+	    	<if test="personNumber != null">		
+	    		person_number = #{personNumber},		
+	    	</if>
+	    	<if test="personPhone != null">		
+	    		person_phone = #{personPhone},		
+	    	</if>
+	    	<if test="consultId != null">		
+	    		consult_id = #{consultId},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="HousPersonType">
+		insert into hous_person_type(
+        	creator,
+        	create_time,
+        	modifier,
+        	modify_time,
+        	process_instance_id,
+        	remark,
+        	type,
+        	person_name,
+        	person_number,
+        	person_phone,
+        	consult_id			
+        )values(
+        	#{creator},
+        	#{createTime},
+        	#{modifier},
+        	#{modifyTime},
+        	#{processInstanceId},
+        	#{remark},
+        	#{type},
+        	#{personName},
+        	#{personNumber},
+        	#{personPhone},		
+        	#{consultId}	
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="HousPersonType">
+        update hous_person_type
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="HousPersonTypeResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from hous_person_type
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="HousPersonTypeResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from hous_person_type
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="HousPersonTypeResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from hous_person_type
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+	
+	 <select id="getItemInfoByConsultId" resultMap="HousPersonTypeResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from hous_person_type
+		where consult_id = #{consultId}
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from hous_person_type
+        where
+        id  = #{id}
+    </delete>
+</mapper>

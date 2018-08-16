@@ -1,0 +1,1 @@
+alter table pub_loanprocess add `manual_assignee` varchar(64) DEFAULT NULL COMMENT '任务分配人'

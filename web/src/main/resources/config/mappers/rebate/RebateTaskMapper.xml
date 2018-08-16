@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- hous_notarization_registration表:公证登记模块 -->
+<mapper namespace="com.company.modules.rebate.workflow.dao.RebateTaskDao">
+
+
+<!-- 查询公证登记信息 -->
+	<sql id="rebateAuditSelectSql">
+	pc.create_time as declarationDate,
+	task.ID_ as taskId,
+	task.TASK_DEF_KEY_ as processStateCode,
+	task.PROC_INST_ID_  processInstanceId,
+	pp.code projectCode,
+	pp.project_name as projectName,
+	pc.id consultId,
+	pp.id projectId,
+	pc.name customerName,
+	pbr.financial_advisers as financialAdvisers,
+	CASE
+            pbr.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    pbr.institution_name as institutionName,/*机构名称*/ 
+	    pbr.salesman as customerManager,/*报单人*/ 
+	pb.account,
+	pb.time_limit as timeLimit,
+	
+	sdd.item_value currentProcessState,
+	
+	/*task.ASSIGNEE_ as assignee*/
+	su.name as assignee,
+	ppb.processInstanceId as oldProcessInstanceId,
+	ppb.period
+	</sql>
+	
+	<sql id="rebateAuditJoinSql">
+	INNER JOIN pub_project_process ppp on task.PROC_INST_ID_=ppp.process_instance_id
+	INNER JOIN pub_project pp on ppp.project_id=pp.id
+	INNER JOIN pl_consult pc on pc.project_id=ppp.project_id
+	INNER JOIN pl_borrow pb  on  ppp.project_id=pb.project_id
+	INNER JOIN sys_role sr on sr.nid = task.DESCRIPTION_
+	INNER JOIN sys_user su ON su.user_name = task.ASSIGNEE_
+	INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+	LEFT JOIN sys_dict_detail as sdd on sdd.item_code = pc.status
+	INNER JOIN pl_borrow_requirement pbr on pbr.process_instance_id = pc.process_instance_id
+	INNER JOIN pub_process_branching ppb on ppb.branching_process_id = task.PROC_INST_ID_
+	</sql>
+	
+	<sql id="rebateAuditWhereSql">
+					<if test="projectCode !='' and projectCode !=null">
+                        pp.code  like CONCAT('%','${projectCode}','%') 
+                    </if>
+                    <if test="projectName !='' and projectName !=null">
+                    and    pp.project_name like CONCAT('%','${projectName}','%') 
+                    </if>
+                    <if test="customerName !='' and customerName !=null">
+                     and   pc.name like  CONCAT('%','${customerName}','%') 
+                    </if>
+                 <!--    <if test="customerManager!='' and customerManager !=null">
+                     and   pc.customer_manager  like CONCAT('%','${customerManager}','%') 
+                    </if> -->
+                    <if test="flowStatus !='' and flowStatus !=null">
+	                AND pc.status = #{flowStatus}
+				    </if>
+					<if test="isCompleted == true ">
+				                AND task.END_TIME_ is not null
+				    </if>
+				
+	</sql>
+	
+	<sql id="baseRoleAndOfficeSql">
+       <if test="userName !=null or roleId !=null or coverdOffices != null" >
+	         and ((
+		        <if test="userName !='' and userName !=null">
+		                 task.ASSIGNEE_ = #{userName}
+		        </if>
+		        <if test="roleId !='' and roleId !=null">
+		                AND sr.id = #{roleId}
+		        </if>
+	        	)
+	            or su.office_id IN
+		        <foreach item="item" index="index" collection="coverdOffices"
+			      open="(" separator="," close=")">
+			        #{item}
+			 	</foreach>
+		 	)
+		 </if>
+		 <if test="taskDefinition != '' and taskDefinition != null">
+           and task.TASK_DEF_KEY_ = #{taskDefinition}
+       </if>
+    </sql>
+    
+    
+			<!--列表模糊查询sql-->
+	<sql id="listQuerySql12">
+		<where>			
+			<if test="projectCode !='' and projectCode !=null">
+				and consult.projectCode like concat('%',#{projectCode}, '%')
+	        </if>	      
+	        <if test="customerName !='' and customerName !=null">
+	            and consult.customerName like concat('%',#{customerName}, '%')
+	        </if>
+	        <if test="customerManager !='' and customerManager !=null">
+	            and consult.customerManager like concat('%',#{customerManager}, '%')
+	        </if>	
+	        <if test="flowStatus != '' and flowStatus != null">
+	           and consult.currentProcessItemCode = #{flowStatus}
+	        </if>
+	        	        <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>       
+		</where>
+	</sql>
+	
+	<!-- 查询返佣审核任务信息 -->
+	 <select id="getUnDoneRebateAuditList" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	select * from(
+	select 
+	<include refid="rebateAuditSelectSql" />
+	,task.CREATE_TIME_ as createTime
+	,CASE
+        plpc.type 
+        WHEN 'back' 
+        THEN '驳回' 
+        WHEN 'backCheckBank'
+        THEN '驳回'           
+        ELSE '正常'	         
+        END dataType/*数据类型*/ 
+	from  ACT_RU_TASK task 
+	<include refid="rebateAuditJoinSql" />
+	left join pub_loanprocess plpc on plpc.new_task_id = task.ID_
+	<trim prefix="where" prefixOverrides="and|or">
+	<include refid="rebateAuditWhereSql" />
+	<include refid="baseRoleAndOfficeSql"/>
+	 </trim>
+	order by task.CREATE_TIME_ desc) consult
+		<include refid="listQuerySql12"/>
+		order by consult.createTime ASC
+    </select>
+    
+	 <select id="getDoneRebateAuditList" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	select * from(
+		select 
+		<include refid="rebateAuditSelectSql" />
+			,task.START_TIME_ as startTime
+			,suser.name as nextAssignee
+			,task.END_TIME_ as endTime
+			from  ACT_HI_TASKINST task 
+			<include refid="rebateAuditJoinSql" />
+		LEFT JOIN pub_loanprocess pub on pub.task_id = task.ID_
+		LEFT JOIN sys_user suser on suser.user_name = pub.next_assignee
+		
+		
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="roleNid != null and roleNid == 'customerServiceStaffB' ">
+				and pp.id not in (select projectId from pub_repayloaninfo where repayment_status = 1)
+			</if>
+			<include refid="rebateAuditWhereSql" />
+			 	<if test="processStatus!='' and processStatus !=null">
+		            and  pc.status=#{processStatus}
+		        </if>
+		    <include refid="baseRoleAndOfficeSql"/>              
+	     </trim>
+	     order by task.END_TIME_ desc) consult
+		<include refid="listQuerySql12"/>
+		order by consult.endTime DESC               
+    </select>
+    
+    
+    <!-- 查询返佣审核任务信息 -->
+	 <select id="getUnDoneRebateHandleList" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	select * from(
+	select 
+	<include refid="rebateAuditSelectSql" />
+	,task.CREATE_TIME_ as createTime
+	,CASE
+            plpc.type 
+            WHEN 'back' 
+            THEN '驳回' 
+            WHEN 'backCheckBank'
+            THEN '驳回'           
+            ELSE '正常'	         
+        END dataType/*数据类型*/ 
+	from  ACT_RU_TASK task 
+	<include refid="rebateAuditJoinSql" />
+	left join pub_loanprocess plpc on plpc.new_task_id = task.ID_
+	<trim prefix="where" prefixOverrides="and|or">
+	<include refid="rebateAuditWhereSql" />
+	<include refid="baseRoleAndOfficeSql"/>
+	 </trim>
+	order by task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql12"/>
+		order by consult.createTime ASC
+	
+    </select>
+    
+	 <select id="getDoneRebateHandleList" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	select * from(
+	select 
+	<include refid="rebateAuditSelectSql" />
+	,task.START_TIME_ as startTime
+	,task.END_TIME_ as endTime
+	from  ACT_HI_TASKINST task 
+	<include refid="rebateAuditJoinSql" />
+	
+	<trim prefix="where" prefixOverrides="and|or">
+		<if test="roleNid != null and roleNid == 'financialStaffReturnCommission' ">
+			and pp.id not in (select projectId from pub_repayloaninfo where repayment_status = 1)
+		</if>
+		<include refid="rebateAuditWhereSql" />
+		 <if test="processStatus!='' and processStatus !=null">
+	                    and  pc.status=#{processStatus}
+	                    </if>
+	      <include refid="baseRoleAndOfficeSql"/>              
+     </trim>
+     order by task.END_TIME_ desc) consult
+		<include refid="listQuerySql12"/>
+		order by consult.endTime DESC              
+    </select>
+</mapper>

@@ -1,0 +1,1 @@
+alter table hous_data_list drop column two_or_five;

@@ -1,0 +1,1 @@
+ALTER TABLE pl_borrow_requirement add phone_number  int(11) DEFAULT NULL COMMENT '手机号码';

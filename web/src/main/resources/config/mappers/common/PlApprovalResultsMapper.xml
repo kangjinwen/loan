@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.common.dao.PlApprovalResultsDao">
+  <resultMap id="PlApprovalResultsMap" type="PlApprovalResults">
+    <id column="id" property="id" />
+    <result column="creator" property="creator" />
+    <result column="create_time" property="createTime" />
+    <result column="modifier" property="modifier" />
+    <result column="modify_time" property="modifyTime" />
+    <result column="is_delete" property="isDelete" />
+    <result column="process_instance_id" property="processInstanceId" />
+    <result column="project_id" property="projectId" />
+    <result column="consult_id" property="consultId" />
+    <result column="customer_id" property="customerId" />
+    <result column="product_id" property="productId" />
+    <result column="approval_account" property="approvalAccount" />
+    <result column="approval_time_limit" property="approvalTimeLimit" />
+    <result column="mortgage_price" property="mortgagePrice" />
+    <result column="REMARK" property="remark" />
+  </resultMap>
+  
+  <!--基本的sql查询字段 公共引用...-->
+  <sql id="searchSql">
+    id, creator, create_time, modifier, modify_time, is_delete, process_instance_id, 
+    project_id, consult_id, customer_id, product_id, approval_account, approval_time_limit, 
+    mortgage_price, REMARK
+  </sql>
+  
+  <!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="modifier !='' and modifier !=null">
+            	and modifier = #{modifier}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and modify_time = #{modifyTime}
+            </if>
+            <if test="isDelete !='' and isDelete !=null">
+            	and is_delete = #{isDelete}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and project_id = #{projectId}
+            </if>
+            <if test="consultId !='' and consultId !=null">
+            	and consult_id = #{consultId}
+            </if>
+            <if test="customerId !='' and customerId !=null">
+            	and customer_id = #{customerId}
+            </if>
+            <if test="productId !='' and productId !=null">
+            	and product_id = #{productId}
+            </if>
+            <if test="approvalAccount !='' and approvalAccount !=null">
+            	and approval_account = #{approvalAccount}
+            </if>
+            <if test="approvalTimeLimit !='' and approvalTimeLimit !=null">
+            	and approval_time_limit = #{approvalTimeLimit}
+            </if>
+            <if test="mortgagePrice !='' and mortgagePrice !=null">
+            	and mortgage_price = #{mortgagePrice}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and REMARK = #{remark}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="modifier!= null">		
+	    		modifier = #{modifier},		
+	    	</if>
+	    	<if test="modifyTime!= null">		
+	    		modify_time = #{modifyTime},		
+	    	</if>
+	    	<if test="isDelete!= null">		
+	    		is_delete = #{isDelete},		
+	    	</if>
+	    	<if test="processInstanceId!= null">		
+	    		process_instance_id = #{processInstanceId},		
+	    	</if>
+	    	<if test="projectId!= null">		
+	    		project_id = #{projectId},		
+	    	</if>
+	    	<if test="consultId!= null">		
+	    		consult_id = #{consultId},		
+	    	</if>
+	    	<if test="customerId!= null">		
+	    		customer_id = #{customerId},		
+	    	</if>
+	    	<if test="productId!= null">		
+	    		product_id = #{productId},		
+	    	</if>
+	    	<if test="approvalAccount!= null">		
+	    		approval_account = #{approvalAccount},		
+	    	</if>
+	    	<if test="approvalTimeLimit!= null">		
+	    		approval_time_limit = #{approvalTimeLimit},		
+	    	</if>
+	    	<if test="mortgagePrice!= null">		
+	    		mortgage_price = #{mortgagePrice},		
+	    	</if>
+	    	<if test="remark!= null">		
+	    		REMARK = #{remark},		
+	    	</if>
+	    </trim>
+    </sql>
+    
+  <insert id="insert" parameterType="PlApprovalResults">
+    insert into pl_approval_results (id, creator, create_time, 
+      modifier, modify_time, is_delete, 
+      process_instance_id, project_id, consult_id, 
+      customer_id, product_id, approval_account, 
+      approval_time_limit, mortgage_price, REMARK
+      )
+    values (#{id}, #{creator}, #{createTime}, 
+      #{modifier}, #{modifyTime}, #{isDelete}, 
+      #{processInstanceId}, #{projectId}, #{consultId}, 
+      #{customerId}, #{productId}, #{approvalAccount}, 
+      #{approvalTimeLimit}, #{mortgagePrice}, #{remark}
+      )
+      <!-- 重新返回给实体类,插入的id值 -->
+     <!--selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey-->
+  </insert>
+  
+  <!--select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="PlApprovalResultsMap">
+    select 
+    <include refid="Base_Column_List" />
+    from pl_approval_results
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from pl_approval_results
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+ 
+  	
+  <insert id="insertSelective" parameterType="PlApprovalResults">
+    insert into pl_approval_results
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="creator != null">
+        creator,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modifier != null">
+        modifier,
+      </if>
+      <if test="modifyTime != null">
+        modify_time,
+      </if>
+      <if test="isDelete != null">
+        is_delete,
+      </if>
+      <if test="processInstanceId != null">
+        process_instance_id,
+      </if>
+      <if test="projectId != null">
+        project_id,
+      </if>
+      <if test="consultId != null">
+        consult_id,
+      </if>
+      <if test="customerId != null">
+        customer_id,
+      </if>
+      <if test="productId != null">
+        product_id,
+      </if>
+      <if test="approvalAccount != null">
+        approval_account,
+      </if>
+      <if test="approvalTimeLimit != null">
+        approval_time_limit,
+      </if>
+      <if test="mortgagePrice != null">
+        mortgage_price,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="creator != null">
+        #{creator,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifier != null">
+        #{modifier,jdbcType=INTEGER},
+      </if>
+      <if test="modifyTime != null">
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDelete != null">
+        #{isDelete,jdbcType=TINYINT},
+      </if>
+      <if test="processInstanceId != null">
+        #{processInstanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="projectId != null">
+        #{projectId,jdbcType=INTEGER},
+      </if>
+      <if test="consultId != null">
+        #{consultId,jdbcType=INTEGER},
+      </if>
+      <if test="customerId != null">
+        #{customerId,jdbcType=INTEGER},
+      </if>
+      <if test="productId != null">
+        #{productId,jdbcType=INTEGER},
+      </if>
+      <if test="approvalAccount != null">
+        #{approvalAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="approvalTimeLimit != null">
+        #{approvalTimeLimit,jdbcType=INTEGER},
+      </if>
+      <if test="mortgagePrice != null">
+        #{mortgagePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert-->
+  
+		<!-- 动态更新 -->
+    <update id="update" parameterType="PlApprovalResults">
+        update pl_approval_results
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>  
+
+	<!-- 动态更新 -->
+    <update id="updateByMap" parameterType="java.util.HashMap">
+        update pl_approval_results
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+    
+    <!--根据id查询-->
+	<select id="getItemInfoById" resultMap="PlApprovalResultsMap" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from pl_approval_results
+		where id = #{id}	
+	</select>
+
+	<!--根据流程id查询-->
+	<select id="getInfoByProcessInstanceId" resultMap="PlApprovalResultsMap" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from pl_approval_results
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultType="java.util.HashMap" parameterType="java.lang.String" >
+		select 
+			approval.id as id,
+        	approval.process_instance_id as processInstanceId,
+        	approval.project_id as projectId,
+        	approval.consult_id as consultId,
+        	approval.product_id as productId,
+        	approval.approval_account as approvalAccount,
+        	approval.approval_time_limit as approvalTimeLimit,
+        	approval.mortgage_price as mortgagePrice,
+        	approval.remark as remark        	
+		from pl_approval_results approval
+		where approval.process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="PlApprovalResultsMap" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from pl_approval_results
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from pl_approval_results
+        where
+        id  = #{id}
+    </delete>
+    
+    <select id="getItemInfoByConsultId" resultMap="PlApprovalResultsMap" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from pl_approval_results
+		where consult_id = #{consultId} limit 1	
+	</select>
+</mapper>

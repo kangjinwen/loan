@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- hous_advance_apply表:垫资申请模块 -->
+<mapper namespace="com.company.modules.advance.dao.HousAdvanceApplyDao">
+	<!--返回MAP-->		
+	<resultMap id="HousAdvanceApplyResult" type="HousAdvanceApply">
+		<id column="id" property="id" />
+		<result column="create_time" property="createTime" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="is_delete" property="isDelete" />
+		<result column="consult_id" property="consultId" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="project_id" property="projectId" />
+		<result column="advance_apply_operator" property="advanceApplyOperator" />
+		<result column="advance_apply_time" property="advanceApplyTime" />
+		<result column="advance_apply_amount" property="advanceApplyAmount" />
+		<result column="advance_amount" property="advanceAmount" />
+		<result column="advance_rate_amount" property="advanceRateAmount" />
+		<result column="status" property="status" />
+		<result column="charged_amount" property="chargedAmount" />
+		<result column="time_limit" property="timeLimit" />
+		<result column="charge_way" property="chargeWay" />
+		<result column="house_situation" property="houseSituation" />
+		<result column="is_closed_down" property="isClosedDown" />
+		<result column="is_abnormal" property="isAbnormal" />
+		<result column="apply_remark" property="applyRemark" />
+		<result column="transfer_file_remark" property="transferFileRemark" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			create_time,
+			modify_time,
+			is_delete,
+			consult_id,
+			process_instance_id,
+			project_id,
+			advance_apply_operator,
+			advance_apply_time,
+			advance_apply_amount,
+			advance_amount,
+			advance_rate_amount,
+			status,
+			charged_amount,
+			time_limit,
+			charge_way,
+			house_situation,
+			is_closed_down,
+			is_abnormal,
+			apply_remark,
+			transfer_file_remark,
+			advance_status,
+			take_back_time,
+			take_back_operator
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and modify_time = #{modifyTime}
+            </if>
+            <if test="isDelete !='' and isDelete !=null">
+            	and is_delete = #{isDelete}
+            </if>
+            <if test="consultId !='' and consultId !=null">
+            	and consult_id = #{consultId}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and project_id = #{projectId}
+            </if>
+            <if test="advanceApplyOperator !='' and advanceApplyOperator !=null">
+            	and advance_apply_operator = #{advanceApplyOperator}
+            </if>
+            <if test="advanceApplyTime !='' and advanceApplyTime !=null">
+            	and advance_apply_time = #{advanceApplyTime}
+            </if>
+            <if test="advanceApplyAmount !='' and advanceApplyAmount !=null">
+            	and advance_apply_amount = #{advanceApplyAmount}
+            </if>
+            <if test="advanceAmount !='' and advanceAmount !=null">
+            	and advance_amount = #{advanceAmount}
+            </if>
+            <if test="advanceRateAmount !='' and advanceRateAmount !=null">
+            	and advance_rate_amount = #{advanceRateAmount}
+            </if>
+            <if test="status !='' and status !=null">
+            	and status = #{status}
+            </if>
+            <if test="chargedAmount !='' and chargedAmount !=null">
+            	and charged_amount = #{chargedAmount}
+            </if>
+            <if test="timeLimit !='' and timeLimit !=null">
+            	and time_limit = #{timeLimit}
+            </if>
+			<if test="chargeWay !='' and chargeWay !=null">
+            	and charge_way = #{chargeWay}
+            </if>
+			<if test="houseSituation !='' and houseSituation !=null">
+            	and house_situation = #{houseSituation}
+            </if>
+			<if test="isClosedDown !='' and isClosedDown !=null">
+            	and is_closed_down = #{isClosedDown}
+            </if>
+			<if test="isAbnormal !='' and isAbnormal !=null">
+            	and is_abnormal = #{isAbnormal}
+            </if>
+			<if test="applyRemark !='' and applyRemark !=null">
+            	and apply_remark = #{applyRemark}
+            </if>
+			<if test="transferFileRemark !='' and transferFileRemark !=null">
+            	and transfer_file_remark = #{transferFileRemark}
+            </if>
+            <if test="advanceStatus !='' and advanceStatus !=null">
+            	and advance_status = #{advanceStatus}
+            </if>
+			<if test="takeBackTime !='' and takeBackTime !=null">
+            	and take_back_time = #{takeBackTime}
+            </if>
+			<if test="takeBackOperator !='' and takeBackOperator !=null">
+            	and take_back_operator = #{takeBackOperator}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="modifyTime != null">		
+	    		modify_time = #{modifyTime},		
+	    	</if>
+	    	<if test="isDelete != null">		
+	    		is_delete = #{isDelete},		
+	    	</if>
+	    	<if test="consultId != null">		
+	    		consult_id = #{consultId},		
+	    	</if>
+	    	<if test="processInstanceId != null">		
+	    		process_instance_id = #{processInstanceId},		
+	    	</if>
+	    	<if test="projectId != null">		
+	    		project_id = #{projectId},		
+	    	</if>
+	    	<if test="advanceApplyOperator != null">		
+	    		advance_apply_operator = #{advanceApplyOperator},		
+	    	</if>
+	    	<if test="advanceApplyTime != null">		
+	    		advance_apply_time = #{advanceApplyTime},		
+	    	</if>
+	    	<if test="advanceApplyAmount != null">		
+	    		advance_apply_amount = #{advanceApplyAmount},		
+	    	</if>
+	    	<if test="advanceAmount != null">		
+	    		advance_amount = #{advanceAmount},		
+	    	</if>
+	    	<if test="advanceRateAmount != null">		
+	    		advance_rate_amount = #{advanceRateAmount},		
+	    	</if>
+	    	<if test="accountHolder != null">		
+	    		account_holder = #{accountHolder},		
+	    	</if>
+	    	<if test="bankCard != null">		
+	    		bank_card = #{bankCard},		
+	    	</if>
+	    	<if test="openingBank != null">		
+	    		opening_bank = #{openingBank},		
+	    	</if>
+	    	<if test="status != null">		
+	    		status = #{status},		
+	    	</if>
+	    	<if test="chargedAmount !=null">
+            	and charged_amount = #{chargedAmount}
+            </if>
+            <if test="timeLimit !=null">
+            	and time_limit = #{timeLimit}
+            </if>
+			<if test="chargeWay !=null">
+            	and charge_way = #{chargeWay}
+            </if>
+			<if test="houseSituation !=null">
+            	and house_situation = #{houseSituation}
+            </if>
+			<if test="isClosedDown !=null">
+            	and is_closed_down = #{isClosedDown}
+            </if>
+			<if test="isAbnormal !=null">
+            	and is_abnormal = #{isAbnormal}
+            </if>
+			<if test="applyRemark !=null">
+            	and apply_remark = #{applyRemark}
+            </if>
+			<if test="transferFileRemark !=null">
+            	and transfer_file_remark = #{transferFileRemark}
+            </if>
+            <if test="advanceStatus !=null">
+            	and advance_status = #{advanceStatus}
+            </if>
+			<if test="takeBackTime !=null">
+            	and take_back_time = #{takeBackTime}
+            </if>
+			<if test="takeBackOperator !=null">
+            	and take_back_operator = #{takeBackOperator}
+            </if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="HousAdvanceApply">
+		insert into hous_advance_apply(
+        	create_time,
+        	modify_time,
+        	is_delete,
+        	consult_id,
+        	process_instance_id,
+        	new_process_instance_id,
+        	project_id,
+        	advance_apply_operator,
+        	advance_apply_time,
+        	advance_apply_amount,
+        	advance_amount,
+        	advance_rate_amount,
+        	status,
+        	charged_amount,
+			time_limit,
+			charge_way,
+			house_situation,
+			is_closed_down,
+			is_abnormal,
+			apply_remark,
+			transfer_file_remark,
+			advance_status,
+			take_back_time,
+			take_back_operator	
+        )values(
+        	#{createTime},
+        	#{modifyTime},
+        	#{isDelete},
+        	#{consultId},
+        	#{processInstanceId},
+        	#{newProcessInstanceId},
+        	#{projectId},
+        	#{advanceApplyOperator},
+        	#{advanceApplyTime},
+        	#{advanceApplyAmount},
+        	#{advanceAmount},
+        	#{advanceRateAmount},
+        	#{status},
+        	#{chargedAmount},
+			#{timeLimit},
+			#{chargeWay},
+			#{houseSituation},
+			#{isClosedDown},
+			#{isAbnormal},
+			#{applyRemark},
+			#{transferFileRemark},
+			#{advanceStatus},
+			#{takeBackTime},
+			#{takeBackOperator}		
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="HousAdvanceApply">
+        update hous_advance_apply
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="HousAdvanceApplyResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from hous_advance_apply
+		where id = #{id}	
+	</select>
+	
+	<!--查询贷款基本信息-->
+	<select id="getHousAdvanceApplyInfo" parameterType="long" resultType="java.util.HashMap" >
+		SELECT
+			pbr.account AS account,
+			pbr.time_limit AS timeLimit, 
+			pp.project_name AS projectName,
+			pp.`code` AS projectCode ,
+			hbb.`name` customerName,
+			hf.property_address_id as propertyAddressId,
+			hf.property_address as propertyAddress,
+			pp.id
+		FROM
+			pl_borrow pbr
+		INNER JOIN hous_borrowing_basics hbb ON hbb.project_id = pbr.project_id
+		INNER JOIN pub_project pp ON pp.id = pbr.project_id
+		INNER JOIN hous_face_trial hf ON hf.process_instance_id=pbr.process_instance_id
+		WHERE pp.id = #{projectId}
+	</select>
+	
+	<!--查询垫资申请数据-->
+	<select id="getHousAdvanceApply" parameterType="long" resultType="java.util.HashMap" >
+		SELECT
+			id,
+			new_process_instance_id as newProcessInstanceId,
+			new_process_instance_id as taskId,
+			advance_apply_operator as advanceApplyOperator,
+			advance_apply_amount  as advanceApplyAmount,
+			advance_amount    as advanceAmount,
+			advance_rate_amount as advanceRateAmount,
+			account_holder as accountHolder,
+			bank_card as bankCard,
+			opening_bank as openingBank,
+			charged_amount as chargedAmount,
+			time_limit as timeLimit,
+			charge_way as chargeWay,
+			house_situation as houseSituation,
+			is_closed_down as isClosedDown,
+			is_abnormal as isAbnormal,
+			apply_remark as applyRemark,
+			transfer_file_remark transferFileRemark
+		FROM
+			hous_advance_apply
+		WHERE process_instance_id = #{processInstanceId}
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="HousAdvanceApplyResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from hous_advance_apply
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="HousAdvanceApplyResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from hous_advance_apply
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from hous_advance_apply
+        where
+        id  = #{id}
+    </delete>
+</mapper>

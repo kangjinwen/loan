@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- hous_advance_notarize表:借款基本信息模块 -->
+<mapper namespace="com.company.modules.advance.dao.HousAdvanceNotarizeDao">
+	<!--返回MAP-->		
+	<resultMap id="HousAdvanceNotarizeResult" type="HousAdvanceNotarize">
+		<id column="id" property="id" />
+		<result column="create_time" property="createTime" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="is_delete" property="isDelete" />
+		<result column="consult_id" property="consultId" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="new_process_instance_id" property="newProcessInstanceId" />
+		<result column="project_id" property="projectId" />
+		<result column="lender" property="lender" />
+		<result column="trustee_of_lender" property="trusteeOfLender" />
+		<result column="trustee" property="trustee" />
+		<result column="remark" property="remark" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			create_time,
+			modify_time,
+			is_delete,
+			consult_id,
+			process_instance_id,
+			new_process_instance_id,
+			project_id,
+			lender,
+			trustee_of_lender,
+			trustee,
+			remark			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and modify_time = #{modifyTime}
+            </if>
+            <if test="isDelete !='' and isDelete !=null">
+            	and is_delete = #{isDelete}
+            </if>
+            <if test="consultId !='' and consultId !=null">
+            	and consult_id = #{consultId}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="newProcessInstanceId !='' and newProcessInstanceId !=null">
+            	and new_process_instance_id = #{newProcessInstanceId}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and project_id = #{projectId}
+            </if>
+            <if test="lender !='' and lender !=null">
+            	and lender = #{lender}
+            </if>
+            <if test="trusteeOfLender !='' and trusteeOfLender !=null">
+            	and trustee_of_lender = #{trusteeOfLender}
+            </if>
+            <if test="trustee !='' and trustee !=null">
+            	and trustee = #{trustee}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="modifyTime != null">		
+	    		modify_time = #{modifyTime},		
+	    	</if>
+	    	<if test="isDelete != null">		
+	    		is_delete = #{isDelete},		
+	    	</if>
+	    	<if test="consultId != null">		
+	    		consult_id = #{consultId},		
+	    	</if>
+	    	<if test="processInstanceId != null">		
+	    		process_instance_id = #{processInstanceId},		
+	    	</if>
+	    	<if test="newProcessInstanceId != null">		
+	    		new_process_instance_id = #{newProcessInstanceId},		
+	    	</if>
+	    	<if test="projectId != null">		
+	    		project_id = #{projectId},		
+	    	</if>
+	    	<if test="lender != null">		
+	    		lender = #{lender},		
+	    	</if>
+	    	<if test="trusteeOfLender != null">		
+	    		trustee_of_lender = #{trusteeOfLender},		
+	    	</if>
+	    	<if test="trustee != null">		
+	    		trustee = #{trustee},		
+	    	</if>
+	    	<if test="remark != null">		
+	    		remark = #{remark},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="HousAdvanceNotarize">
+		insert into hous_advance_notarize(
+        	create_time,
+        	modify_time,
+        	is_delete,
+        	consult_id,
+        	process_instance_id,
+        	new_process_instance_id,
+        	project_id,
+        	lender,
+        	trustee_of_lender,
+        	trustee,
+        	remark			
+        )values(
+        	#{createTime},
+        	#{modifyTime},
+        	#{isDelete},
+        	#{consultId},
+        	#{processInstanceId},
+        	#{newProcessInstanceId},
+        	#{projectId},
+        	#{lender},
+        	#{trusteeOfLender},
+        	#{trustee},
+        	#{remark}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="HousAdvanceNotarize">
+        update hous_advance_notarize
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="HousAdvanceNotarizeResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from hous_advance_notarize
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="HousAdvanceNotarizeResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from hous_advance_notarize
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="HousAdvanceNotarizeResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from hous_advance_notarize
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+	
+	<!--查询贷款基本信息-->
+	<select id="getHousAdvanceNotarizeInfo" parameterType="long" resultType="java.util.HashMap" >
+		SELECT
+			pbr.account AS account,
+			pbr.time_limit AS timeLimit, 
+			pp.project_name AS projectName,
+			pp.`code` AS projectCode ,
+			hbb.`name` customerName,
+			pp.id
+		FROM
+			pl_borrow_requirement pbr
+		INNER JOIN hous_borrowing_basics hbb ON hbb.project_id = pbr.project_id
+		INNER JOIN pub_project pp ON pp.id = pbr.project_id
+		WHERE pp.id = #{projectId}
+	</select>
+	
+	<!--查询垫资公证数据-->
+	<select id="getHousAdvanceNotarize" parameterType="long" resultType="java.util.HashMap" >
+		SELECT
+			id,
+			new_process_instance_id as newProcessInstanceId,
+			new_process_instance_id as taskId,		
+			lender  as lender,
+			trustee_of_lender    as trusteeOfLender,
+			trustee as trustee,
+			remark as remark
+		FROM
+			hous_advance_notarize
+		WHERE process_instance_id = #{processInstanceId}
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from hous_advance_notarize
+        where
+        id  = #{id}
+    </delete>
+</mapper>

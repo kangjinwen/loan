@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- pl_settlementfee表:结算管理模块 -->
+<mapper namespace="com.company.modules.settleaccount.dao.PlSettlementfeeDao">
+	<!--返回MAP-->		
+	<resultMap id="PlSettlementfeeResult" type="PlSettlementfee">
+		<id column="id" property="id" />
+		<result column="processinstanceid" property="processinstanceid" />
+		<result column="project_id" property="projectId" />
+		<result column="capital" property="capital" />
+		<result column="is_payoff" property="isPayoff" />
+		<result column="disposal_amount" property="disposalAmount" />
+		<result column="disposal_balance_amount" property="disposalBalanceAmount" />
+		<result column="disposal_back_amount" property="disposalBackAmount" />
+		<result column="margin_fee" property="marginFee" />
+		<result column="is_breach_of_contract" property="isBreachOfContract" />
+		<result column="back_margin_fee" property="backMarginFee" />
+		<result column="illegal_disposal_fee" property="illegalDisposalFee" />
+		<result column="is_illegal" property="isIllegal" />
+		<result column="back_illegal_disposal_fee" property="backIllegalDisposalFee" />
+		<result column="gps_install_fee" property="gpsInstallFee" />
+		<result column="is_uninstall" property="isUninstall" />
+		<result column="back_gps_install_fee" property="backGpsInstallFee" />
+		<result column="total_back_amount" property="totalBackAmount" />
+		<result column="presbank_name" property="presbankName" />
+		<result column="presbank" property="presbank" />
+		<result column="presback_time" property="presbackTime" />
+		<result column="remark" property="remark" />
+		<result column="contract_no" property="contractNo" />
+		<result column="customer_name" property="customerName" />
+		<result column="customer_cbank_name" property="customerCbankName" />
+		<result column="customer_bank" property="customerBank" />
+		<result column="customer_obank_name" property="customerObankName" />
+		<result column="is_settleaccounts" property="isSettleaccounts" />
+		<result column="handler_name" property="handlerName" />
+		<result column="handler_time" property="handlerTime" />
+		<result column="back_account_amount" property="backAccountAmount" />
+	</resultMap>
+	
+	
+	<resultMap id="plSettlementfeeResultMap" type="java.util.HashMap">
+		<result column="id" property="id" />
+		<result column="processInstanceId" property="processInstanceId" />
+		<result column="project_id" property="projectId" />
+		<result column="capital" property="capital" />
+		<result column="is_payoff" property="isPayoff" />
+		<result column="disposal_amount" property="disposalAmount" />
+		<result column="disposal_balance_amount" property="disposalBalanceAmount" />
+		<result column="disposal_back_amount" property="disposalBackAmount" />
+		<result column="margin_fee" property="marginFee" />
+		<result column="is_breach_of_contract" property="isBreachOfContract" />
+		<result column="back_margin_fee" property="backMarginFee" />
+		<result column="illegal_disposal_fee" property="illegalDisposalFee" />
+		<result column="is_illegal" property="isIllegal" />
+		<result column="back_illegal_disposal_fee" property="backIllegalDisposalFee" />
+		<result column="gps_install_fee" property="gpsInstallFee" />
+		<result column="is_uninstall" property="isUninstall" />
+		<result column="back_gps_install_fee" property="backGpsInstallFee" />
+		<result column="total_back_amount" property="totalBackAmount" />
+		<result column="presbank_name" property="presbankName" />
+		<result column="presbank" property="presbank" />
+		<result column="presback_time" property="presbackTime" />
+		<result column="remark" property="remark" />
+		<result column="contract_no" property="contractNo" />
+		<result column="customer_name" property="customerName" />
+		<result column="customer_cbank_name" property="customerCbankName" />
+		<result column="customer_bank" property="customerBank" />
+		<result column="customer_obank_name" property="customerObankName" />
+		<result column="is_settleaccounts" property="isSettleaccounts" />
+		<result column="handler_name" property="handlerName" />
+		<result column="handler_time" property="handlerTime" />
+		<result column="back_account_amount" property="backAccountAmount" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			processinstanceid,
+			project_id,
+			capital,
+			is_payoff,
+			disposal_amount,
+			disposal_balance_amount,
+			disposal_back_amount,
+			margin_fee,
+			is_breach_of_contract,
+			back_margin_fee,
+			illegal_disposal_fee,
+			is_illegal,
+			back_illegal_disposal_fee,
+			gps_install_fee,
+			is_uninstall,
+			back_gps_install_fee,
+			total_back_amount,
+			presbank_name,
+			presbank,
+			presback_time,
+			remark,
+			contract_no,
+			customer_name,
+			customer_cbank_name,
+			customer_bank,
+			customer_obank_name,
+			is_settleaccounts,
+			handler_name,
+			handler_time,
+			back_account_amount			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="processinstanceid !='' and processinstanceid !=null">
+            	and processinstanceid = #{processinstanceid}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and project_id = #{projectId}
+            </if>
+            <if test="capital !='' and capital !=null">
+            	and capital = #{capital}
+            </if>
+            <if test="isPayoff !='' and isPayoff !=null">
+            	and is_payoff = #{isPayoff}
+            </if>
+            <if test="disposalAmount !='' and disposalAmount !=null">
+            	and disposal_amount = #{disposalAmount}
+            </if>
+            <if test="disposalBalanceAmount !='' and disposalBalanceAmount !=null">
+            	and disposal_balance_amount = #{disposalBalanceAmount}
+            </if>
+            <if test="disposalBackAmount !='' and disposalBackAmount !=null">
+            	and disposal_back_amount = #{disposalBackAmount}
+            </if>
+            <if test="marginFee !='' and marginFee !=null">
+            	and margin_fee = #{marginFee}
+            </if>
+            <if test="isBreachOfContract !='' and isBreachOfContract !=null">
+            	and is_breach_of_contract = #{isBreachOfContract}
+            </if>
+            <if test="backMarginFee !='' and backMarginFee !=null">
+            	and back_margin_fee = #{backMarginFee}
+            </if>
+            <if test="illegalDisposalFee !='' and illegalDisposalFee !=null">
+            	and illegal_disposal_fee = #{illegalDisposalFee}
+            </if>
+            <if test="isIllegal !='' and isIllegal !=null">
+            	and is_illegal = #{isIllegal}
+            </if>
+            <if test="backIllegalDisposalFee !='' and backIllegalDisposalFee !=null">
+            	and back_illegal_disposal_fee = #{backIllegalDisposalFee}
+            </if>
+            <if test="gpsInstallFee !='' and gpsInstallFee !=null">
+            	and gps_install_fee = #{gpsInstallFee}
+            </if>
+            <if test="isUninstall !='' and isUninstall !=null">
+            	and is_uninstall = #{isUninstall}
+            </if>
+            <if test="backGpsInstallFee !='' and backGpsInstallFee !=null">
+            	and back_gps_install_fee = #{backGpsInstallFee}
+            </if>
+            <if test="totalBackAmount !='' and totalBackAmount !=null">
+            	and total_back_amount = #{totalBackAmount}
+            </if>
+            <if test="presbankName !='' and presbankName !=null">
+            	and presbank_name = #{presbankName}
+            </if>
+            <if test="presbank !='' and presbank !=null">
+            	and presbank = #{presbank}
+            </if>
+            <if test="presbackTime !='' and presbackTime !=null">
+            	and presback_time = #{presbackTime}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+            <if test="contractNo !='' and contractNo !=null">
+            	and contract_no = #{contractNo}
+            </if>
+            <if test="customerName !='' and customerName !=null">
+            	and customer_name = #{customerName}
+            </if>
+            <if test="customerCbankName !='' and customerCbankName !=null">
+            	and customer_cbank_name = #{customerCbankName}
+            </if>
+            <if test="customerBank !='' and customerBank !=null">
+            	and customer_bank = #{customerBank}
+            </if>
+            <if test="customerObankName !='' and customerObankName !=null">
+            	and customer_obank_name = #{customerObankName}
+            </if>
+            <if test="isSettleaccounts !='' and isSettleaccounts !=null">
+            	and is_settleaccounts = #{isSettleaccounts}
+            </if>
+            <if test="handlerName !='' and handlerName !=null">
+            	and handler_name = #{handlerName}
+            </if>
+            <if test="handlerTime !='' and handlerTime !=null">
+            	and handler_time = #{handlerTime}
+            </if>
+            <if test="backAccountAmount !='' and backAccountAmount !=null">
+            	and back_account_amount = #{backAccountAmount}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="processinstanceid!= null">		
+	    		processinstanceid = #{processinstanceid},		
+	    	</if>
+	    	<if test="projectId!= null">		
+	    		project_id = #{projectId},		
+	    	</if>
+	    	<if test="capital!= null">		
+	    		capital = #{capital},		
+	    	</if>
+	    	<if test="isPayoff!= null">		
+	    		is_payoff = #{isPayoff},		
+	    	</if>
+	    	<if test="disposalAmount!= null">		
+	    		disposal_amount = #{disposalAmount},		
+	    	</if>
+	    	<if test="disposalBalanceAmount!= null">		
+	    		disposal_balance_amount = #{disposalBalanceAmount},		
+	    	</if>
+	    	<if test="disposalBackAmount!= null">		
+	    		disposal_back_amount = #{disposalBackAmount},		
+	    	</if>
+	    	<if test="marginFee!= null">		
+	    		margin_fee = #{marginFee},		
+	    	</if>
+	    	<if test="isBreachOfContract!= null">		
+	    		is_breach_of_contract = #{isBreachOfContract},		
+	    	</if>
+	    	<if test="backMarginFee!= null">		
+	    		back_margin_fee = #{backMarginFee},		
+	    	</if>
+	    	<if test="illegalDisposalFee!= null">		
+	    		illegal_disposal_fee = #{illegalDisposalFee},		
+	    	</if>
+	    	<if test="isIllegal!= null">		
+	    		is_illegal = #{isIllegal},		
+	    	</if>
+	    	<if test="backIllegalDisposalFee!= null">		
+	    		back_illegal_disposal_fee = #{backIllegalDisposalFee},		
+	    	</if>
+	    	<if test="gpsInstallFee!= null">		
+	    		gps_install_fee = #{gpsInstallFee},		
+	    	</if>
+	    	<if test="isUninstall!= null">		
+	    		is_uninstall = #{isUninstall},		
+	    	</if>
+	    	<if test="backGpsInstallFee!= null">		
+	    		back_gps_install_fee = #{backGpsInstallFee},		
+	    	</if>
+	    	<if test="totalBackAmount!= null">		
+	    		total_back_amount = #{totalBackAmount},		
+	    	</if>
+	    	<if test="presbankName!= null">		
+	    		presbank_name = #{presbankName},		
+	    	</if>
+	    	<if test="presbank!= null">		
+	    		presbank = #{presbank},		
+	    	</if>
+	    	<if test="presbackTime!= null">		
+	    		presback_time = #{presbackTime},		
+	    	</if>
+	    	<if test="remark!= null">		
+	    		remark = #{remark},		
+	    	</if>
+	    	<if test="contractNo!= null">		
+	    		contract_no = #{contractNo},		
+	    	</if>
+	    	<if test="customerName!= null">		
+	    		customer_name = #{customerName},		
+	    	</if>
+	    	<if test="customerCbankName!= null">		
+	    		customer_cbank_name = #{customerCbankName},		
+	    	</if>
+	    	<if test="customerBank!= null">		
+	    		customer_bank = #{customerBank},		
+	    	</if>
+	    	<if test="customerObankName!= null">		
+	    		customer_obank_name = #{customerObankName},		
+	    	</if>
+	    	<if test="isSettleaccounts!= null">		
+	    		is_settleaccounts = #{isSettleaccounts},		
+	    	</if>
+	    	<if test="handlerName!= null">		
+	    		handler_name = #{handlerName},		
+	    	</if>
+	    	<if test="handlerTime!= null">		
+	    		handler_time = #{handlerTime},		
+	    	</if>
+	    	<if test="backAccountAmount!= null">		
+	    		back_account_amount = #{backAccountAmount},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="PlSettlementfee">
+		insert into pl_settlementfee(
+        	processinstanceid,
+        	project_id,
+        	capital,
+        	is_payoff,
+        	disposal_amount,
+        	disposal_balance_amount,
+        	disposal_back_amount,
+        	margin_fee,
+        	is_breach_of_contract,
+        	back_margin_fee,
+        	illegal_disposal_fee,
+        	is_illegal,
+        	back_illegal_disposal_fee,
+        	gps_install_fee,
+        	is_uninstall,
+        	back_gps_install_fee,
+        	total_back_amount,
+        	presbank_name,
+        	presbank,
+        	presback_time,
+        	remark,
+        	contract_no,
+        	customer_name,
+        	customer_cbank_name,
+        	customer_bank,
+        	customer_obank_name,
+        	is_settleaccounts,
+        	handler_name,
+        	handler_time,
+        	back_account_amount			
+        )values(
+        	#{processinstanceid},
+        	#{projectId},
+        	#{capital},
+        	#{isPayoff},
+        	#{disposalAmount},
+        	#{disposalBalanceAmount},
+        	#{disposalBackAmount},
+        	#{marginFee},
+        	#{isBreachOfContract},
+        	#{backMarginFee},
+        	#{illegalDisposalFee},
+        	#{isIllegal},
+        	#{backIllegalDisposalFee},
+        	#{gpsInstallFee},
+        	#{isUninstall},
+        	#{backGpsInstallFee},
+        	#{totalBackAmount},
+        	#{presbankName},
+        	#{presbank},
+        	#{presbackTime},
+        	#{remark},
+        	#{contractNo},
+        	#{customerName},
+        	#{customerCbankName},
+        	#{customerBank},
+        	#{customerObankName},
+        	#{isSettleaccounts},
+        	#{handlerName},
+        	#{handlerTime},
+        	#{backAccountAmount}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	 
+	 
+	 <insert id="savePlSettlementfee" parameterType="java.util.HashMap">
+		insert into pl_settlementfee(
+        	processInstanceId,
+        	project_id,
+        	capital,
+        	is_payoff,
+        	disposal_amount,
+        	disposal_balance_amount,
+        	disposal_back_amount,
+        	margin_fee,
+        	is_breach_of_contract,
+        	back_margin_fee,
+        	illegal_disposal_fee,
+        	is_illegal,
+        	back_illegal_disposal_fee,
+        	gps_install_fee,
+        	is_uninstall,
+        	back_gps_install_fee,
+        	total_back_amount,
+        	presbank_name,
+        	presbank,
+        	presback_time,
+        	remark,
+        	contract_no,
+        	customer_name,
+        	customer_cbank_name,
+        	customer_bank,
+        	customer_obank_name,
+        	is_settleaccounts,
+        	handler_name,
+        	handler_time,
+        	back_account_amount			
+        )values(
+        	#{processInstanceId},
+        	#{projectId},
+        	#{capital},
+        	#{isPayoff},
+        	#{disposalAmount},
+        	#{disposalBalanceAmount},
+        	#{disposalBackAmount},
+        	#{marginFee},
+        	#{isBreachOfContract},
+        	#{backMarginFee},
+        	#{illegalDisposalFee},
+        	#{isIllegal},
+        	#{backIllegalDisposalFee},
+        	#{gpsInstallFee},
+        	#{isUninstall},
+        	#{backGpsInstallFee},
+        	#{totalBackAmount},
+        	#{presbankName},
+        	#{presbank},
+        	#{presbackTime},
+        	#{remark},
+        	#{contractNo},
+        	#{customerName},
+        	#{customerCbankName},
+        	#{customerBank},
+        	#{customerObankName},
+        	#{isSettleaccounts},
+        	#{handlerName},
+        	#{handlerTime},
+        	#{backAccountAmount}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="PlSettlementfee">
+        update pl_settlementfee
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<update id="updatePlSettlementfeeById" parameterType="java.util.HashMap">
+        update pl_settlementfee
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="PlSettlementfeeResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from pl_settlementfee
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="PlSettlementfeeResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from pl_settlementfee
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!--分页列表查询-->
+	<sql id="selectUnDoneSettleAccounts">
+			borrow.account borrowAccount, 				/*借款金额*/
+			borrow.process_instance_id	processInstanceId,/*流程编号*/
+			proj.id						projectId,		/*项目ID*/
+			proj.code					projectCode,	/*项目编号*/
+			proj.project_name 			projectName, 	/* 项目名称/借款名称 */
+			repayloan.contract_no		contractNo,		/*合同编号*/
+			repayloan.customer_name		customerName,	/*客户姓名*/
+			if(ISNULL(repayloan.repaymentTime),'--',DATE_FORMAT(repayloan.repaymentTime,'%Y-%m-%d')) repaymentStartTime,				/*还款开始时间*/
+			if(ISNULL(repayloan.end_repayTime),'--',DATE_FORMAT(repayloan.end_repayTime,'%Y-%m-%d')) repaymentEndTime,				/*还款结束时间*/
+			/*office.id as 				officeId,*/
+			/*office.name				officeName,营业厅*/
+			repayloan.time_limit		timeLimit,		/*借款期数*/
+			prodType.product_type		productType,
+			total.capital				capital,		/*借款本金*/
+			case repayloan.repayment_process when 5 then 1 else 0 end isDisposal,			/*是否处置*/
+			case repayloan.repayment_process when 5 then '是' else '否' end isDisposalText,	/*是否处置*/
+			ifnull(sf.is_settleaccounts,0)			isSettleaccounts,						/*是否结清*/
+			case ifnull(sf.is_settleaccounts,0)	 when 1 then '已结算' else '待结算' end isSettleaccountsText,/*是否已结算*/
+			contract.borrow_end 			borrowEnd,/*到期日期*/
+		plb.financial_advisers as financialAdvisers,
+		CASE
+            plb.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    plb.institution_name as institutionName,/*机构名称*/ 
+	    plb.salesman as customerManager,/*报单人*/ 
+			dd.item_value currentProcessState,
+			total.payoffTime				payoffTime
+	</sql>
+	<sql id="selectAlreadyDoneSettleAccounts">
+		<include refid="selectUnDoneSettleAccounts"/>
+		,
+		suser.name			handlerName,
+		sf.handler_time				handlerTime
+	</sql>
+	<sql id="settleAccountsFrom">
+		inner join pl_borrow borrow on repayloan.borrowId=borrow.id
+		inner join pub_project proj on borrow.project_id=proj.id
+		INNER JOIN pl_consult pc on pc.project_id=proj.id
+		left join sys_office office on office.id=repayloan.officeid
+		inner join pl_product product on product.id=borrow.product_id
+		inner join pl_contract contract on contract.id=repayloan.contractId
+		inner join (select sum(capital) capital,max(realpayment_time) payoffTime,processInstanceId from pub_repaymentdetail group by processInstanceId) total on borrow.process_instance_id=total.processInstanceId
+		left join pl_settlementfee sf on sf.processInstanceId=borrow.process_instance_id
+		left join sys_user suser on suser.user_name = sf.handler_name
+		inner join product_type prodType on product.product_type = prodType.id
+		INNER JOIN sys_user AS manager ON manager.id = pc.customer_manager 
+		
+		
+		INNER JOIN (select max(create_time) branchProcessId,processInstanceId,branching_process_id,process_status from pub_process_branching GROUP BY processInstanceId)
+			ppb ON ppb.processInstanceId = borrow.process_instance_id
+		INNER JOIN sys_dict_detail dd ON dd.item_code = ppb.process_status
+		
+		INNER JOIN pl_borrow_requirement plb ON plb.project_id = borrow.project_id
+	</sql>
+	
+	
+	
+	<sql id="dynamicQuerySql">
+		<if test="vo.projectCode!=null and vo.projectCode != ''">
+			and proj.code = #{vo.projectCode}
+		</if>
+		<if test="vo.contractNo!=null and vo.contractNo != ''">
+			and repayloan.contract_no = #{vo.contractNo}
+		</if>
+		<if test="vo.customerName!=null and vo.customerName != ''">
+			and repayloan.customer_name like concat('%',#{vo.customerName},'%')
+		</if>
+		<if test="coverdOffices != null">
+			AND office.id IN
+			<foreach item="office" collection="coverdOffices" open="(" separator="," close=")" >
+				#{office}
+			</foreach>
+		</if>	
+	</sql>
+	
+	<sql id="dynamicQuery">
+	      <where>
+	        <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>
+			
+			<if test="customerManager !='' and customerManager !=null">
+				and customerManager = #{customerManager}
+			</if>
+		</where>
+	</sql>
+	
+	
+	<select id="getCompletedPageListByMap" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		select * from (
+		select 
+			repayloan.id AS repayloanId,
+			pc.create_time as declarationDate,
+			<include refid="selectAlreadyDoneSettleAccounts"/>
+			,sysuser.name as nextAssignee
+		from pub_repayloaninfo repayloan
+			<include refid="settleAccountsFrom"/>
+			left join pub_process_branching ppbing on ppbing.branching_process_id = borrow.process_instance_id
+			left join pub_loanprocess pub on pub.task_id = ppbing.branching_process_id
+            left join sys_user sysuser on sysuser.user_name = pub.next_assignee
+           
+           <if test="roleNid != null and roleNid == 'moneyRepayStaff' ">
+				INNER JOIN (select projectId from pub_repayloaninfo where repayment_status = 0 or repayment_status = 2) unSettle on proj.id = unSettle.projectId
+			</if>
+		where repayloan.islocked=0 and repayloan.repayment_status=1 and sf.is_settleaccounts=1
+			<include refid="dynamicQuerySql"/>
+		) as result 
+		<include refid="dynamicQuery"/>
+		ORDER BY repayloanId DESC
+	</select>
+	
+	<select id="getUnCompletePageListByMap" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		select * from (
+		select
+			repayloan.id AS repayloanId,
+			pc.create_time as declarationDate,
+			<include refid="selectUnDoneSettleAccounts"/>
+		from pub_repayloaninfo repayloan
+			<include refid="settleAccountsFrom"/>
+		where repayloan.islocked=0 and repayloan.repayment_status=1 and (sf.id is null or sf.is_settleaccounts=0)
+			<include refid="dynamicQuerySql"/>
+		) as result 
+		<include refid="dynamicQuery"/>
+		ORDER BY repayloanId ASC
+	</select>
+	
+	
+	
+	<select id="findSettileAccountMapByProcessInstanceId" parameterType="String"  resultMap="plSettlementfeeResultMap">
+		select * from pl_settlementfee where processInstanceId=#{processInstanceId}
+	</select>
+	
+	<select id="getDocumentApplicationAssignee" parameterType="int"  resultType="String">
+		SELECT
+			ASSIGNEE_
+		FROM
+			ACT_HI_TASKINST
+		WHERE
+			PROC_INST_ID_ = (
+				SELECT
+					process_instance_id
+				FROM
+					pub_project_process
+				WHERE
+					project_id = #{projectId}
+				AND extension_number = 0
+				AND process_type = 0
+			)
+		AND TASK_DEF_KEY_ = 'usertask-householdTaskAssign'
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from pl_settlementfee
+        where
+        id  = #{id}
+    </delete>
+</mapper>

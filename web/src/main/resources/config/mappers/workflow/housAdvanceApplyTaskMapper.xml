@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.workflow.dao.RDZZTaskDao">
+	
+	<sql id="housAdvanceApplyBaseWhere">
+		<where> 
+			<if test="projectCode !='' and projectCode !=null">
+	                pp.`code` like concat('',#{projectCode}, '%') 
+	        </if>
+	        <if test="projectName !='' and projectName !=null">
+	                AND pp.project_name like concat('',#{projectName}, '%') 
+	        </if>
+	        <if test="customerName !='' and customerName !=null">
+	                AND pc.`name` like concat('%',#{customerName}, '%') 
+	        </if>
+	        <if test="status !='' and status !=null">
+	                AND pc.`status` = #{status}
+	        </if>
+	         <if test="processingOpinion !='' and processingOpinion !=null">
+	                AND ppb.`processing_opinion` = #{processingOpinion}
+	        </if>
+	        <if test="taskDefinition !='' and taskDefinition !=null">
+	                AND task.TASK_DEF_KEY_ = #{taskDefinition}
+	        </if>
+	        <if test="flowStatus !='' and flowStatus !=null">
+	                AND task.TASK_DEF_KEY_ = #{flowStatus}
+	        </if>
+	        <if test="processInstanceId !='' and processInstanceId !=null">
+	                AND task.PROC_INST_ID_ = #{processInstanceId}
+	        </if>
+	        <if test="isCompleted == true ">
+	                AND task.END_TIME_ is not null
+	        </if>
+			<if test="userName !=null or roleId !=null or coverdOffices != null" >
+	         and ((
+		        <if test="userName !='' and userName !=null">
+		                 task.ASSIGNEE_ = #{userName}
+		        </if>
+		        <if test="roleId !='' and roleId !=null">
+		                AND r.id = #{roleId}
+		        </if>
+	        	)
+				<if test="coverdOffices !=null">
+	           		or assignee.office_id IN
+		        	<foreach item="item" index="index" collection="coverdOffices" open="(" separator="," close=")">
+			        #{item}
+			 		</foreach>
+			 	</if>
+		 	)
+		 	</if>
+		 	
+		</where>
+	</sql>
+	
+	<!-- 垫资确认未完成 -->
+	<select id="queryUndoHousAdvanceApplyTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			<!--pc.customer_manager AS customerManager,-->
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			pc.id AS consultId,
+			pc.name AS customerName,
+			task.CREATE_TIME_ AS createTime,
+			pbr.account as account,
+			pbr.time_limit as timeLimit,
+			CASE
+	            pbr.project_belongs 
+	            WHEN 1 
+	            THEN '赚赚自有' 
+	            WHEN 2 
+	            THEN '报单机构' 
+	            WHEN 3 
+	            THEN '报单个人'
+            ELSE '' END businessOriginText,/*来源*/ 
+	        pbr.institution_name as institutionName,/*机构名称*/ 
+	        pbr.salesman as customerManager/*报单人*/
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN hous_advance_apply AS haa 
+		    ON haa.process_instance_id=task.PROC_INST_ID_
+		  INNER JOIN pl_borrow_requirement pbr on pbr.project_id=haa.project_id  
+		  INNER JOIN pub_project_process AS process 
+		  ON process.process_instance_id=task.PROC_INST_ID_  AND process.process_type='8'		   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = process.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = process.project_id AND process.process_type='8'	
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		<include refid="housAdvanceApplyBaseWhere"/>
+		
+        <if test="customerManager !='' and customerManager !=null">
+                AND pbr.salesman like concat('%',#{customerManager}, '%') 
+        </if>
+        )
+        as coulut
+        <include refid="dymicQuery"/>
+        
+		order by coulut.createTime ASC
+	</select>
+	
+	<!-- 垫资公证未完成 -->
+	<select id="queryUndoHousAdvanceNotarizeTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			pb.account,
+            pb.time_limit AS timeLimit,
+			<!--pc.customer_manager AS customerManager,-->
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			pc.id AS consultId,
+			pc.name AS customerName,
+			task.CREATE_TIME_ AS createTime,
+			CASE
+	            pb.project_belongs 
+	            WHEN 1 
+	            THEN '赚赚自有' 
+	            WHEN 2 
+	            THEN '报单机构' 
+	            WHEN 3 
+	            THEN '报单个人'
+	            ELSE ''             
+	        END businessOriginText,/*来源*/ 
+	        pb.institution_name as institutionName,/*机构名称*/ 
+	        pb.salesman as customerManager/*报单人*/ 
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN hous_advance_apply AS haa 
+		    ON haa.process_instance_id=task.PROC_INST_ID_  
+		  INNER JOIN pub_project_process AS process 
+		  ON process.process_instance_id=task.PROC_INST_ID_  AND process.process_type='8'	
+		  INNER JOIN pl_borrow_requirement pb 
+          ON process.project_id = pb.project_id AND process.process_type='8'		   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = process.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = process.project_id AND process.process_type='8'	
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		<include refid="housAdvanceApplyBaseWhere"/>
+        <if test="customerManager !='' and customerManager !=null">
+			AND pb.salesman like concat('%',#{customerManager}, '%') 
+        </if>
+        ) as coulut
+        <include refid="dymicQuery"/>
+		order by coulut.createTime ASC
+	</select>
+	
+	<!-- 垫资公证已完成 -->
+	<select id="queryDoneHousAdvanceNotarizeTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			pb.account,
+            pb.time_limit AS timeLimit,
+			<!-- pc.customer_manager AS customerManager, -->
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			pc.id AS consultId,
+			pc.name AS customerName,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime,
+			suser.name AS nextAssignee,
+			CASE
+            	pb.project_belongs 
+				WHEN 1 
+            	THEN '赚赚自有' 
+            	WHEN 2 
+            	THEN '报单机构' 
+            	WHEN 3 
+            	THEN '报单个人'
+            	ELSE ''             
+        		END businessOriginText,/*来源*/ 
+        	pb.institution_name as institutionName,/*机构名称*/ 
+        	pb.salesman as customerManager/*报单人*/ 
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN hous_advance_notarize AS han 
+		    ON han.process_instance_id=task.PROC_INST_ID_  
+		  INNER JOIN pub_project_process AS process 
+		  ON process.process_instance_id=task.PROC_INST_ID_  AND process.process_type='8'	
+		  INNER JOIN pl_borrow_requirement pb 
+          ON process.project_id = pb.project_id AND process.process_type='8'		   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = process.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = process.project_id AND process.process_type='8'	
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   left join pub_loanprocess pub on pub.task_id = task.ID_
+		   left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="housAdvanceApplyBaseWhere"/>
+        <if test="customerManager !='' and customerManager !=null">
+			AND pb.salesman like concat('%',#{customerManager}, '%') 
+        </if>
+        ) as coulut
+        <include refid="dymicQuery"/>
+		ORDER BY coulut.endTime DESC
+	</select>
+	
+	<!-- 垫资确认已完成 -->
+	<select id="queryDoneHousAdvanceApplyTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		
+		select * from(
+		SELECT
+			/*task.ASSIGNEE_ AS assignee,*/
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value AS currentProcessStateCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			<!--pc.customer_manager AS customerManager,-->
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			pc.id AS consultId,
+			pc.name AS customerName,
+			task.START_TIME_ AS startTime,
+			suser.name as nextAssignee,
+			task.END_TIME_ AS endTime,
+			pbr.account as account,
+			pbr.time_limit as timeLimit,
+			CASE
+	            pbr.project_belongs 
+	            WHEN 1 
+	            THEN '赚赚自有' 
+	            WHEN 2 
+	            THEN '报单机构' 
+	            WHEN 3 
+	            THEN '报单个人'
+            ELSE '' END businessOriginText,/*来源*/ 
+	        pbr.institution_name as institutionName,/*机构名称*/ 
+	        pbr.salesman as customerManager/*报单人*/
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN hous_advance_apply AS haa 
+		    ON haa.process_instance_id=task.PROC_INST_ID_ 
+		    INNER JOIN pl_borrow_requirement pbr on pbr.project_id=haa.project_id 
+		  INNER JOIN pub_project_process AS process 
+		  ON process.process_instance_id=task.PROC_INST_ID_  AND process.process_type='8'		   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = process.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 
+		    INNER JOIN sys_dict_detail AS sdd 
+           ON sdd.item_code = haa.status and sdd.parent_id=277
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = process.project_id AND process.process_type='8'	
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   left join pub_loanprocess pub on pub.task_id = task.ID_
+		   left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="housAdvanceApplyBaseWhere"/>
+		<if test="customerManager !='' and customerManager !=null">
+			AND pbr.salesman like concat('%',#{customerManager}, '%') 
+        </if>
+        ) as coulut
+        <include refid="dymicQuery"/>
+		ORDER BY coulut.createTime DESC
+	</select>
+
+	<sql id="dymicQuery">
+		   <where>        <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>
+        </where>
+	</sql>	
+
+</mapper>

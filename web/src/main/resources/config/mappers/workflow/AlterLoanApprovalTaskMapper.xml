@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.workflow.dao.TaskDao">
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="baseAuditSelectSql">
+		task.ID_ taskId,
+		task.PROC_INST_ID_ processInstanceId,
+		pp.id projectId,
+		pp. CODE projectCode,	/*项目编号*/
+		pp.project_name projectName,
+		borrow.account borrowAccount,
+        /*借款金额*/
+        borrow.time_limit timeLimit,
+        /*借款期数*/
+        repayloan.end_repayTime AS endRepayTime,
+	    /*借款到期时间*/
+	    repayloan.repaymentTime AS startRepayTime,
+	    /*借款开始时间*/
+	    repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+	    /*借款剩余本金*/
+	    ppb.extension_count as extensionCount,
+		/*展期期限*/
+		ppb.extension_amount as extensionAmount,
+		/*展期金额*/
+		ppb.extension_amount - borrow.account AS excessAccount,
+		/*超额金额*/
+		ppb.extension_fee as extensionFee,
+		/*展期费*/
+		ppb.extension_rate as extensionRate,
+		/*展期利率*/
+		ppb.extension_returnfee_rate as extensionReturnfeeRate,
+		/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+		ppb.branching_process_type branchingProcessType, /*变更类型*/
+		case ppb.branching_process_type 
+			when 1 then '提前还款'
+			when 2 then '违约金罚息减免'
+			when 3 then '强制结清'
+			when 5 then '押品处置'
+			when 6 then '展期'
+			else '' end branchingProcessTypeText,
+		contract.contract_no contractNo,
+		contract.borrow_end borrowEnd,
+		dd.item_value currentProcessState,		
+		dd.item_code currentProcessStateCode,
+		task.NAME_ AS processState,
+		assignee.`name` AS executor,/*处理人*/
+		task.TASK_DEF_KEY_ AS processStateCode,
+		procdef.NAME_ AS procDef,
+		taskdict.item_value AS procName,
+		cc.`name` customerName,	/*客户名称*/
+		cc.id AS consultid,
+	IF (IFNULL(ppp.extension_number, 0) > 0,1,0) AS isExtension,
+	CASE
+            borrowReq.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    borrowReq.institution_name as institutionName,/*机构名称*/ 
+	    borrowReq.salesman as customerManager,/*报单人*/ 
+	 plp.NAME proName
+	</sql>
+
+	
+	<!-- 待处理 基本的sql查询字段-->
+	<sql id="undoneBaseAuditSelectSql">
+		<include refid="baseAuditSelectSql" />
+		,task.CREATE_TIME_ as startTime
+	</sql>
+	<!-- 已处理 基本的sql查询字段-->
+	<sql id="doneBaseAuditSelectSql">
+		<include refid="baseAuditSelectSql" />
+		,task.START_TIME_ as startTime
+		,task.END_TIME_ as endTime
+	</sql>
+	
+	<!--基本的动态过滤sql-->
+	<sql id="baseAuditDynamicQuerySql">
+			<if test="projectCode != null and projectCode != ''">
+			    and  pp.code = #{projectCode}
+			</if>
+			<if test="customerName != null and customerName != ''">
+			   and   cc.`name` like concat('%',#{customerName},'%')
+			</if>
+			<if test="branchingProcessType != null and branchingProcessType != ''">
+			    and  ppb.branching_process_type = #{branchingProcessType}
+			</if>
+			<if test="executor != null and executor != ''">
+			    and  assignee.`name` like concat('%',#{executor},'%')
+			</if>
+			<if test="contractNo!=null and contractNo != ''">
+				and contract.contract_no = #{contractNo}
+			</if>
+			<if test="userName != null and userName != ''">
+			    and task.ASSIGNEE_ = #{userName}
+			</if>
+			<if test="institutionName != null and institutionName != ''">
+			    and  borrowReq.institution_name like concat('%',#{institutionName},'%')
+			</if>
+			
+			
+	    	<if test="processInstanceId != null and processInstanceId != ''">
+			    and  task.PROC_INST_ID_ = #{processInstanceId}
+			</if>
+			<if test="processBusinessName != null and processBusinessName != ''">
+			    and  ins.BUSINESS_KEY_ = #{processBusinessName}
+			</if>
+			<if test="currentProcessStateCode != null and currentProcessStateCode != ''">
+			    and  cc.`STATUS` = #{currentProcessStateCode}
+			</if>
+			<if test="projectId != null and projectId != ''">
+			    and  borrow.project_id = #{projectId}
+			</if>
+			<if test="branchingProcessId != null and branchingProcessId != ''">
+			   and   ppb.branching_process_id = #{branchingProcessId}
+			</if>
+			<if test="processStateCode != null and processStateCode != ''">
+			    and  task.TASK_DEF_KEY_ = #{processStateCode}
+			</if>
+			<if test="taskId != null and taskId != ''">
+			   and   task.ID_ = #{taskId}
+			</if>
+			<if test="roleId != null and roleId != ''">
+				and  role.id  = #{roleId}
+			</if>
+	</sql>
+	
+	<!--展期列表模糊查询sql-->
+	<sql id="listQuerySql21">
+		<where>			
+			<if test="projectCode !='' and projectCode !=null">
+				and consult.projectCode like concat('%',#{projectCode}, '%')
+	        </if>	      
+	        <if test="customerName !='' and customerName !=null">
+	            and consult.customerName like concat('%',#{customerName}, '%')
+	        </if>
+	        <if test="customerManager !='' and customerManager !=null">
+	            and consult.customerManager like concat('%',#{customerManager}, '%')
+	        </if>	
+	        <if test="flowStatus != '' and flowStatus != null">
+	           and consult.currentProcessItemCode = #{flowStatus}
+	        </if>
+	        	        <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>
+	               
+		</where>
+	</sql>
+
+	<sql id="baseJoinSql">
+		LEFT JOIN pub_project_process ppp ON ppp.process_instance_id = task.PROC_INST_ID_
+		INNER JOIN ACT_RE_PROCDEF procdef ON task.PROC_DEF_ID_ = procdef.ID_
+		LEFT JOIN sys_dict_detail taskdict ON taskdict.item_code = procdef.NAME_
+		INNER JOIN ACT_HI_PROCINST ins ON ins.ID_ = task.PROC_INST_ID_
+		INNER JOIN pub_process_branching ppb ON ppb.branching_process_id = task.PROC_INST_ID_
+		INNER JOIN pub_project pp ON pp.id = ppp.project_id
+		INNER JOIN pl_consult cc ON cc.project_id = ppp.project_id
+		INNER JOIN sys_dict_detail dd ON dd.item_code = ppb.process_status
+		AND (dd.parent_id = '23' or dd.parent_id = '281')
+		INNER JOIN pl_contract contract ON ppb.processInstanceId = contract.process_instance_id
+		INNER JOIN pl_borrow borrow ON borrow.process_instance_id = ppb.processInstanceId
+		INNER JOIN pub_repayloaninfo repayloan   
+        ON repayloan.borrowId = borrow.id 
+		INNER JOIN pl_borrow_requirement borrowReq on borrow.process_instance_id = borrowReq.process_instance_id
+		LEFT JOIN pl_product plp ON borrow.product_id = plp.id
+		INNER JOIN sys_user assignee ON assignee.user_name = task.ASSIGNEE_	
+		INNER JOIN sys_user as manager ON manager.id = cc.customer_manager	
+	</sql>
+	
+	<sql id="baseUndoneJoinSql">
+		<include refid="baseJoinSql" />
+		INNER JOIN sys_role role ON  role.nid = task.DESCRIPTION_
+	</sql>
+
+	<sql id="baseDoneJoinSql">
+		<include refid="baseJoinSql" />
+		INNER JOIN pub_loanprocess l on l.task_id = task.ID_
+		INNER JOIN sys_role role ON  role.nid = task.DESCRIPTION_
+		left join sys_user suser on suser.user_name = l.next_assignee
+	</sql>
+
+	<!-- 贷后变更 审批列表(已经申请完，流程已启动，显示的审批任务列表) -->
+	<select id="queryUndoneAfterLoanApprovalTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT 
+		cc.create_time as declarationDate,
+		<include refid="undoneBaseAuditSelectSql" />		
+		FROM
+			ACT_RU_TASK task
+		<include refid="baseUndoneJoinSql" />
+		WHERE  1 = 1
+		<include refid="baseAuditDynamicQuerySql" />		
+		order by task.ID_ ASC) consult
+		<include refid="listQuerySql21"/>
+		order by consult.startTime ASC
+	</select>
+
+	<select id="queryAlreadyDoneAfterLoanApprovalTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT 
+		cc.create_time as declarationDate,
+		<include refid="doneBaseAuditSelectSql" />
+		,suser.name as nextAssignee
+		FROM
+			ACT_HI_TASKINST task
+		<include refid="baseDoneJoinSql" />       
+		WHERE  1 = 1
+		<include refid="baseAuditDynamicQuerySql" />
+		order by task.ID_ desc) consult
+		<include refid="listQuerySql21"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<select id="getProcessState" parameterType="java.lang.String" resultType="java.util.HashMap">
+        select NAME_ as processStateName,TASK_DEF_KEY_ as processState from ACT_RU_TASK where ID_ = #{taskId}
+    </select>
+    
+    
+    <select id="queryUserList" parameterType="java.lang.String" resultType="java.util.HashMap">
+        SELECT
+			user1.id AS userId,
+			user1.`name` AS name,
+			user1.user_name AS userName,
+			userRole.role_id AS roleId
+		FROM
+			sys_user  user1
+		LEFT JOIN sys_user_role userRole ON user1.id = userRole.user_id
+		WHERE  user1.office_id = (SELECT taskUser.office_id
+		FROM
+			ACT_RU_TASK task
+		INNER JOIN sys_user taskUser  ON task.ASSIGNEE_ = taskUser.user_name
+		WHERE task.ID_ = #{taskId} ) 
+		
+		AND userRole.role_id = (
+		SELECT
+		
+			role.id 
+		FROM
+			ACT_RU_TASK task
+		
+		INNER JOIN sys_role role ON task.DESCRIPTION_ = role.nid
+		WHERE task.ID_ = #{taskId}
+		)
+		 and user1.is_receive_order = 1
+    </select>
+    
+    <!-- 查询是否有核行的历史记录 -->
+     <select id="queryHouseCheckBankList" parameterType="java.lang.String" resultType="java.util.HashMap">
+       SELECT 
+		*
+		FROM
+			ACT_HI_TASKINST task
+			where task.PROC_INST_ID_ = #{processInstanceId} and TASK_DEF_KEY_='usertask-houseCheckBank'
+    </select>
+</mapper>

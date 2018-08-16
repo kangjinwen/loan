@@ -1,0 +1,22 @@
+CREATE TABLE `hous_property_information` (
+	`id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号id',
+	`creator` int(11) DEFAULT NULL COMMENT '创建人',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`modifier` int(11) DEFAULT NULL COMMENT '修改者',
+	`modify_time` datetime DEFAULT NULL COMMENT '修改时间',
+	`is_delete` tinyint(4) unsigned zerofill DEFAULT NULL COMMENT '0不删除1已删除',
+	`process_instance_id` varchar(64) DEFAULT NULL COMMENT '流程ID',
+	`project_id` int(11) DEFAULT NULL COMMENT '项目编号',
+	`property_address_id` varchar(32) DEFAULT NULL COMMENT '房产地址',
+	`property_address` varchar(128) DEFAULT NULL COMMENT '房产详细地址',
+	`property_area` decimal(20,2) DEFAULT NULL COMMENT '房产面积',
+	`property_properties` tinyint(4) DEFAULT NULL COMMENT '房产性质',
+	`property_situation` tinyint(4) DEFAULT NULL COMMENT '房产现状',
+	`whether_one_contact` tinyint(4) DEFAULT NULL COMMENT '是否一抵',
+	`against_one_mortgagee` varchar(64) DEFAULT NULL COMMENT '一抵抵押权人',
+	`against_one_amount` decimal(20,2) DEFAULT NULL COMMENT '一抵金额',
+	`whether_two_contact` tinyint(4) DEFAULT NULL COMMENT '是否二抵',
+	`against_two_mortgagee` varchar(64) DEFAULT NULL COMMENT '二抵抵押权人',
+	`against_two_amount` decimal(20,2) DEFAULT NULL COMMENT '二抵金额',
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='房产信息表';

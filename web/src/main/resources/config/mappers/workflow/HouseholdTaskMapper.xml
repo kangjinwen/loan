@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.workflow.dao.RDZZTaskDao">
+	
+	<sql id="householdBaseSql">
+		/*task.ASSIGNEE_ as assignee,*/
+		pc.create_time as declarationDate,
+		assignee.name as assignee, /*任务处理人*/
+		task.PROC_INST_ID_ as processInstanceId,
+		task.TASK_DEF_KEY_ as processStateCode,
+		sdd.item_value as currentProcessStateCode,
+		sdd.item_code as currentProcessItemCode,
+		pi.property_area as propertyArea,
+		<!--bb.`name` as customerName,-->
+		br.account as account,
+		br.time_limit as timeLimit,
+		pp.`code` as projectCode,
+		pp.project_name as projectName,
+		/*pc.customer_manager as customerManager,*/
+		/*soffice.name customerManager, 报单人*/
+		br.financial_advisers as financialAdvisers,
+		CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+		pp.id as projectId,
+		task.ID_ as taskId,
+		pc.id as consultId,
+		pc.name as customerName,
+	</sql>
+	
+	<sql id="householdBaseJoin">
+		INNER JOIN hous_property_information pi ON pi.process_instance_id = task.PROC_INST_ID_
+		<!--INNER JOIN hous_borrowing_basics bb ON bb.process_instance_id = task.PROC_INST_ID_-->
+		INNER JOIN pl_borrow_requirement br ON br.process_instance_id = task.PROC_INST_ID_
+		INNER JOIN pub_project pp ON pp.id = br.project_id
+		INNER JOIN sys_role r on r.nid = task.DESCRIPTION_
+		INNER JOIN sys_user assignee ON assignee.user_name = task.ASSIGNEE_
+		INNER JOIN pl_consult pc ON pc.process_instance_id = task.PROC_INST_ID_		
+		INNER JOIN sys_user AS manager ON manager.id = pc.customer_manager 
+		INNER JOIN sys_dict_detail as sdd on sdd.item_code = pc.`status`
+	</sql>
+	
+	<sql id="householdBaseWhere">
+		<where> 
+			<if test="projectCode !='' and projectCode !=null">
+	                pp.`code` like concat('%',#{projectCode}, '%') 
+	        </if>
+	        <if test="projectName !='' and projectName !=null">
+	                AND pp.project_name like concat('%',#{projectName}, '%') 
+	        </if>
+	        <if test="customerName !='' and customerName !=null">
+	                AND pc.`name` like concat('%',#{customerName}, '%') 
+	        </if>
+	        <if test="status !='' and status !=null">
+	                AND pc.`status` = #{status}
+	        </if>
+	        <if test="taskDefinition !='' and taskDefinition !=null">
+	                AND task.TASK_DEF_KEY_ = #{taskDefinition}
+	        </if>    
+	      
+	        <if test="processInstanceId !='' and processInstanceId !=null">
+	                AND task.PROC_INST_ID_ = #{processInstanceId}
+	        </if>
+	        <if test="isCompleted == true ">
+	                AND task.END_TIME_ is not null
+	        </if>
+			<if test="userName !=null or roleId !=null or coverdOffices != null" >
+	         and ((
+		        <if test="userName !='' and userName !=null">
+		                 task.ASSIGNEE_ = #{userName}
+		        </if>
+		        <if test="roleId !='' and roleId !=null">
+		                AND r.id = #{roleId}
+		        </if>
+	        	)
+	            or assignee.office_id IN
+		        <foreach item="item" index="index" collection="coverdOffices" open="(" separator="," close=")">
+			        #{item}
+			 	</foreach>
+		 	)
+		 	</if>
+		</where>
+	</sql>
+	
+	<!--列表模糊查询sql-->
+	<sql id="listQuerySql4">
+		<where>			
+			<if test="projectCode !='' and projectCode !=null">
+				and consult.projectCode like concat('%',#{projectCode}, '%')
+	        </if>	      
+	        <if test="customerName !='' and customerName !=null">
+	            and consult.customerName like concat('%',#{customerName}, '%')
+	        </if>
+	        <if test="customerManager !='' and customerManager !=null">
+	            and consult.customerManager like concat('%',#{customerManager}, '%')
+	        </if>	
+	        <if test="flowStatus != '' and flowStatus != null">
+	           and consult.currentProcessItemCode = #{flowStatus}
+	        </if>   
+	        
+	        	        <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>
+	            
+		</where>
+	</sql>
+	
+	<select id="queryUndoHouseholdTasks" parameterType="map" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			<include refid="householdBaseSql"/>
+			task.CREATE_TIME_ as createTime
+			,CASE
+            plpc.type 
+            WHEN 'back' 
+            THEN '驳回' 
+            WHEN 'backCheckBank'
+            THEN '驳回' 
+            WHEN 'backTaskAssign'
+            THEN '驳回'
+            WHEN 'backHouseholdInvestigate'
+            THEN '驳回'          
+            ELSE '正常'	         
+        END dataType/*数据类型*/ 
+		FROM
+			ACT_RU_TASK task
+		<include refid="householdBaseJoin"/>
+		left join pub_loanprocess plpc on plpc.new_task_id = task.ID_
+		<include refid="householdBaseWhere"/>
+		order by task.CREATE_TIME_ desc) consult
+		<include refid="listQuerySql4"/>
+		order by consult.createTime ASC
+	</select>
+	
+	<select id="queryDoneHouseholdTasks" parameterType="map" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			<include refid="householdBaseSql"/>
+			task.START_TIME_ as startTime,
+			ifnull(suser.name,pub.next_assignee_name) as nextAssignee,
+			task.END_TIME_ as endTime
+		FROM
+			ACT_HI_TASKINST task
+		<include refid="householdBaseJoin"/>
+		left join pub_loanprocess pub on pub.task_id = task.ID_
+		left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="householdBaseWhere"/>
+		order by task.END_TIME_ desc) consult
+		<include refid="listQuerySql4"/>
+		order by consult.endTime DESC
+	</select>
+</mapper>

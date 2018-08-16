@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- charge_data_store表:押品管理模块 -->
+<mapper namespace="com.company.modules.chargedata.dao.ChargeDataStoreDao">
+	<!--返回MAP-->		
+	<resultMap id="ChargeDataStoreResult" type="ChargeDataStore">
+		<id column="id" property="id" />
+		<result column="customer_name" property="customerName" />
+		<result column="cert_number" property="certNumber" />
+		<result column="account" property="account" />
+		<result column="time_limit" property="timeLimit" />
+		<result column="repayment_rate" property="repaymentRate" />
+		<result column="single_rate" property="singleRate" />
+		<result column="business_origin" property="businessOrigin" />
+		<result column="institution_name" property="institutionName" />
+		<result column="customer_manager" property="customerManager" />
+		<result column="charge_status" property="chargeStatus" />
+		<result column="in_store_time" property="inStoreTime" />
+		<result column="out_store_time" property="outStoreTime" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="loan_date" property="loanDate" />
+		<result column="lender" property="lender" />
+		<result column="trustee_of_lender" property="trusteeOfLender" />
+		<result column="product_name" property="productName" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			customer_name,
+			cert_number,
+			account,
+			time_limit,
+			repayment_rate,
+			single_rate,
+			business_origin,
+			institution_name,
+			customer_manager,
+			charge_status,
+			in_store_time,
+			out_store_time,
+			process_instance_id,
+			loan_date,
+			lender,
+			trustee_of_lender,
+			product_name		
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="customerName !='' and customerName !=null">
+            	and customer_name like concat('%',#{customerName},'%')
+            </if>
+            <if test="certNumber !='' and certNumber !=null">
+            	and cert_number = #{certNumber}
+            </if>
+            <if test="account !='' and account !=null">
+            	and account = #{account}
+            </if>
+            <if test="timeLimit !='' and timeLimit !=null">
+            	and time_limit = #{timeLimit}
+            </if>
+            <if test="repaymentRate !='' and repaymentRate !=null">
+            	and repayment_rate = #{repaymentRate}
+            </if>
+            <if test="singleRate !='' and singleRate !=null">
+            	and single_rate = #{singleRate}
+            </if>
+            <if test="businessOrigin !='' and businessOrigin !=null">
+            	and business_origin like concat('%',#{businessOrigin},'%')
+            </if>
+            <if test="institutionName !='' and institutionName !=null">
+            	and institution_name like concat('%',#{institutionName},'%')
+            </if>
+            <if test="customerManager !='' and customerManager !=null">
+            	and customer_manager like concat('%',#{customerManager},'%')
+            </if>
+            <if test="chargeStatus !='' and chargeStatus !=null">
+            	and charge_status = #{chargeStatus}
+            </if>
+            <if test="inStoreTime !='' and inStoreTime !=null">
+            	and in_store_time = #{inStoreTime}
+            </if>
+            <if test="outStoreTime !='' and outStoreTime !=null">
+            	and out_store_time = #{outStoreTime}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="loanDate !='' and loanDate !=null">
+            	and loan_date = #{loanDate}
+            </if>
+            <if test="lender !='' and lender !=null">
+            	and lender = #{lender}
+            </if>
+            <if test="trusteeOfLender !='' and trusteeOfLender !=null">
+            	and trustee_of_lender = #{trusteeOfLender}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="customerName!= null">		
+	    		customer_name = #{customerName},		
+	    	</if>
+	    	<if test="certNumber!= null">		
+	    		cert_number = #{certNumber},		
+	    	</if>
+	    	<if test="account!= null">		
+	    		account = #{account},		
+	    	</if>
+	    	<if test="timeLimit!= null">		
+	    		time_limit = #{timeLimit},		
+	    	</if>
+	    	<if test="repaymentRate!= null">		
+	    		repayment_rate = #{repaymentRate},		
+	    	</if>
+	    	<if test="singleRate!= null">		
+	    		single_rate = #{singleRate},		
+	    	</if>
+	    	<if test="businessOrigin!= null">		
+	    		business_origin = #{businessOrigin},		
+	    	</if>
+	    	<if test="institutionName!= null">		
+	    		institution_name = #{institutionName},		
+	    	</if>
+	    	<if test="customerManager!= null">		
+	    		customer_manager = #{customerManager},		
+	    	</if>
+	    	<if test="chargeStatus!= null">		
+	    		charge_status = #{chargeStatus},		
+	    	</if>
+	    	<if test="inStoreTime!= null">		
+	    		in_store_time = #{inStoreTime},		
+	    	</if>
+	    	<if test="outStoreTime!= null">		
+	    		out_store_time = #{outStoreTime},		
+	    	</if>
+	    	<if test="processInstanceId!= null">		
+	    		process_instance_id = #{processInstanceId},		
+	    	</if>
+	    	<if test="loanDate!= null">		
+	    		loan_date = #{loanDate},		
+	    	</if>
+	    	<if test="lender!= null">		
+	    		lender = #{lender},		
+	    	</if>
+	    	<if test="trusteeOfLender!= null">		
+	    		trustee_of_lender = #{trusteeOfLender},		
+	    	</if>
+	    	<if test="productName != null">		
+	    		product_name = #{productName},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="ChargeDataStore">
+		insert into charge_data_store(
+        	customer_name,
+        	cert_number,
+        	account,
+        	time_limit,
+        	repayment_rate,
+        	single_rate,
+        	business_origin,
+        	institution_name,
+        	customer_manager,
+        	charge_status,
+        	in_store_time,
+        	out_store_time,
+        	process_instance_id,
+        	loan_date,
+        	lender,
+        	product_name,
+        	trustee_of_lender			
+        )values(
+        	#{customerName},
+        	#{certNumber},
+        	#{account},
+        	#{timeLimit},
+        	#{repaymentRate},
+        	#{singleRate},
+        	#{businessOrigin},
+        	#{institutionName},
+        	#{customerManager},
+        	#{chargeStatus},
+        	#{inStoreTime},
+        	#{outStoreTime},
+        	#{processInstanceId},
+        	#{loanDate},
+        	#{lender},
+        	#{productName},
+        	#{trusteeOfLender}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="ChargeDataStore">
+        update charge_data_store
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="ChargeDataStoreResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data_store
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="ChargeDataStoreResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data_store
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="queryBorrowInfoByProcessInstanceId" resultMap="ChargeDataStoreResult" parameterType="java.lang.String" >
+		SELECT
+			pbr.process_instance_id,
+			pbr.account,
+			pbr.time_limit,
+			pbr.repayment_rate,
+			pbr.single_rate,
+			pbr.institution_name,/*机构*/
+			hbb.`name` customer_name,
+			hbb.cert_number,
+			hnr.lender,
+			hnr.trustee_of_lender,
+			CASE
+				 pbr.project_belongs 
+				 WHEN 1 
+				 THEN '赚赚自有' 
+				 WHEN 2 
+				 THEN '报单机构' 
+				 WHEN 3 
+				 THEN '报单个人'
+				 ELSE ''	         
+			END business_origin,/*来源*/
+			pbr.salesman as customer_manager,/*报单人*/ 
+			pp.name as product_name
+		FROM
+			pl_borrow_requirement pbr
+		  INNER JOIN hous_borrowing_basics hbb on pbr.process_instance_id = hbb.process_instance_id
+			INNER JOIN hous_notarization_registration hnr on pbr.process_instance_id = hnr.process_instance_id
+			INNER JOIN pl_consult pc on pbr.process_instance_id = pc.process_instance_id
+			INNER JOIN pl_product pp on pbr.product_id = pp.id
+		
+		where pbr.process_instance_id = #{processInstanceId}
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="ChargeDataStoreResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data_store
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from charge_data_store
+        where
+        id  = #{id}
+    </delete>
+</mapper>

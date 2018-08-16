@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.system.dao.ChannelPartnerDao">
+  <resultMap id="ChannelPartnerMap" type="ChannelPartner">
+    <id column="ID" property="id" />
+    <result column="PARTNER_NAME" property="partnerName" />
+    <result column="LOGO" property="logo" />
+    <result column="TITLE" property="title" />
+    <result column="CREATE_TIME" property="createTime" />
+    <result column="IS_DELETE" property="isDelete" />
+    <result column="REMARK" property="remark" />
+  </resultMap>
+
+    <sql id="searchSql">
+			ID,
+			PARTNER_NAME,
+        	LOGO,
+        	TITLE,
+        	CREATE_TIME,
+        	IS_DELETE,
+        	REMARK
+	</sql>
+
+    <sql id="updateByPo">
+        <trim prefix="set" suffixOverrides=",">
+            <if test="id!= null">
+                ID = #{id},
+            </if>
+            <if test="partnerName!= null">
+                PARTNER_NAME = #{partnerName},
+            </if>
+            <if test="logo!= null">
+                LOGO = #{logo},
+            </if>
+            <if test="title!= null">
+                TITLE = #{title},
+            </if>
+            <if test="createTime!= null">
+                CREATE_TIME = #{createTime},
+            </if>
+            <if test="isDelete!= null">
+                IS_DELETE = #{isDelete},
+            </if>
+            <if test="remark!= null">
+                REMARK = #{remark},
+            </if>
+        </trim>
+    </sql>
+
+    <sql id="searchByPo">
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id !='' and id !=null">
+                ID  = #{id}
+            </if>
+            <if test="partnerName !='' and partnerName !=null">
+                and PARTNER_NAME = #{partnerName}
+            </if>
+            <if test="logo !='' and logo !=null">
+                and LOGO = #{logo}
+            </if>
+            <if test="Title !='' and Title !=null">
+                and TITLE = #{Title}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+                and CREATE_TIME = #{createTime}
+            </if>
+            <if test="isDelete !='' and isDelete !=null">
+                and IS_DELETE = #{isDelete}
+            </if>
+            <if test="remark !='' and remark !=null">
+                and REMARK = #{remark}
+            </if>
+        </trim>
+    </sql>
+
+	<!--根据流程id查询-->
+	<select id="getLogoInfoByName" resultType="java.util.HashMap" parameterType="java.lang.String" >
+		select 
+		  partner.LOGO as logo,
+		  partner.TITLE as title
+		from channel_partner partner
+		where partner.PARTNER_NAME = #{partnerName}
+	</select>
+
+    <insert id="insert" parameterType="ChannelPartner">
+        insert into channel_partner(
+        ID,
+        PARTNER_NAME,
+        LOGO,
+        TITLE,
+        CREATE_TIME,
+        IS_DELETE,
+        REMARK
+        )
+        values (
+        #{id},
+        #{partnerName},
+        #{logo},
+        #{title},
+        #{createTime},
+        #{isDelete},
+        #{remark}
+        )
+        <selectKey resultType="int" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <update id="update" parameterType="ChannelPartner">
+        update channel_partner
+        <include refid="updateByPo"/>
+        where ID = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from channel_partner
+        where
+        ID  = #{id}
+    </delete>
+
+    <select id="queryInfoByPartnerName" resultMap="ChannelPartnerMap" parameterType="java.lang.String" >
+        select
+        <include refid="searchSql"/>
+        from channel_partner
+        where PARTNER_NAME = #{partnerName}
+    </select>
+
+    <select id="getInfoByID" resultMap="ChannelPartnerMap"  >
+        select
+        <include refid="searchSql"/>
+        from channel_partner
+        where ID = #{id}
+    </select>
+
+    <select id="getPartnerList" resultMap="ChannelPartnerMap" >
+        select
+        <include refid="searchSql"/>
+        from channel_partner
+        <include refid="searchByPo"/>
+        order by id desc
+    </select>
+
+</mapper>

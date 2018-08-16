@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- charge_data表:押品管理模块 -->
+<mapper namespace="com.company.modules.chargedata.dao.ChargeDataDao">
+	<!--返回MAP-->		
+	<resultMap id="ChargeDataResult" type="ChargeData">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="status" property="status" />
+		<result column="remark" property="remark" />
+		<result column="create_time" property="createTime" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="file_number" property="fileNumber" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			name,
+			status,
+			remark,
+			create_time,
+			process_instance_id,
+			file_number			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="name !='' and name !=null">
+            	and name = #{name}
+            </if>
+            <if test="status !='' and status !=null">
+            	and status = #{status}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="fileNumber !='' and fileNumber !=null">
+            	and file_number = #{fileNumber}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="name!= null">		
+	    		name = #{name},		
+	    	</if>
+	    	<if test="status!= null">		
+	    		status = #{status},		
+	    	</if>
+	    	<if test="remark!= null">		
+	    		remark = #{remark},		
+	    	</if>
+	    	<if test="processInstanceId!= null">		
+	    		process_instance_id = #{processInstanceId},		
+	    	</if>
+	    	<if test="fileNumber!= null">		
+	    		file_number = #{fileNumber},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="ChargeData">
+		insert into charge_data(
+        	name,
+        	status,
+        	remark,
+        	create_time,
+        	process_instance_id,
+        	file_number			
+        )values(
+        	#{name},
+        	#{status},
+        	#{remark},
+        	#{createTime},
+        	#{processInstanceId},
+        	#{fileNumber}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="ChargeData">
+        update charge_data
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="ChargeDataResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="ChargeDataResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="ChargeDataResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from charge_data
+        where
+        id  = #{id}
+    </delete>
+</mapper>

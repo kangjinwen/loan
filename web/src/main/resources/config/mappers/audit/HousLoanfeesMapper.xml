@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- hous_loanfees表:返费签单/代收服务费模块 -->
+<mapper namespace="com.company.modules.audit.dao.HousLoanfeesDao">
+	<!--返回MAP-->		
+	<resultMap id="HousLoanfeesResult" type="HousLoanfees">
+		<id column="id" property="id" />
+		<result column="project_belongs" property="projectBelongs" />
+		<result column="financial_advisers" property="financialAdvisers" />
+		<result column="institution_name" property="institutionName" />
+		<result column="salesman" property="salesman" />
+		<result column="return_rate" property="returnRate" />
+		<result column="return_fee" property="returnFee" />
+		<result column="return_limit" property="returnLimit" />
+		<result column="return_card" property="returnCard" />
+		<result column="return_bank" property="returnBank" />
+		<result column="return_bank_name" property="returnBankName" />
+		<result column="service_fee" property="serviceFee" />
+		<result column="service_name" property="serviceName" />
+		<result column="service_card" property="serviceCard" />
+		<result column="service_bank" property="serviceBank" />
+		<result column="service_bank_name" property="serviceBankName" />
+		<result column="process_instance_id" property="processinstanceid" />
+		<result column="project_id" property="projectId" />
+		<result column="creator" property="creator" />
+		<result column="create_time" property="createTime" />
+		<result column="modifier" property="modifier" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="first_interest" property="firstInterest" />
+		<result column="sum_account" property="sumAccount" />		
+		<result column="collection_service_fee" property="collectionServiceFee" />
+		<result column="return_service_fee" property="returnServiceFee" />
+		<result column="collection_service_name" property="collectionServiceName" />
+		<result column="collection_service_card" property="collectionServiceCard" />
+		<result column="collection_service_bank" property="collectionServiceBank" />
+		
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			project_belongs,
+			financial_advisers,
+			institution_name,
+			salesman,
+			return_rate,
+			return_fee,
+			return_limit,
+			return_card,
+			return_bank,
+			return_bank_name,
+			service_fee,
+			service_name,
+			service_card,
+			service_bank,
+			service_bank_name,
+			process_instance_id,
+			project_id,
+			creator,
+			create_time,
+			modifier,
+			modify_time,
+			first_interest,
+			sum_account,
+			collection_service_fee,
+			return_service_fee,
+			collection_service_name,
+			collection_service_card,
+			collection_service_bank			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="projectBelongs !='' and projectBelongs !=null">
+            	and project_belongs = #{projectBelongs}
+            </if>
+            <if test="financialAdvisers !='' and financialAdvisers !=null">
+            	and financial_advisers = #{financialAdvisers}
+            </if>
+            <if test="institutionName !='' and institutionName !=null">
+            	and institution_name = #{institutionName}
+            </if>
+            <if test="salesman !='' and salesman !=null">
+            	and salesman = #{salesman}
+            </if>
+            <if test="returnRate !='' and returnRate !=null">
+            	and return_rate = #{returnRate}
+            </if>
+            <if test="returnFee !='' and returnFee !=null">
+            	and return_fee = #{returnFee}
+            </if>
+            <if test="returnLimit !='' and returnLimit !=null">
+            	and return_limit = #{returnLimit}
+            </if>
+            <if test="returnCard !='' and returnCard !=null">
+            	and return_card = #{returnCard}
+            </if>
+            <if test="returnBank !='' and returnBank !=null">
+            	and return_bank = #{returnBank}
+            </if>
+            <if test="returnBankName !='' and returnBankName !=null">
+            	and return_bank_name = #{returnBankName}
+            </if>
+            <if test="serviceFee !='' and serviceFee !=null">
+            	and service_fee = #{serviceFee}
+            </if>
+            <if test="serviceName !='' and serviceName !=null">
+            	and service_name = #{serviceName}
+            </if>
+            <if test="serviceCard !='' and serviceCard !=null">
+            	and service_card = #{serviceCard}
+            </if>
+            <if test="serviceBank !='' and serviceBank !=null">
+            	and service_bank = #{serviceBank}
+            </if>
+            <if test="serviceBankName !='' and serviceBankName !=null">
+            	and service_bank_name = #{serviceBankName}
+            </if>
+            <if test="processinstanceid !='' and processinstanceid !=null">
+            	and process_instance_id = #{processinstanceid}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and project_id = #{projectId}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="modifier !='' and modifier !=null">
+            	and modifier = #{modifier}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and modify_time = #{modifyTime}
+            </if>
+            <if test="firstInterest !='' and firstInterest !=null">
+            	and first_interest = #{firstInterest}
+            </if>
+            <if test="sumAccount !='' and sumAccount !=null">
+            	and sum_account = #{sumAccount}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="projectBelongs!= null">		
+	    		project_belongs = #{projectBelongs},		
+	    	</if>
+	    	<if test="financialAdvisers!= null">		
+	    		financial_advisers = #{financialAdvisers},		
+	    	</if>
+	    	<if test="institutionName!= null">		
+	    		institution_name = #{institutionName},		
+	    	</if>
+	    	<if test="salesman!= null">		
+	    		salesman = #{salesman},		
+	    	</if>
+	    	<if test="returnRate!= null">		
+	    		return_rate = #{returnRate},		
+	    	</if>
+	    	<if test="returnFee!= null">		
+	    		return_fee = #{returnFee},		
+	    	</if>
+	    	<if test="returnLimit!= null">		
+	    		return_limit = #{returnLimit},		
+	    	</if>
+	    	<if test="returnCard!= null">		
+	    		return_card = #{returnCard},		
+	    	</if>
+	    	<if test="returnBank!= null">		
+	    		return_bank = #{returnBank},		
+	    	</if>
+	    	<if test="returnBankName!= null">		
+	    		return_bank_name = #{returnBankName},		
+	    	</if>
+	    	<if test="serviceFee!= null">		
+	    		service_fee = #{serviceFee},		
+	    	</if>
+	    	<if test="serviceName!= null">		
+	    		service_name = #{serviceName},		
+	    	</if>
+	    	<if test="serviceCard!= null">		
+	    		service_card = #{serviceCard},		
+	    	</if>
+	    	<if test="serviceBank!= null">		
+	    		service_bank = #{serviceBank},		
+	    	</if>
+	    	<if test="serviceBankName!= null">		
+	    		service_bank_name = #{serviceBankName},		
+	    	</if>
+	    	<if test="processinstanceid!= null">		
+	    		process_instance_id = #{processinstanceid},		
+	    	</if>
+	    	<if test="projectId!= null">		
+	    		project_id = #{projectId},		
+	    	</if>
+	    	<if test="modifier!= null">		
+	    		modifier = #{modifier},		
+	    	</if>
+	    	<if test="modifyTime!= null">		
+	    		modify_time = #{modifyTime},		
+	    	</if>
+	    	 <if test="firstInterest !='' and firstInterest !=null">
+            	first_interest = #{firstInterest},
+            </if>
+            <if test="sumAccount !='' and sumAccount !=null">
+            	sum_account = #{sumAccount},
+            </if>            
+             <if test="collectionServiceFee !='' and collectionServiceFee !=null">
+            	collection_service_fee = #{collectionServiceFee},
+            </if>
+             <if test="returnServiceFee !='' and returnServiceFee !=null">
+            	return_service_fee = #{returnServiceFee},
+            </if>
+             <if test="collectionServiceName !='' and collectionServiceName !=null">
+            	collection_service_name = #{collectionServiceName},
+            </if>
+             <if test="collectionServiceCard !='' and collectionServiceCard !=null">
+            	collection_service_card = #{collectionServiceCard},
+            </if>
+             <if test="collectionServiceBank !='' and collectionServiceBank !=null">
+            	collection_service_bank = #{collectionServiceBank},
+            </if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="HousLoanfees">
+		insert into hous_loanfees(
+        	project_belongs,
+        	financial_advisers,
+        	institution_name,
+        	salesman,
+        	return_rate,
+        	return_fee,
+        	return_limit,
+        	return_card,
+        	return_bank,
+        	return_bank_name,
+        	service_fee,
+        	service_name,
+        	service_card,
+        	service_bank,
+        	service_bank_name,
+        	process_instance_id,
+        	project_id,
+        	creator,
+        	create_time,
+        	modifier,
+        	modify_time,
+        	first_interest,
+			sum_account,
+			collection_service_fee,
+			return_service_fee,
+			collection_service_name,
+			collection_service_card,
+			collection_service_bank				
+        )values(
+        	#{projectBelongs},
+        	#{financialAdvisers},
+        	#{institutionName},
+        	#{salesman},
+        	#{returnRate},
+        	#{returnFee},
+        	#{returnLimit},
+        	#{returnCard},
+        	#{returnBank},
+        	#{returnBankName},
+        	#{serviceFee},
+        	#{serviceName},
+        	#{serviceCard},
+        	#{serviceBank},
+        	#{serviceBankName},
+        	#{processinstanceid},
+        	#{projectId},
+        	#{creator},
+        	#{createTime},
+        	#{modifier},
+        	#{modifyTime},
+        	#{firstInterest},	
+        	#{sumAccount},
+        	#{collectionServiceFee},
+			#{returnServiceFee},
+			#{collectionServiceName},
+			#{collectionServiceCard},
+			#{collectionServiceBank}					
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="HousLoanfees">
+        update hous_loanfees
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="HousLoanfeesResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from hous_loanfees
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="HousLoanfeesResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from hous_loanfees
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--根据项目id查询-->
+	<select id="getItemInfoByProjectId" resultMap="HousLoanfeesResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from hous_loanfees
+		where project_id = #{projectId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="HousLoanfeesResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from hous_loanfees
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from hous_loanfees
+        where
+        id  = #{id}
+    </delete>
+    
+    <select id="getLoanFormInfo" resultType="java.util.HashMap" parameterType="java.lang.String">
+	    SELECT
+			/*hl.first_interest as firstInterest,*/
+			ROUND(pb.single_rate * pb.account,2) as firstInterest,
+			hlc.actual_fee as actualFee,
+			hlc.collection_form as collectionForm,
+		    pb.account as loanAmount,
+		    hl.process_instance_id as processInstanceId,
+		    pl.bank_account as bankAccount,
+			pl.bank_flag as bankFlag,
+			pl.loan_time as loanTime,
+			hmr.lenders_mortgage as lendersMortgage,
+			pl.bank_name as bankName
+		FROM
+			hous_loanfees hl
+		INNER JOIN hous_lower_cost hlc ON hlc.process_instance_id = hl.process_instance_id
+		INNER JOIN pl_borrow pb ON pb.process_instance_id = hl.process_instance_id
+		LEFT JOIN pub_loan pl ON pl.processInstanceId = hl.process_instance_id
+		left join hous_mortgage_registration hmr on hmr.process_instance_id = pb.process_instance_id
+		where
+        hl.process_instance_id  = #{processInstanceId}
+    </select>
+</mapper>

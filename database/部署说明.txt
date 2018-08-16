@@ -1,0 +1,13 @@
+部署：
+
+1.运行002目录下fangdai-system.sql脚本即可实现系统正常运行。
+2.运行fangdai-system.sql脚本后，运行002目录下fangdai-business.sql脚本可添加产品、字典等业务数据。
+
+
+
+
+
+备注：
+
+1.程序中未使用到的部分放在：fangdai-useless.sql。
+2.为防止划分错误，暂允许001与002并行存在。

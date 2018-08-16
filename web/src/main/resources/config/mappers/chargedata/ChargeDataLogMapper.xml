@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- charge_data_log表:押品管理模块 -->
+<mapper namespace="com.company.modules.chargedata.dao.ChargeDataLogDao">
+	<!--返回MAP-->		
+	<resultMap id="ChargeDataLogResult" type="ChargeDataLog">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="create_time" property="createTime" />
+		<result column="remark" property="remark" />
+		<result column="charge_data_id" property="chargeDataId" />
+		<result column="type" property="type" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="check_in_time" property="checkInTime" />
+		<result column="creator" property="creator" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			name,
+			create_time,
+			remark,
+			type,
+			charge_data_id,
+			process_instance_id,
+			check_in_time,
+			creator			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="name !='' and name !=null">
+            	and name = #{name}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+            <if test="type !='' and type !=null">
+            	and type = #{type}
+            </if>
+            <if test="chargeDataId !='' and chargeDataId !=null">
+            	and charge_data_id = #{chargeDataId}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="checkInTime !='' and checkInTime !=null">
+            	and check_in_time = #{checkInTime}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="name!= null">		
+	    		name = #{name},		
+	    	</if>
+	    	<if test="remark!= null">		
+	    		remark = #{remark},		
+	    	</if>
+	    	<if test="chargeDataId!= null">		
+	    		charge_data_id = #{chargeDataId},		
+	    	</if>
+	    	<if test="processInstanceId!= null">		
+	    		process_instance_id = #{processInstanceId},		
+	    	</if>
+	    	<if test="checkInTime!= null">		
+	    		check_in_time = #{checkInTime},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="ChargeDataLog">
+		insert into charge_data_log(
+        	name,
+        	create_time,
+        	remark,
+        	type,
+        	charge_data_id,
+        	process_instance_id,
+        	check_in_time,
+        	creator			
+        )values(
+        	#{name},
+        	#{createTime},
+        	#{remark},
+        	#{type},
+        	#{chargeDataId},
+        	#{processInstanceId},
+        	#{checkInTime},
+        	#{creator}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="ChargeDataLog">
+        update charge_data_log
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="ChargeDataLogResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data_log
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="ChargeDataLogResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data_log
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="ChargeDataLogResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from charge_data_log
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from charge_data_log
+        where
+        id  = #{id}
+    </delete>
+</mapper>

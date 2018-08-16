@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- pl_consult表:咨询信息模块 -->
+<mapper namespace="com.company.modules.common.dao.PlConsultDao">
+	<!--返回MAP-->
+	<resultMap id="PlConsultResult" type="PlConsult">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="name" property="name" />
+		<result column="mobile" property="mobile" />
+		<result column="idcard" property="idcard" />
+		<result column="creator" property="creator" />
+		<result column="curuserid" property="curuserid" />
+		<result column="customer_manager" property="customerManager" />
+		<result column="create_time" property="createTime" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="status" property="status" />
+		<result column="modifier" property="modifier" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="project_id" property="projectId" />
+		<result column="remark" property="remark" />
+		<result column="extension_time" property="extensionTime" />
+		<result column="business_origin" property="businessOrigin" />
+		<result column="fee_success" property="feeSuccess" />
+		<result column="customer_id" property="customerId" />
+		<result column="org_id" property="orgId" />
+	</resultMap>
+
+	<!--退费申请返回MAP-->
+	<resultMap id="PlConsultFeeResult" type="com.company.modules.common.domain.PlConsultFee">
+		<result column="projectId" property="projectId" />
+		<result column="processInstanceId" property="processInstanceId" />
+		<result column="customerManager" property="customerManager" />
+		<result column="projectName" property="projectName" />
+		<result column="curuserId" property="curuserId" />
+		<result column="createTime" property="createTime" />
+		<result column="projectCode" property="projectCode" />
+		<result column="applyRefundIsSuccess" property="applyRefundIsSuccess" />
+		<result column="applyRefundTime" property="applyRefundTime" />
+		<result column="refundOperator" property="refundOperator" />
+		<result column="institutionName" property="institutionName" />
+		<result column="businessOriginText" property="businessOriginText" />
+		<result column="nextAssignee" property="nextAssignee" />
+	</resultMap>
+
+	<!--垫资申请返回MAP-->
+	<resultMap id="PlConsultAdvanceApplyResult" type="com.company.modules.common.domain.PlConsultAdvanceApply">
+		<result column="projectId" property="projectId" />
+		<result column="processInstanceId" property="processInstanceId" />
+		<result column="customerManager" property="customerManager" />
+		<result column="projectName" property="projectName" />
+		<result column="curuserId" property="curuserId" />
+		<result column="createTime" property="createTime" />
+		<result column="projectCode" property="projectCode" />
+		<result column="applyRefundIsSuccess" property="applyRefundIsSuccess" />
+		<result column="applyRefundTime" property="applyRefundTime" />
+		<result column="refundOperator" property="refundOperator" />
+		<result column="advanceApply" property="advanceApply" />
+		<result column="consultId" property="consultId" />
+		<result column="advanceApplyOperator" property="advanceApplyOperator" />
+		<result column="advanceApplyTime" property="advanceApplyTime" />
+		<result column="currentProcessStateCode" property="currentProcessStateCode" />
+		<result column="newProcessInstanceId" property="newProcessInstanceId" />
+		<result column="nextAssign" property="nextAssign" />
+	</resultMap>
+
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			product_id,
+        	name,
+        	mobile,
+        	idcard,
+        	creator,
+        	curuserid,
+        	customer_manager,
+        	create_time,
+        	process_instance_id,
+        	status,
+        	modifier,
+        	modify_time,
+        	project_id,
+        	remark,
+        	extension_time,
+        	business_origin,
+        	fee_success,
+        	customer_id,
+        	org_id
+	</sql>
+
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="productId !='' and productId !=null">
+            	and product_id = #{productId}
+            </if>
+            <if test="name !='' and name !=null">
+            	and name = #{name}
+            </if>
+            <if test="mobile !='' and mobile !=null">
+            	and mobile = #{mobile}
+            </if>
+            <if test="idcard !='' and idcard !=null">
+            	and idcard = #{idcard}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="curuserid !='' and curuserid !=null">
+            	and curuserid = #{curuserid}
+            </if>
+            <if test="customerManager !='' and customerManager !=null">
+            	and customer_manager like concat('%',#{customerManager}, '%')
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and process_instance_id = #{processInstanceId}
+            </if>
+            <if test="status !='' and status !=null">
+            	and status = #{status}
+            </if>
+            <if test="modifier !='' and modifier !=null">
+            	and modifier = #{modifier}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and modify_time = #{modifyTime}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and project_id = #{projectId}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+            <if test="extensionTime !='' and extensionTime !=null">
+            	and extension_time = #{extensionTime}
+            </if>
+            <if test="businessOrigin !='' and businessOrigin !=null">
+            	and business_origin = #{businessOrigin}
+            </if>
+             <if test="feeSuccess !='' and feeSuccess !=null">
+            	and fee_success = #{feeSuccess}
+            </if>
+            <if test="customerId !='' and customerId !=null">
+            	and customer_id = #{customerId}
+            </if>
+            <if test="orgId !='' and orgId !=null">
+            	and org_id = #{orgId}
+            </if>
+		</trim>
+	</sql>
+
+	<!-- 退费、垫资申请where条件 -->
+	<sql id="searchByPoFee">
+		<trim prefix="where" prefixOverrides="and|or">
+		     <if test="projectCode !='' and projectCode !=null">
+               pp.code like concat('%',#{projectCode}, '%')
+            </if>
+			<if test="id !='' and id !=null">
+                pl.id  = #{id}
+            </if>
+            <if test="productId !='' and productId !=null">
+            	and pl.product_id = #{productId}
+            </if>
+            <if test="customerName !='' and customerName !=null">
+            	and pl.name like concat('%',#{customerName}, '%')
+            </if>
+            <if test="mobile !='' and mobile !=null">
+            	and pl.mobile = #{mobile}
+            </if>
+            <if test="idcard !='' and idcard !=null">
+            	and pl.idcard = #{idcard}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and pl.creator = #{creator}
+            </if>
+            <if test="curuserid !='' and curuserid !=null">
+            	and pl.curuserid = #{curuserid}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and pl.create_time = #{createTime}
+            </if>
+            <if test="processInstanceId !='' and processInstanceId !=null">
+            	and pl.process_instance_id = #{processInstanceId}
+            </if>
+            <if test="status !='' and status !=null">
+            	and pl.status = #{status}
+            </if>
+            <if test="modifier !='' and modifier !=null">
+            	and pl.modifier = #{modifier}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and pl.modify_time = #{modifyTime}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and pl.project_id = #{projectId}
+            </if>
+            <if test="flowStatus != '' and flowStatus != null">
+	           and haa.status = #{flowStatus}
+	        </if>
+            <if test="remark !='' and remark !=null">
+            	and pl.remark = #{remark}
+            </if>
+            <if test="extensionTime !='' and extensionTime !=null">
+            	and pl.extension_time = #{extensionTime}
+            </if>
+            <if test="businessOrigin !='' and businessOrigin !=null">
+            	and pl.business_origin = #{businessOrigin}
+            </if>
+             <if test="feeSuccess !='' and feeSuccess !=null">
+            	and pl.fee_success = #{feeSuccess}
+            </if>
+            <if test="advanceApply !='' and advanceApply !=null">
+            	and pl.advance_apply = #{advanceApply}
+            </if>
+            <if test="customerId !='' and customerId !=null">
+            	and pl.customer_id = #{customerId}
+            </if>
+            <if test="orgId !='' and orgId !=null">
+            	and pl.org_id = #{orgId}
+            </if>
+		</trim>
+	</sql>
+
+
+	<sql id="listQuerySql">
+		<where>
+	        <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>
+		</where>
+	</sql>
+
+
+
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="productId!= null">
+	    		product_id = #{productId},
+	    	</if>
+	    	<if test="name!= null">
+	    		name = #{name},
+	    	</if>
+	    	<if test="mobile!= null">
+	    		mobile = #{mobile},
+	    	</if>
+	    	<if test="idcard!= null">
+	    		idcard = #{idcard},
+	    	</if>
+	    	<if test="curuserid!= null">
+	    		curuserid = #{curuserid},
+	    	</if>
+	    	<if test="customerManager!= null">
+	    		customer_manager = #{customerManager},
+	    	</if>
+	    	<if test="processInstanceId!= null">
+	    		process_instance_id = #{processInstanceId},
+	    	</if>
+	    	<if test="status!= null">
+	    		status = #{status},
+	    	</if>
+	    	<if test="modifier!= null">
+	    		modifier = #{modifier},
+	    	</if>
+	    	<if test="modifyTime!= null">
+	    		modify_time = #{modifyTime},
+	    	</if>
+	    	<if test="projectId!= null">
+	    		project_id = #{projectId},
+	    	</if>
+	    	<if test="remark!= null">
+	    		remark = #{remark},
+	    	</if>
+	    	<if test="extensionTime!= null">
+	    		extension_time = #{extensionTime},
+	    	</if>
+	    	<if test="businessOrigin!= null">
+	    		business_origin = #{businessOrigin},
+	    	</if>
+	    	<if test="feeSuccess!= null">
+	    		fee_success = #{feeSuccess},
+	    	</if>
+	    	<if test="advanceApply!=null">
+	    		advance_apply = #{advanceApply},
+	    	</if>
+	    	<if test="orgId!=null">
+	    		org_id = #{orgId},
+	    	</if>
+	    </trim>
+    </sql>
+
+    <!--列表模糊查询sql-->
+	<sql id="listQuerySql14">
+		<where>
+			<if test="projectCode !='' and projectCode !=null">
+				and consult.projectCode like concat('%',#{projectCode}, '%')
+	        </if>
+	        <if test="customerName !='' and customerName !=null">
+	            and consult.customerName like concat('%',#{customerName}, '%')
+	        </if>
+	        <if test="customerManager !='' and customerManager !=null">
+	            and consult.customerManager like concat('%',#{customerManager}, '%')
+	        </if>
+	        <if test="flowStatus != '' and flowStatus != null">
+	           and consult.currentProcessItemCode = #{flowStatus}
+	        </if>
+
+	        <!--增加查询条件  -->
+	       	<if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(createTime,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(createTime,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>
+		</where>
+	</sql>
+
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="PlConsult">
+		insert into pl_consult(
+        	product_id,
+        	name,
+        	mobile,
+        	idcard,
+        	creator,
+        	curuserid,
+        	customer_manager,
+        	create_time,
+        	process_instance_id,
+        	status,
+        	modifier,
+        	modify_time,
+        	project_id,
+        	remark,
+        	extension_time,
+        	business_origin,
+        	fee_success,
+        	advance_apply,
+        	customer_id
+        )values(
+        	#{productId},
+        	#{name},
+        	#{mobile},
+        	#{idcard},
+        	#{creator},
+        	#{curuserid},
+        	#{customerManager},
+        	#{createTime},
+        	#{processInstanceId},
+        	#{status},
+        	#{modifier},
+        	#{modifyTime},
+        	#{projectId},
+        	#{remark},
+        	#{extensionTime},
+        	#{businessOrigin},
+        	#{feeSuccess},
+        	#{advanceApply},
+        	#{customerId}
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+
+    <!-- 动态更新 -->
+    <update id="update" parameterType="PlConsult">
+        update pl_consult
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="PlConsultResult" parameterType="long" >
+		select
+		<include refid="searchSql"/>
+		from pl_consult
+		where id = #{id}
+	</select>
+
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="PlConsultResult" parameterType="java.lang.String" >
+		select
+		<include refid="searchSql"/>
+		from pl_consult
+		where process_instance_id = #{processInstanceId}
+	</select>
+
+	<!--根据projectId查询-->
+	<select id="getPlConsultByProjectId" resultMap="PlConsultResult" parameterType="long" >
+		select
+		<include refid="searchSql"/>
+		from pl_consult
+		where project_id = #{projectId}
+	</select>
+
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="PlConsultResult" parameterType="java.util.HashMap" >
+		select
+		<include refid="searchSql"/>
+		from pl_consult
+		<include refid="searchByPo"/>
+		order by id desc
+	</select>
+
+	<!--分页列表查询,查询下户费收取成功-->
+	<select id="getPlConsultFeeByMap" resultMap="PlConsultFeeResult" parameterType="java.util.HashMap" >
+		select * from(
+		select
+		pl.id as id,
+		pl.`project_id` AS projectId,
+		pl.`process_instance_id` AS processInstanceId,
+	    pl.`name` AS customerName,
+	    pl.`curuserid` AS curuserId,
+		pl.`create_time` AS createTime,
+		pbr.financial_advisers as financialAdvisers,
+		suser.name AS nextAssignee,
+		CASE
+            pbr.project_belongs
+            WHEN 1
+            THEN '赚赚自有'
+            WHEN 2
+            THEN '报单机构'
+            WHEN 3
+            THEN '报单个人'
+            ELSE ''
+        END businessOriginText,/*来源*/
+	    pbr.institution_name as institutionName,/*机构名称*/
+	    pbr.salesman as customerManager,/*报单人*/
+		hlc.`apply_refund_is_success` AS applyRefundIsSuccess,
+		hlc.`apply_refund_time` AS applyRefundTime,
+		hlc.`refund_operator` AS refundOperator,
+		pp.`code` AS projectCode
+		FROM pl_consult pl
+		INNER JOIN pub_project pp ON pp.id = pl.project_id
+		INNER JOIN hous_lower_cost hlc ON pl.project_id	= hlc.project_id
+		INNER JOIN pl_borrow_requirement pbr ON pbr.process_instance_id = pl.process_instance_id
+        INNER JOIN sys_user as manager ON manager.id = pl.customer_manager
+		  LEFT JOIN pub_project_process ppp
+      ON ppp.project_id = pl.project_id
+      AND ppp.process_type = 7
+    LEFT JOIN pub_loanprocess publ
+      ON publ.process_instance_id = ppp.process_instance_id
+      AND ppp.process_type = 7
+    LEFT JOIN sys_user suser
+      ON suser.user_name = publ.next_assignee
+		<include refid="searchByPoFee"/>
+		order by pl.id desc) consult
+		<include refid="listQuerySql14"/>
+		order by consult.id ASC
+	</select>
+
+	<!--分页列表查询,查询垫资申请列表(未完成)-->
+	<select id="getPlConsultByadvanceApplyList" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		select * from(
+		select
+		pl.`id` AS consultId,
+		pl.`project_id` AS projectId,
+		pl.`advance_apply` AS advanceApply,
+		pl.`process_instance_id` AS processInstanceId,
+	    pl.`name` AS customerName,
+	   <!--
+	    haa.`advance_apply_operator` AS advanceApplyOperator,
+	    haa.`advance_apply_time` AS advanceApplyTime,
+	    haa.`new_process_instance_id` AS newProcessInstanceId,
+	    haa.`new_process_instance_id` AS taskId,
+	    -->
+
+		CASE
+            pbr.project_belongs
+            WHEN 1
+            THEN '赚赚自有'
+            WHEN 2
+            THEN '报单机构'
+            WHEN 3
+            THEN '报单个人'
+            ELSE ''
+        END businessOriginText,/*来源*/
+		pbr.institution_name as institutionName,/*机构名称*/
+
+
+	    pl.`curuserid` AS curuserId,
+		pl.`create_time` AS declarationDate,
+		manager.`name` AS customerManager,
+		pp.`code` AS projectCode
+		FROM pl_consult pl
+		<!-- INNER JOIN hous_advance_apply haa ON pl.project_id	= haa.project_id -->
+		INNER JOIN pub_project pp ON pp.id = pl.project_id
+        INNER JOIN sys_user as manager ON manager.id = pl.customer_manager
+        INNER JOIN pl_borrow_requirement pbr ON pbr.process_instance_id = pl.process_instance_id
+
+		<include refid="searchByPoFee"/>
+        <if test="customerManager !='' and customerManager !=null">
+            and manager.name like concat('%',#{customerManager}, '%')
+		</if>
+		) AS result <include refid="listQuerySql"/>
+		order by consultId ASC
+	</select>
+
+	<!--分页列表查询,查询垫资申请记录(已完成)-->
+	<select id="getDoPlConsultByadvanceApplyList" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		select * from(
+		select
+		pl.`id` AS consultId,
+		pl.`project_id` AS projectId,
+		pl.`advance_apply` AS advanceApply,
+		pl.`process_instance_id` AS processInstanceId,
+	    pl.`name` AS customerName,
+	    haa.`advance_apply_operator` AS advanceApplyOperator,
+	    haa.`advance_apply_time` AS advanceApplyTime,
+	    haa.`process_instance_id` AS newProcessInstanceId,
+	    pl.`curuserid` AS curuserId,
+		pl.`create_time` AS declarationDate,
+		<!--manager.`name` AS customerManager,	-->
+		pp.`code` AS projectCode,
+		suser.name AS nextAssignee,
+		sd.item_value as currentProcessStateCode,
+		CASE
+            pbr.project_belongs
+            WHEN 1
+            THEN '赚赚自有'
+            WHEN 2
+            THEN '报单机构'
+            WHEN 3
+            THEN '报单个人'
+        ELSE '' END businessOriginText,/*来源*/
+        pbr.institution_name as institutionName,/*机构名称*/
+        pbr.salesman as customerManager/*报单人*/,
+        pub.task_id as taskId
+		FROM pl_consult pl
+	    INNER JOIN hous_advance_apply haa ON pl.project_id	= haa.project_id
+	    INNER JOIN pl_borrow_requirement pbr on pbr.project_id=haa.project_id
+		INNER JOIN pub_project pp ON pp.id = pl.project_id
+        INNER JOIN sys_user as manager ON manager.id = pl.customer_manager
+        LEFT JOIN sys_dict_detail sd on sd.item_code=haa.status and sd.parent_id=277
+        LEFT JOIN pub_loanprocess pub on pub.process_Instance_Id = haa.process_instance_id
+		LEFT JOIN sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="searchByPoFee"/>
+		<if test="processState !='' and processState !=null">
+			and pub.process_state=#{processState}
+		</if>
+		<if test="customerManager !='' and customerManager !=null">
+            and pbr.salesman like concat('%',#{customerManager}, '%')
+		</if>
+		) AS result <include refid="listQuerySql"/>
+		order by consultId desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from pl_consult
+        where
+        id  = #{id}
+    </delete>
+
+    <select id="getPlConsultList" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	select
+    	project_id as projectId,
+    	proj.id,
+    	proj.`code`,
+    	proj.project_name as projectName,
+    	sd.item_value as processStatusName,
+    	cus.name,cus.salesman,
+    	cons.create_time as createTime,
+    	cons.process_instance_id as processInstanceId
+		from pl_consult cons
+		INNER JOIN pub_project proj on proj.id=cons.project_id
+		INNER JOIN pub_customer cus on cus.id=cons.customer_id
+		INNER JOIN sys_dict_detail sd on sd.item_code = cons.status and sd.parent_id=23
+		ORDER BY cons.create_time DESC
+    </select>
+
+</mapper>

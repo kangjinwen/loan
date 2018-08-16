@@ -1,0 +1,1516 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.workflow.dao.RDZZTaskDao">
+	
+	<sql id="extendedBaseWhere">
+		<where> 
+			<if test="projectCode !='' and projectCode !=null">
+	                pp.`code` like concat('',#{projectCode}, '%') 
+	        </if>
+	        <if test="projectName !='' and projectName !=null">
+	                AND pp.project_name like concat('',#{projectName}, '%') 
+	        </if>
+	        <if test="customerName !='' and customerName !=null">
+	                AND pc.`name` like concat('',#{customerName}, '%') 
+	        </if>
+	        <if test="status !='' and status !=null">
+	                AND pc.`status` = #{status}
+	        </if>
+	        <choose>
+		        <when test="taskDefinitionArray != '' and taskDefinitionArray != null">
+		             and task.TASK_DEF_KEY_ in
+	           		<foreach item="taskDefinitionArray" collection="taskDefinitionArray" open="(" separator="," close=")">
+				        #{taskDefinitionArray,jdbcType=VARCHAR}
+				 	</foreach>
+		        </when>
+		        <otherwise>
+		           and task.TASK_DEF_KEY_ = #{taskDefinition}
+		        </otherwise>
+		    </choose> 
+	         <if test="processingOpinion !='' and processingOpinion !=null">
+	                AND ppb.`processing_opinion` = #{processingOpinion}
+	        </if>
+	        <if test="taskDefinition !='' and taskDefinition !=null">
+	                AND task.TASK_DEF_KEY_ = #{taskDefinition}
+	        </if>
+	       <!-- <if test="flowStatus !='' and flowStatus !=null">
+	                AND task.TASK_DEF_KEY_ = #{flowStatus}
+	        </if>
+	         <if test="customerManager !='' and customerManager !=null">
+	                AND pc.customer_manager like concat('',#{customerManager}, '%') 
+	        </if> -->
+	        <if test="processInstanceId !='' and processInstanceId !=null">
+	                AND task.PROC_INST_ID_ = #{processInstanceId}
+	        </if>
+	        <if test="isCompleted == true ">
+	                AND task.END_TIME_ is not null
+	        </if>
+			<if test="userName !=null or roleId !=null or coverdOffices != null" >
+	         and ((
+		        <if test="userName !='' and userName !=null">
+		                 task.ASSIGNEE_ = #{userName}
+		        </if>
+		        <if test="roleId !='' and roleId !=null">
+		                AND r.id = #{roleId}
+		        </if>
+	        	)
+				<if test="coverdOffices !=null">
+	           		or assignee.office_id IN
+		        	<foreach item="item" index="index" collection="coverdOffices" open="(" separator="," close=")">
+			        #{item}
+			 		</foreach>
+			 	</if>
+		 	)
+		 	</if>
+		</where>
+	</sql>
+	
+	<!--展期列表模糊查询sql-->
+	<sql id="listQuerySql20">
+		<where>			
+			<if test="projectCode !='' and projectCode !=null">
+				and consult.projectCode like concat('',#{projectCode}, '%')
+	        </if>	      
+	        <if test="customerName !='' and customerName !=null">
+	            and consult.customerName like concat('',#{customerName}, '%')
+	        </if>
+	        <if test="customerManager !='' and customerManager !=null">
+	            and consult.customerManager like concat('',#{customerManager}, '%')
+	        </if>	
+	        <if test="flowStatus != '' and flowStatus != null">
+	           and consult.currentProcessItemCode = #{flowStatus}
+	        </if> 
+	        	        <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>      
+		</where>
+	</sql>
+	
+	
+	<!-- 客服调查未完成(展期)-->
+	<select id="queryUnExtensionSurveyTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			/*task.ASSIGNEE_ AS assignee,*/
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  date_add(repayloan.end_repayTime, INTERVAL 1 day) as rolltime, 
+			  /*借款到期时间加一天，用于第三方调查参数*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+				CASE
+            br.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+    
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/
+			ppb.processing_opinion as processingOpinion,
+			hbb.cert_number as certNumber,
+			hbb.father_name as fatherName,
+			hbb.mother_name as motherName,
+			hbb.father_number as fatherNumber,
+			hbb.mother_number as motherNumber,
+			hbb.spouse_name as spouseName,
+			hbb.spouse_cert_number as spouseCertNumber,
+			hbb.total_borrowed as totalBorrowed,
+			hbb.total_borrowed_cert_number as totalBorrowedCertNumber,
+			/*借款人身份证*/
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		  INNER JOIN hous_borrowing_basics hbb
+		    ON hbb.project_id =  pc.project_id 
+		INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+	<!-- 展期房产评估(未完成)-->
+	<select id="queryUnExtensionCollateralAssessTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			/*task.ASSIGNEE_ AS assignee,*/
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  date_add(repayloan.end_repayTime, INTERVAL 1 day) as rolltime, 
+			  /*借款到期时间加一天，用于第三方调查参数*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+				CASE
+            br.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+    
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/
+			ppb.processing_opinion as processingOpinion,
+			hbb.cert_number as certNumber,
+			hbb.father_name as fatherName,
+			hbb.mother_name as motherName,
+			hbb.father_number as fatherNumber,
+			hbb.mother_number as motherNumber,
+			hbb.spouse_name as spouseName,
+			hbb.spouse_cert_number as spouseCertNumber,
+			hbb.total_borrowed as totalBorrowed,
+			hbb.total_borrowed_cert_number as totalBorrowedCertNumber,
+			/*借款人身份证*/
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		  INNER JOIN hous_borrowing_basics hbb
+		    ON hbb.project_id =  pc.project_id 
+		INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+	<!-- 展期公证分配(未完成)-->
+	<select id="queryUnNotarizationAssignTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,		
+			CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+	<!-- 超额展期公证登记(未完成)-->
+	<select id="queryUnhousExcessiveNotarizationTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		  INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+	<!-- 展期超额抵押(未完成)-->
+	<select id="queryUnhousExcessiveMortgageTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		  INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+		<!-- 展期合同(未完成)-->
+	<select id="queryUnHouSignExtendedContractTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			CASE
+            pbr.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    pbr.institution_name as institutionName,/*机构名称*/ 
+	    pbr.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		   INNER JOIN pl_borrow_requirement pbr on pbr.process_instance_id = pc.process_instance_id
+		  INNER JOIN sys_user as manager ON manager.id = pc.customer_manager	
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC
+		) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+	<!-- 展期费管理(未完成)-->
+	<select id="queryUnHoueExtendedfeeTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			CASE
+            pbr.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    pbr.institution_name as institutionName,/*机构名称*/ 
+	    pbr.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.id as id,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/	
+			ROUND(ppb.extension_fee * (ppb.extension_rate/100),2) as firstInterest,
+			/*首期利息*/		
+			(ROUND(ppb.extension_fee * (ppb.extension_rate/100),2)) + (ppb.extension_fee) as receivableAmount,
+			/*应收取金额*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		   INNER JOIN pl_borrow_requirement pbr on pbr.process_instance_id = pc.process_instance_id
+		  INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+	<!-- 展期费划扣(未完成)-->
+	<select id="queryUnHoueDeductTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,			
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			CASE
+            pbr.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    pbr.institution_name as institutionName,/*机构名称*/ 
+	    pbr.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.id as id,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/	
+			ROUND(ppb.extension_fee * (ppb.extension_rate/100),2) as firstInterest,
+			/*首期利息*/		
+			(ROUND(ppb.extension_fee * (ppb.extension_rate/100),2)) + (ppb.extension_fee) as receivableAmount,
+			/*应收取金额*/		
+			ppb.actual_extension_fee as actualExtensionFee,
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.CREATE_TIME_ AS createTime
+		FROM
+			ACT_RU_TASK task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		   INNER JOIN pl_borrow_requirement pbr on pbr.process_instance_id = pc.process_instance_id
+		  INNER JOIN sys_user as manager ON manager.id = pc.customer_manager	
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.CREATE_TIME_ ASC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.createTime ASC
+	</select>
+	
+	
+	<!-- 超额展期公证登记(已完成)-->
+	<select id="queryDonehousExcessiveNotarizationTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value currentProcessStateCode,	
+			sdd.item_code as currentProcessItemCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			suser.name as nextAssignee,
+		CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		  INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN sys_dict_detail AS sdd 
+            ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		   left join pub_loanprocess pub on pub.task_id = task.ID_
+          left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<!-- 展期超额抵押登记(已完成)-->
+	<select id="queryDonehousExcessiveMortgageTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value currentProcessStateCode,		
+			sdd.item_code as currentProcessItemCode,	
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			suser.name as nextAssignee,
+		CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		 INNER JOIN sys_user as manager ON manager.id = pc.customer_manager	    
+		  INNER JOIN sys_dict_detail AS sdd 
+            ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		   left join pub_loanprocess pub on pub.task_id = task.ID_
+          left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC
+		) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<!-- 展期合同签订(已完成)-->
+	<select id="queryDoneHouSignExtendedContractTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value currentProcessStateCode,	
+			sdd.item_code as currentProcessItemCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			suser.name as nextAssignee,
+CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		 INNER JOIN sys_user as manager ON manager.id = pc.customer_manager	    
+		  INNER JOIN sys_dict_detail AS sdd 
+            ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		   left join pub_loanprocess pub on pub.task_id = task.ID_
+          left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<!-- 展期费管理(已完成)-->
+	<select id="queryDoneHoueExtendedfeeTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value currentProcessStateCode,	
+			sdd.item_code as currentProcessItemCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			suser.name as nextAssignee,
+		CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/				
+			ROUND(ppb.extension_fee * (ppb.extension_rate/100),2) as firstInterest,
+			/*首期利息*/		
+			(ROUND(ppb.extension_fee * (ppb.extension_rate/100),2)) + (ppb.extension_fee) as receivableAmount,
+			/*应收取金额*/	
+			ppb.collection_form as collectionForm,
+			/*收取形式*/	
+			ppb.actual_extension_fee as actualExtensionFee,
+			/*实收金额*/	
+			ppb.finance_specialist as financeSpecialist,	
+			/*财务专员*/	
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		 INNER JOIN sys_user as manager ON manager.id = pc.customer_manager	    
+		  INNER JOIN sys_dict_detail AS sdd 
+            ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		   left join pub_loanprocess pub on pub.task_id = task.ID_
+          left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<!-- 展期划扣(已完成)-->
+	<select id="queryDoneHoueDeductTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value currentProcessStateCode,	
+			sdd.item_code as currentProcessItemCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+		CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_amount - borrow.account AS excessAccount,
+			/*超额金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/				
+			ROUND(ppb.extension_fee * (ppb.extension_rate/100),2) as firstInterest,
+			/*首期利息*/		
+			(ROUND(ppb.extension_fee * (ppb.extension_rate/100),2)) + (ppb.extension_fee) as receivableAmount,
+			/*应收取金额*/	
+			ppb.collection_form as collectionForm,
+			/*收取形式*/	
+			ppb.actual_extension_fee as actualExtensionFee,
+			/*实收金额*/	
+			ppb.finance_specialist as financeSpecialist,	
+			/*财务专员*/	
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		 INNER JOIN sys_user as manager ON manager.id = pc.customer_manager	    
+		  INNER JOIN sys_dict_detail AS sdd 
+            ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          left JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<!-- 展期公证分配(已完成)-->
+	<select id="queryDoneNotarizationAssignTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+			pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value currentProcessStateCode,	
+			sdd.item_code as currentProcessItemCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,	
+			suser.name as nextAssignee,		
+			CASE
+           br.project_belongs 
+           WHEN 1 
+           THEN '赚赚自有' 
+           WHEN 2 
+           THEN '报单机构' 
+           WHEN 3 
+           THEN '报单个人'
+           ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/		
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '超额展期' 
+		    WHEN 1 
+		    THEN '正常展期' 
+		    ELSE '' 
+		  END processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		  INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		  INNER JOIN sys_dict_detail AS sdd 
+            ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+		   left join pub_loanprocess pub on pub.task_id = task.ID_
+		left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<!-- 客服调查已完成(展期)-->
+	<select id="queryDoneExtensionSurveyTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+		pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value AS currentProcessStateCode,	
+			sdd.item_code as currentProcessItemCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			suser.name as nextAssignee,
+				CASE
+            br.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/
+			ppb.processing_opinion as processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime 
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		   INNER JOIN sys_dict_detail AS sdd 
+             ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+			left join pub_loanprocess pub on pub.task_id = task.ID_
+		left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+	
+	<!-- 展期房产评估(已完成)-->
+	<select id="queryDoneExtensionCollateralAssessTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		SELECT
+		pc.create_time as declarationDate,
+			assignee.name AS assignee,
+			task.PROC_INST_ID_ AS newProcessInstanceId,
+			task.TASK_DEF_KEY_ AS processStateCode,	
+			sdd.item_value AS currentProcessStateCode,	
+			sdd.item_code as currentProcessItemCode,		
+			pp.`code` AS projectCode,
+			pp.project_name AS projectName,
+			suser.name as nextAssignee,
+				CASE
+            br.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    br.institution_name as institutionName,/*机构名称*/ 
+	    br.salesman as customerManager,/*报单人*/ 
+			pp.id AS projectId,
+			pc.process_instance_id AS processInstanceId,
+			task.ID_ AS taskId,
+			borrow.account borrowAccount,
+		      /*借款金额*/
+		       borrow.time_limit timeLimit,
+		       /*借款期数*/
+		        repayloan.end_repayTime AS endRepayTime,
+			  /*借款到期时间*/
+			  repayloan.repaymentTime AS startRepayTime,
+			  /*借款开始时间*/
+			  repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+			  /*借款剩余本金*/
+			pc.id AS consultId,
+			pc.name AS customerName,
+			ppb.extension_count as extensionCount,
+			/*展期期限*/
+			ppb.extension_amount as extensionAmount,
+			/*展期金额*/
+			ppb.extension_fee as extensionFee,
+			/*展期费*/
+			ppb.extension_rate as extensionRate,
+			/*展期利率*/
+			ppb.extension_returnfee_rate as extensionReturnfeeRate,
+			/*展期返佣点费*/
+			ppb.processing_opinion as processingOpinion,
+			task.START_TIME_ AS startTime,
+			task.END_TIME_ AS endTime 
+		FROM
+			ACT_HI_TASKINST task 
+		  INNER JOIN pub_process_branching AS ppb 
+		    ON ppb.branching_process_id=task.PROC_INST_ID_  		 	   
+		  INNER JOIN pub_project pp 
+		    ON pp.id = ppb.project_id 
+		  INNER JOIN sys_role r 
+		    ON r.nid = task.DESCRIPTION_ 		 
+		  INNER JOIN pl_consult pc 
+		    ON pc.project_id  = ppb.project_id	
+		INNER JOIN sys_user as manager ON manager.id = pc.customer_manager
+		   INNER JOIN sys_dict_detail AS sdd 
+             ON sdd.item_code = pc.status 
+		  INNER JOIN pub_project proj 
+            ON pc.project_id = proj.id 
+          INNER JOIN pl_borrow borrow 
+            ON borrow.project_id = pc.project_id
+          INNER JOIN pub_repayloaninfo repayloan   
+            ON repayloan.borrowId = borrow.id 
+		   INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		   INNER JOIN pl_borrow_requirement br ON br.process_instance_id = pc.process_instance_id
+			left join pub_loanprocess pub on pub.task_id = task.ID_
+		left join sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="extendedBaseWhere"/>
+		ORDER BY task.END_TIME_ DESC) consult
+		<include refid="listQuerySql20"/>
+		order by consult.endTime DESC
+	</select>
+
+
+</mapper>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- pub_customer_relation表:联系明细管理模块 -->
+<mapper namespace="com.company.modules.credit.dao.PubCustomerRelationDao">
+	<!--返回MAP-->		
+	<resultMap id="PubCustomerRelationResult" type="PubCustomerRelation">
+		<id column="id" property="id" />
+		<result column="creator" property="creator" />
+		<result column="create_time" property="createTime" />
+		<result column="is_delete" property="isDelete" />
+		<result column="customer_id" property="customerId" />
+		<result column="loan_count" property="loanCount" />
+		<result column="user_name" property="userName" />
+		<result column="type" property="type" />
+		<result column="contact_time" property="contactTime" />
+		<result column="remark" property="remark" />
+	</resultMap>
+	
+	<!--联系列表返回MAP-->		
+	<resultMap id="getCustomerRelationList" type="com.company.modules.credit.domain.PubCustomerRelationInfo">
+		<result column="id" property="id" />
+		<result column="customerName" property="customerName" />
+		<result column="sex" property="sex" />
+		<result column="certType" property="certType" />
+		<result column="certNumber" property="certNumber" />
+		<result column="birthday" property="birthday" />
+		<result column="mobile" property="mobile" />
+		<result column="contactCount" property="contactCount" />
+		<result column="loans" property="loans" />
+		<result column="age" property="age" />
+	</resultMap>
+	
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			creator,
+			create_time,
+			is_delete,
+			customer_id,
+			loan_count,
+			user_name,
+			type,
+			contact_time,
+			remark			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="isDelete !='' and isDelete !=null">
+            	and is_delete = #{isDelete}
+            </if>
+            <if test="customerId !='' and customerId !=null">
+            	and customer_id = #{customerId}
+            </if>
+            <if test="loanCount !='' and loanCount !=null">
+            	and loan_count = #{loanCount}
+            </if>
+            <if test="userName !='' and userName !=null">
+            	and user_name = #{userName}
+            </if>
+            <if test="type !='' and type !=null">
+            	and type = #{type}
+            </if>
+            <if test="contactTime !='' and contactTime !=null">
+            	and contact_time = #{contactTime}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="isDelete != null">		
+	    		is_delete = #{isDelete},		
+	    	</if>
+	    	<if test="customerId != null">		
+	    		customer_id = #{customerId},		
+	    	</if>
+	    	<if test="loanCount != null">		
+	    		loan_count = #{loanCount},		
+	    	</if>
+	    	<if test="userName != null">		
+	    		user_name = #{userName},		
+	    	</if>
+	    	<if test="type != null">		
+	    		type = #{type},		
+	    	</if>
+	    	<if test="contactTime != null">		
+	    		contact_time = #{contactTime},		
+	    	</if>
+	    	<if test="remark != null">		
+	    		remark = #{remark},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="PubCustomerRelation">
+		insert into pub_customer_relation(
+        	creator,
+        	create_time,
+        	is_delete,
+        	customer_id,
+        	loan_count,
+        	user_name,
+        	type,
+        	contact_time,
+        	remark			
+        )values(
+        	#{creator},
+        	#{createTime},
+        	#{isDelete},
+        	#{customerId},
+        	#{loanCount},
+        	#{userName},
+        	#{type},
+        	#{contactTime},
+        	#{remark}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="PubCustomerRelation">
+        update pub_customer_relation
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<sql id="listQuerySql">
+		<where>		
+	        <!--增加查询条件  -->
+			<if test="customerName !='' and customerName !=null">
+	            and c.name like concat('%', #{customerName}, '%')
+			</if>		
+			<if test="mobile !='' and mobile !=null">
+	            and c.mobile like concat('%', #{mobile}, '%')
+			</if>	
+		</where>
+	</sql>
+	
+	<!--分页列表查询,查询客户联系列表-->
+	<select id="getCustomerRelationList" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		SELECT c.id,
+		       c.name AS customerName,
+		       case c.sex
+			   when 1 then '男'
+			   when 2 then '女' 
+			   else ''
+			   end sex,
+		       c.cert_type as certType,
+		       c.cert_number as certNumber,
+		       c.birthday,
+		       c.mobile,
+		       c.loans,
+		       (SELECT count(1) FROM pub_customer_relation r WHERE r.customer_id=c.id) AS contactCount,
+		       round((datediff(CURDATE(), c.birthday))/365) as age
+		FROM pub_customer c
+		<include refid="listQuerySql"/>
+		ORDER BY c.id DESC
+	</select>
+
+	<!--分页列表查询,查询客户联系记录-->
+	<select id="getCustomerRelationDetail" resultMap="PubCustomerRelationResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from pub_customer_relation
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="PubCustomerRelationResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from pub_customer_relation
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="PubCustomerRelationResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from pub_customer_relation
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="PubCustomerRelationResult" parameterType="java.util.HashMap" >
+		select 
+			id,
+			creator,
+			create_time,
+			is_delete,
+			customer_id,
+			loan_count,
+			user_name,
+			case type  
+			   when 1 then '电话'
+			   when 2 then '上门' 
+			   when 3 then '邮件' 
+			   when 4 then '短信' 
+			   else ''
+			end type,
+			contact_time,
+			remark		
+		from pub_customer_relation
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from pub_customer_relation
+        where
+        id  = #{id}
+    </delete>
+</mapper>

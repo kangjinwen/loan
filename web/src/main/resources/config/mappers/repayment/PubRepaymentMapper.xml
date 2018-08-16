@@ -1,0 +1,1085 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- pub_attachment表:补充资料模块 -->
+<mapper namespace="com.company.modules.repayment.dao.PubRepaymentDao">
+	
+	<!-- ======================================= 还款管理 ======================================= -->
+	<sql id="dynamicQuerySql">
+		dict2.parent_id = #{dictEloanType}
+		/* AND repayloan.islocked = 0 */
+		<!--
+		<if test="coverdOffices != null">
+			AND office.id IN
+			<foreach item="office" collection="coverdOffices" open="(" separator="," close=")" >
+				#{office}
+			</foreach>
+		</if>
+		<if test="executorCoverdOffices != null">
+			AND office.id IN
+			<foreach item="exeOffice" collection="executorCoverdOffices" open="(" separator="," close=")" >
+				#{exeOffice}
+			</foreach>
+		</if>
+		-->
+		<if test="repayment.projectCode!=null and repayment.projectCode != ''">
+			and proj.code = #{repayment.projectCode}
+		</if>
+		<if test="repayment.contractNo!=null and repayment.contractNo != ''">
+			and repayloan.contract_no = #{repayment.contractNo}
+		</if>
+		<if test="repayment.repaymentStatus !=null">
+			and repayloan.repayment_status = #{repayment.repaymentStatus}
+		</if>
+		<if test="repayment.officeId !=null ">
+			and office.id = #{repayment.officeId}
+		</if>
+		<if test="repayment.timeLimit !=null and repayment.timeLimit != ''">
+			and repayloan.time_limit = #{repayment.timeLimit}
+		</if>
+		<if test="repayment.customerName!=null and repayment.customerName != ''">
+			and repayloan.customer_name like concat('%',#{repayment.customerName},'%')
+		</if>
+		<if test="repayment.loanStartDate !=null and repayment.loanStartDate != ''">
+			<![CDATA[
+			and DATE_FORMAT(borrow.loan_time,'%Y-%m-%d') >= DATE_FORMAT(#{repayment.loanStartDate},'%Y-%m-%d')
+			]]>
+		</if>
+		<if test="repayment.loanEndDate !=null and repayment.loanEndDate != ''">
+			<![CDATA[
+			and DATE_FORMAT(borrow.loan_time,'%Y-%m-%d') <= DATE_FORMAT(#{repayment.loanEndDate},'%Y-%m-%d')
+			]]>
+		</if>
+		<if test="roleNid != null and roleNid == 'moneyRepayStaff' ">
+			and repayloan.repayment_status = 0 or repayloan.repayment_status = 2
+		</if>
+	</sql>
+	
+	<!--列表模糊查询sql-->
+	<sql id="listQuerySql50">
+		<where>			
+			<if test="repayment.businessOriginText !='' and repayment.businessOriginText !=null">
+				and consult.businessOriginText like concat('%',#{repayment.businessOriginText}, '%')
+	        </if>	      
+	        <if test="repayment.institutionName !='' and repayment.institutionName !=null">
+	            and consult.institutionName like concat('%',#{repayment.institutionName}, '%')
+	        </if>
+	        <if test="repayment.customerManager !='' and repayment.customerManager !=null">
+	            and consult.customerManager like concat('%',#{repayment.customerManager}, '%')
+	        </if>		            
+		</where>
+	</sql>
+	
+	<select id="getPageListByMap" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+			select * from(
+			SELECT
+				repayloan.id as repayloanId,
+				repayloan.islocked,						/*是否锁定 0未锁定 1锁定*/
+				proj.CODE projectCode,					/*项目编号*/
+				proj.project_name projectName, 			/* 项目名称/借款名称 */
+				repayloan.contract_no contractNo, 		/*合同编号*/
+				borrow.account borrowAccount, 			/*借款金额*/
+				repayloan.time_limit timeLimit, 		/*借款期数*/
+				borrow.repayment_type repaymentType, 	/*还款方式*/
+				dict2.item_value repaymentTypeText,		/*还款方式描述*/
+				if(ISNULL(repayloan.repaymentTime),'--',DATE_FORMAT(repayloan.repaymentTime,'%Y-%m-%d')) repaymentStartTime,/*还款开始时间*/
+				if(ISNULL(repayloan.end_repayTime),'--',DATE_FORMAT(repayloan.end_repayTime,'%Y-%m-%d')) repaymentEndTime,				/*还款结束时间*/
+				CASE
+		           br.project_belongs 
+		           WHEN 1 
+		           THEN '赚赚自有' 
+		           WHEN 2 
+		           THEN '报单机构' 
+		           WHEN 3 
+		           THEN '报单个人'
+		           ELSE ''	         
+		        END businessOriginText,/*来源*/ 
+			    br.institution_name as institutionName,/*机构名称*/ 
+			    br.salesman as customerManager,/*报单人*/ 
+				borrow.process_instance_id processInstanceId, 	/*流程编号*/
+				proj.id projectId, 								/*项目ID*/
+				if(ISNULL(borrow.loan_time),'--',DATE_FORMAT(borrow.loan_time,'%Y-%m-%d')) loanTime, 						/*放款日期*/
+				if(ISNULL(cus.name),'－ －',cus.name) customerName, 			/*客户姓名*/
+				if(ISNULL(office.NAME),'--',office.NAME)  officeName, 		/*组织机构*/
+				
+				repayloan.repayment_capital_amount repayCapital, 			/*已还本金*/
+				repayloan.capital_amount - repayloan.repayment_capital_amount needpayCapital, /*待还本金/剩余本金*/
+				repayloan.repayment_interest_amount repayInterest, 			/*已还利息*/
+				repayloan.serviceFee fwf, 									/*服务费*/
+				repayloan.repayment_status repaymentStatus,
+				case repayloan.repayment_status when 0 then '还款中' 
+						when 1 then '结清' when 2 then '逾期' end as repaymentStatusText, 				/*还款状态*/
+				if(ISNULL(repayloan.repayment_process),0,repayloan.repayment_process) repaymentProcess, /*还款处理*/
+				if(ISNULL(dict1.item_value),'正常还款',dict1.item_value)  repaymentProcessText,
+				if(ISNULL(prodType.product_type),'－ －',prodType.product_type) productType, 								/*产品类型*/
+		  		if(ISNULL(houslc.actual_fee),0,houslc.actual_fee) actualFee, 				/*下户费*/
+				houslf.return_fee returnFee, 								/* 返费 */
+				borrow.account * borrow.single_rate as firstInterest
+			FROM
+				pub_repayloaninfo repayloan
+			INNER JOIN pl_borrow borrow ON repayloan.borrowId = borrow.id
+			INNER JOIN pl_consult pl_con on pl_con.id=borrow.consult_id
+			INNER JOIN pub_customer cus on cus.id=pl_con.customer_id
+			LEFT JOIN pl_product pro ON borrow.product_id = pro.id
+			LEFT JOIN product_type prodType ON pro.product_type = prodType.id
+			INNER JOIN pub_project proj ON borrow.project_id = proj.id
+			LEFT JOIN sys_office office ON office.id = repayloan.officeid
+			LEFT JOIN sys_dict_detail dict1 ON dict1.item_code = repayloan.repayment_process
+			AND dict1.parent_id = (select id from sys_dict where type_code='REPAYMENT_PROCESS')
+			
+			LEFT JOIN (SELECT * FROM sys_dict_detail WHERE parent_id = #{dictEloanType}) dict2 ON dict2.item_code = borrow.repayment_type
+			INNER JOIN pl_feeinfo feeinfo ON feeinfo.process_instance_id = borrow.process_instance_id
+			LEFT JOIN hous_lower_cost houslc on proj.id = houslc.project_id
+			LEFT JOIN hous_loanfees houslf on proj.id = houslf.project_id
+			INNER JOIN pl_borrow_requirement br ON br.process_instance_id = borrow.process_instance_id
+			<where>
+				<include refid="dynamicQuerySql" />
+				ORDER BY repayloan.id ASC
+			</where>) consult
+		<include refid="listQuerySql50"/>
+		order by consult.repayloanId ASC
+	</select>
+	
+	
+	<!-- ======================================= 还款详情 ======================================= -->
+	<resultMap id="repaymentdetailMapResult" type="java.util.HashMap">
+		<result column="id" property="id" />
+		<result column="creator" property="creator" />
+		<result column="create_time" property="createTime" />
+		<result column="modifier" property="modifier" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="is_delete" property="isDelete" />
+		<result column="processInstanceId" property="processInstanceId" />
+		<!-- 还款日期 -->
+		<result column="repayment_time" property="repaymentTime" />
+		<!-- 实际还款日期 -->
+		<result column="realpayment_time" property="realpaymentTime" />
+		<result column="period" property="period" />
+		<result column="account" property="account" />
+		<result column="real_account" property="realAccount" />
+		<result column="penalty" property="penalty" />
+		<result column="default_interest" property="defaultInterest" />
+		<result column="real_interest" property="realInterest" />
+		<result column="repayment_type" property="repaymentType" />
+		
+		<result column="repayment_staus" property="repaymentStaus" />
+		<result column="repayment_staus_text" property="repaymentStausText" />
+		<result column="is_payoff" property="isPayoff" />
+		<result column="is_payoff_text" property="isPayoffText" />
+		
+		<result column="capital" property="capital"/>
+		<result column="interest" property="interest"/>
+		<result column="customer_id" property="customerId"/>
+		<result column="borrow_id" property="borrowId"/>
+		<result column="reduction_penalty"            property="reductionPenalty"/>
+		
+		<result column="violations_penalty"           property="violationsPenalty"/>
+		<result column="violations_truck_fee"         property="violationsTruckFee"/>
+		<result column="violations_travel_fee"        property="violationsTravelFee"/>
+		<result column="violations_other_fee"         property="violationsOtherFee"/>
+		<result column="violations_total_amount"      property="violationsTotalAmount"/>
+		<result column="breach_contract"      property="breachContract"/>
+		<result column="all_breaks"      property="allBreaks"/>
+		<result column="gps_use_fee"      property="gpsUsingFee"/>
+		<result column="other_fee"      property="otherFee"/>
+		<result column="parking_fee"      property="parkingFee"/>
+		
+		<result column="cancel_overdue"      property="cancelOverdue"/>
+		
+		<result column="repayment_platform_amount" property="repaymentPlatformAmount"/>
+		<result column="repayment_gpsuse_amount" property="repaymentGPSuseAmount"/>
+		<result column="repayment_capital_amount" property="repaymentCapitalAmount"/>
+		<result column="repayment_interest_amount" property="repaymentInterestAmount"/>
+		<result column="customer_balance" property="customerBalance"/>
+		<result column="needrepay_capital" property="needrepayCapital"/>
+		<result column="repayment_parking_amount" property="repaymentParkingAmount"/>
+	</resultMap>
+	
+	
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="baseRepaymentdetailSelectSql">
+			id,
+			creator,
+			create_time,
+			modifier,
+			
+			modify_time,
+			is_delete,
+			processInstanceId,
+			repayment_time,
+			
+			realpayment_time,
+			period,
+			account,
+			if(ISNULL(real_account),0,real_account) real_account,
+			
+			if(ISNULL(penalty),0,penalty) penalty,
+			if(ISNULL(default_interest),0,default_interest) default_interest,
+			if(ISNULL(real_interest),0,real_interest) real_interest,
+			repayment_type,
+			
+			repayment_staus,
+			case repayment_staus 
+				when 0 then '还款中' 
+				when 1 then '正常还款' 
+				when 2 then '逾期未还款'
+				when 3 then '逾期还款'
+				when 4 then '提前还款'
+				when 5 then '押品拍卖'
+				end as repayment_staus_text,
+			
+			is_payoff,
+			case is_payoff when 0 then '未结清' when 1 then '已结清' end as is_payoff_text,
+			
+			if(ISNULL(capital),0,capital) capital,
+			if(ISNULL(interest),0,interest) interest,
+			customer_id,
+			
+			borrow_id,
+			if(ISNULL(reduction_penalty),0,reduction_penalty) reduction_penalty,
+			if(ISNULL(breach_contract),0,breach_contract) breach_contract,
+			
+			violations_penalty,      
+			violations_truck_fee, 
+			   
+			violations_travel_fee,   
+			violations_other_fee,    
+			violations_total_amount,
+			all_breaks,
+			parking_fee,
+			other_fee,
+			gps_use_fee,
+			cancel_overdue,
+			repayment_platform_amount,
+			repayment_gpsuse_amount,
+			
+			if(ISNULL(repayment_capital_amount),0,repayment_capital_amount) repayment_capital_amount,
+			if(ISNULL(repayment_interest_amount),0,repayment_interest_amount) repayment_interest_amount,
+			
+			customer_balance,
+			if(ISNULL(needrepay_capital),0,needrepay_capital)  needrepay_capital,
+			repayment_parking_amount
+	</sql>
+	
+	
+	<!--基本的sql查询条件公共引用...-->
+	<sql id="baseRepaymentdetailWhereSql">
+    	<if  test="id != null">
+		     and id = #{id}
+		</if>
+		<if  test="creator != null">
+		      and creator = #{creator}
+		</if>
+		<if  test="createTime != null">
+		      and create_time = #{createTime}
+		</if>
+		<if  test="modifier != null">
+		      and modifier = #{modifier}
+		</if>
+		<if  test="modifyTime != null">
+		     and  modify_time = #{modifyTime}
+		</if>
+		<if  test="isDelete != null">
+		     and  is_delete = #{isDelete}
+		</if>
+		<if  test="processInstanceId != null">
+		    and   processInstanceId = #{processInstanceId}
+		</if>
+		<if  test="repaymentTime != null">
+		     and  repayment_time = #{repaymentTime}
+		</if>
+		<if  test="realpaymentTime != null">
+		     and  realpayment_time = #{realpaymentTime}
+		</if>
+		<if  test="period != null">
+		     and  period = #{period}
+		</if>
+		<if  test="account != null">
+		     and  account = #{account}
+		</if>
+		<if  test="realAccount != null">
+		     and  real_account = #{realAccount}
+		</if>
+		<if  test="penalty != null">
+		    and   penalty = #{penalty}
+		</if>
+		<if  test="defaultInterest != null">
+		    and   default_interest = #{defaultInterest}
+		</if>
+		<if  test="realInterest != null">
+		    and   real_interest = #{realInterest}
+		</if>
+		<if  test="repaymentType != null">
+		    and   repayment_type = #{repaymentType}
+		</if>
+		<if  test="repaymentStaus != null">
+		    and   repayment_staus = #{repaymentStaus}
+		</if>
+		<if  test="isPayoff != null">
+		     and  is_payoff = #{isPayoff}
+		</if>
+		<if  test="capital != null">
+			and   capital = #{capital}
+		</if>
+		<if  test="interest != null">
+			 and  interest = #{interest}
+		</if>
+		<if  test="customer_id != null">
+			and   customer_id = #{customerId}
+		</if>
+		<if  test="borrow_id != null">  
+			and borrow_id=#{borrowId}
+		</if>
+		
+		<!-- <if  test="violationsPenalty">  violations_penalty     =#violationsPenalty#</if>
+		<if  test="violationsTruckFee">  violations_truck_fee   =#violationsTruckFee#</if>
+		<if  test="violationsTravelFee">  violations_travel_fee  =#violationsTravelFee#</if>
+		<if  test="violationsOtherFee">  violations_other_fee   =#violationsOtherFee#</if>
+		<if  test="violationsTotalAmount">  violations_total_amount=#violationsTotalAmount#</if> -->
+		
+		<if  test="breachContract != null">
+			and   breach_contract = #{breachContract}
+		</if>
+		<if  test="allBreaks != null">
+			and   all_breaks = #{allBreaks}
+		</if>
+		<if  test="gpsUsingFee != null">
+			and   gps_use_fee = #{gpsUsingFee}
+		</if>
+		<if  test="otherFee != null">
+			and   other_fee = #{otherFee}
+		</if>
+		<if  test="parkingFee != null">
+			and   parking_fee = #{parkingFee}
+		</if>
+		<if  test="cancelOverdue != null">
+			and   cancel_overdue = #{cancelOverdue}
+		</if>
+		<if  test="repaymentPlatformAmount != null">
+			and repayment_platform_amount=#{repaymentPlatformAmount}
+		</if>
+		<if  test="repaymentGPSuseAmount != null">
+			and repayment_gpsuse_amount=#{repaymentGPSuseAmount}
+		</if>
+		<if   test="repaymentCapitalAmount != null">
+			and repayment_capital_amount=#{repaymentCapitalAmount}
+		</if>
+		<if  test="repaymentInterestAmount != null">
+			and repayment_interest_amount=#{repaymentInterestAmount}
+		</if>
+		<if  test="customerBalance != null">
+			and customer_balance=#{customerBalance}
+		</if>
+		<if  test="needrepayCapital != null">
+			and needrepay_capital=#{needrepayCapital}
+		</if>
+		<if  test="repaymentParkingAmount != null">
+			and repayment_parking_amount=#{repaymentParkingAmount}
+		</if>
+	</sql>
+    
+	<select id="getRepaymentDetailPageByMap" resultMap="repaymentdetailMapResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="baseRepaymentdetailSelectSql" />
+	    from pub_repaymentdetail
+	    where processInstanceId = #{repayment.processInstanceId}
+		order by id
+	</select>
+	
+	<select id="queryAllOverdue" parameterType="java.util.HashMap" resultMap="repaymentdetailMapResult">
+		select 
+		<include refid="baseRepaymentdetailSelectSql"/>
+		from pub_repaymentdetail
+		where  1=1 and is_payoff=1 and 
+		repayment_staus=3
+		<include refid="baseRepaymentdetailWhereSql"/>
+	</select>
+	
+	<select id="getMinUnPayedRepaymentdetail" resultMap="repaymentdetailMapResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="baseRepaymentdetailSelectSql" />	
+	    from pub_repaymentdetail
+	    where 1=1 and is_payoff=0
+		<include refid="baseRepaymentdetailWhereSql"/>	
+		order by period asc
+	 	limit 0, 1
+	</select>
+	
+	
+	
+	<!-- 导出表格查询还款计划 -->
+	<sql id="queryRepayLoanListFrom">
+		from pub_repayloaninfo repayloan
+		inner join pl_borrow borrow on repayloan.borrowId=borrow.id
+		left join pl_product pro on borrow.product_id =  pro.id
+		inner join pub_project proj on borrow.project_id=proj.id
+		left join sys_office office on office.id=repayloan.officeid
+		left join sys_dict_detail dict1 on dict1.item_code=repayloan.repayment_process and dict1.parent_id = #dict1parentId#
+		left join (select * from sys_dict_detail where parent_id=#dictParentId1# or parent_id=#dictParentId2#) dict2 on dict2.item_code=borrow.repayment_type
+		inner join pl_feeinfo feeinfo on feeinfo.process_instance_id=borrow.processInstanceId
+	</sql>
+	
+	<sql id="queryRepayLoanListWhere">
+        <if test="coverdOffices != null">
+			AND office.id IN
+			<foreach item="office" collection="coverdOffices" open="(" separator="," close=")" >
+				#{office}
+			</foreach>
+		</if>
+		<if test="executorCoverdOffices != null">
+			AND office.id IN
+			<foreach item="exeOffice" collection="executorCoverdOffices" open="(" separator="," close=")" >
+				#{exeOffice}
+			</foreach>
+		</if>
+		<if test="repayment.projectCode!=null and repayment.projectCode != ''">
+			and proj.code = #{repayment.projectCode}
+		</if>
+		<if test="repayment.contractNo!=null and repayment.contractNo != ''">
+			and repayloan.contract_no = #{repayment.contractNo}
+		</if>
+		<if test="repayment.repaymentStatus !=null and repayment.repaymentStatus != ''">
+			and repayloan.repayment_status = #{repayment.repaymentStatus}
+		</if>
+		<if test="repayment.officeId !=null and repayment.officeId != ''">
+			and office.id = #{repayment.officeId}
+		</if>
+		<if test="repayment.timeLimit !=null and repayment.timeLimit != ''">
+			and repayloan.time_limit = #{repayment.timeLimit}
+		</if>
+		<if test="repayment.customerName!=null and repayment.customerName != ''">
+			and repayloan.customer_name like concat('%',#{repayment.customerName},'%')
+		</if>
+		<if test="repayment.processInstanceId!=null and repayment.processInstanceId != ''">
+			and borrow.processInstanceId = #{repayment.processInstanceId}
+		</if>
+		<if test="repayment.islocked!=null and repayment.islocked != ''">
+			and repayloan.islocked = #{repayment.islocked}
+		</if>
+	</sql>
+	
+	<select id="queryRepayLoanList" parameterType="java.util.HashMap"  resultType="java.util.LinkedHashMap">
+		select
+			borrow.process_instance_id processInstanceId,	/*流程编号*/
+			proj.id						projectId,			/*项目ID*/
+			proj.code					projectCode,
+			repayloan.contract_no				htbh,		/*合同编号*/
+			borrow.loan_time			loanTime,			/*放款日期*/
+			repayloan.customer_name			customerName,	/*客户姓名*/
+			office.name					officeName,			/*营业厅*/
+			repayloan.time_limit			timeLimit,		/*借款期数*/
+			borrow.account				account,			/*借款/贷款 金额*/
+			borrow.repayment_type		repaymentType,		/*还款方式*/
+			dict2.item_value			repaymentTypeText,
+			repayloan.repayment_capital_amount			repayCapital,					/*已还本金*/
+			repayloan.capital_amount-repayloan.repayment_capital_amount needpayCapital,/*待还本金/剩余本金*/
+			repayloan.repayment_interest_amount  		repayInterest,					/*已还利息*/
+			repayloan.serviceFee		fwf,											/*服务费*/
+			repayloan.repayment_status		repaymentStatus,				/*还款状态*/
+			repayloan.repayment_process		repaymentProcess,					/*还款处理*/
+			dict1.item_value 			repaymentProcessText
+			<include refid="queryRepayLoanListFrom"/>
+			where 
+			dict2.parent_id=#dictParentId1#
+			<include refid="queryRepayLoanListWhere"/>
+		order by repayloan.id desc
+	</select>
+	
+	
+	<select id="validateWhetherCanPay" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+			SELECT *
+			FROM
+				pub_repaymentdetail
+			<where>
+				<include refid="baseRepaymentdetailWhereSql"/>
+			</where>
+	</select>
+	
+	<update id="updateBorrowCnt" parameterType="String">
+		update pl_borrow borrow,(
+			SELECT
+				sum(repay.capital) real_account,
+				sum(repay.interest) interest,
+				CASE WHEN (
+					SELECT
+						count(1)
+					FROM
+						pub_repaymentdetail
+					WHERE
+						processInstanceId = #{processInstanceId}
+						AND is_payoff = 0
+				) = 0 
+					THEN
+						1
+					WHEN (
+						SELECT
+							repayment_staus
+						FROM
+							pub_repaymentdetail
+						WHERE
+							id = (
+								SELECT
+									max(id)
+								FROM
+									pub_repaymentdetail
+								WHERE
+									processInstanceId = #{processInstanceId}
+								AND repayment_staus != 0
+							)
+						) = 2 
+					THEN 2
+					ELSE 0
+					END 	STATUS
+				FROM
+					pub_repaymentdetail repay
+				WHERE
+					processInstanceId = #{processInstanceId} AND real_account IS NOT NULL AND real_account > 0
+		)c
+		set
+			borrow.repayment_yes_account=c.real_account,
+			borrow.repayment_yes_interest=c.interest,
+			borrow.repayment_status=c.status
+		where
+			process_instance_id=#{processInstanceId}
+	</update>
+	<update id="updateRepayCnt" parameterType="java.util.HashMap">
+		update pub_repayloaninfo rep,
+		(
+			SELECT
+				sum(repay.capital) repayment_capital_amount,
+				sum(repay.interest) repayment_interest_amount,
+				CASE WHEN (
+					SELECT
+						count(1)
+					FROM
+						pub_repaymentdetail
+					WHERE
+						processInstanceId = #{processInstanceId}
+						AND is_payoff = 0
+				) = 0 
+					THEN
+						1
+					WHEN (
+						SELECT
+							repayment_staus
+						FROM
+							pub_repaymentdetail
+						WHERE
+							id = (
+								SELECT
+									max(id)
+								FROM
+									pub_repaymentdetail
+								WHERE
+									processInstanceId = #{processInstanceId}
+								AND repayment_staus != 0
+							)
+						) = 2 
+					THEN 2
+					ELSE 0
+					END 	STATUS
+				FROM
+					pub_repaymentdetail repay
+				WHERE
+					processInstanceId = #{processInstanceId} AND real_account IS NOT NULL AND real_account > 0
+		)c
+		set
+			rep.repayment_capital_amount = c.repayment_capital_amount,
+			rep.repayment_interest_amount = c.repayment_interest_amount,
+			rep.repayment_status=c.status
+		where
+			rep.borrowId= #{borrowId}
+	</update>
+	
+	<!-- 要算首期利息 -->
+	<!-- <update id="updateRepayCnt" parameterType="java.util.HashMap">
+		update pub_repayloaninfo rep,
+		(
+			SELECT
+				sum(repay.capital) repayment_capital_amount,
+				sum(repay.interest) repayment_interest_amount,
+				CASE WHEN (
+					SELECT
+						count(1)
+					FROM
+						pub_repaymentdetail
+					WHERE
+						processInstanceId = #{processInstanceId}
+						AND is_payoff = 0
+				) = 0 
+					THEN
+						1
+					WHEN (
+						SELECT
+							repayment_staus
+						FROM
+							pub_repaymentdetail
+						WHERE
+							id = (
+								SELECT
+									max(id)
+								FROM
+									pub_repaymentdetail
+								WHERE
+									processInstanceId = #{processInstanceId}
+								AND repayment_staus != 0
+							)
+						) = 2 
+					THEN 2
+					ELSE 0
+					END 	STATUS
+				FROM
+					pub_repaymentdetail repay
+				WHERE
+					processInstanceId = #{processInstanceId} AND real_account IS NOT NULL AND real_account > 0
+		)c,
+		(select borrow.account * borrow.single_rate as firstInterest from pl_borrow borrow where borrow.id = #{borrowId}) bro
+		set
+			rep.repayment_capital_amount=c.repayment_capital_amount,
+			rep.repayment_interest_amount = bro.firstInterest + c.repayment_interest_amount,
+			rep.repayment_status=c.status
+		where
+			rep.borrowId= #{borrowId}
+	</update> -->
+	
+	<select id="queryMaxPeriod" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select max(period) from pub_repaymentdetail where processInstanceId= #{processInstanceId}
+	</select>
+	
+	
+	
+	
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="defaultInterest!= null">		
+	    		default_interest = #{defaultInterest},		
+	    	</if>
+	    	<if test="realInterest!= null">		
+	    		real_interest = #{realInterest},		
+	    	</if>
+	    	<if test="penalty!= null">		
+	    		penalty = #{penalty},		
+	    	</if>
+	    	<if test="realAccount!= null">		
+	    		real_account = #{realAccount},		
+	    	</if>
+	    	<if test="isPayoff!= null">		
+	    		is_payoff = #{isPayoff},		
+	    	</if>
+	    	<if test="customerId!= null">		
+	    		customer_id = #{customerId},		
+	    	</if>
+	    	<if test="account!= null">		
+	    		account = #{account},		
+	    	</if>
+	    	<if test="capital!= null">		
+	    		capital = #{capital},		
+	    	</if>
+	    	<if test="interest!= null">		
+	    		interest = #{interest},		
+	    	</if>
+	    	<if test="gpsUseFee!= null">		
+	    		gps_use_fee = #{gpsUseFee},		
+	    	</if>
+	    	<if test="otherFee!= null">		
+	    		other_fee = #{otherFee},		
+	    	</if>
+	    	<if test="parkingFee!= null">		
+	    		parking_fee = #{parkingFee},		
+	    	</if>
+	    	<if test="modifier!= null">		
+	    		modifier = #{modifier},		
+	    	</if>
+	    	<if test="modifyTime!= null">		
+	    		modify_time = #{modifyTime},		
+	    	</if>
+	    	<if test="isDelete!= null">		
+	    		is_delete = #{isDelete},		
+	    	</if>
+	    	<if test="period!= null">		
+	    		period = #{period},		
+	    	</if>
+	    	<if test="realpaymentTime!= null">		
+	    		realpayment_time = #{realpaymentTime},		
+	    	</if>
+	    	<if test="repaymentType!= null">		
+	    		repayment_type = #{repaymentType},		
+	    	</if>
+	    	<if test="repaymentTime!= null">		
+	    		repayment_time = #{repaymentTime},		
+	    	</if>
+	    	<if test="repaymentStaus!= null">		
+	    		repayment_staus = #{repaymentStaus},		
+	    	</if>
+	    	<if test="processinstanceid!= null">		
+	    		processinstanceid = #{processinstanceid},		
+	    	</if>
+	    	<if test="borrowId!= null">		
+	    		borrow_id = #{borrowId},		
+	    	</if>
+	    	<if test="violationsPenalty!= null">		
+	    		violations_penalty = #{violationsPenalty},		
+	    	</if>
+	    	<if test="violationsTruckFee!= null">		
+	    		violations_truck_fee = #{violationsTruckFee},		
+	    	</if>
+	    	<if test="violationsTravelFee!= null">		
+	    		violations_travel_fee = #{violationsTravelFee},		
+	    	</if>
+	    	<if test="violationsOtherFee!= null">		
+	    		violations_other_fee = #{violationsOtherFee},		
+	    	</if>
+	    	<if test="violationsTotalAmount!= null">		
+	    		violations_total_amount = #{violationsTotalAmount},		
+	    	</if>
+	    	<if test="reductionPenalty!= null">		
+	    		reduction_penalty = #{reductionPenalty},		
+	    	</if>
+	    	<if test="breachContract!= null">		
+	    		breach_contract = #{breachContract},		
+	    	</if>
+	    	<if test="allBreaks!= null">		
+	    		all_breaks = #{allBreaks},		
+	    	</if>
+	    	<if test="cancelOverdue!= null">		
+	    		cancel_overdue = #{cancelOverdue},		
+	    	</if>
+	    	<if test="repaymentPlatformAmount!= null">		
+	    		repayment_platform_amount = #{repaymentPlatformAmount},		
+	    	</if>
+	    	<if test="repaymentParkingAmount!= null">		
+	    		repayment_parking_amount = #{repaymentParkingAmount},		
+	    	</if>
+	    	<if test="repaymentGpsuseAmount!= null">		
+	    		repayment_gpsuse_amount = #{repaymentGpsuseAmount},		
+	    	</if>
+	    	<if test="repaymentCapitalAmount!= null">		
+	    		repayment_capital_amount = #{repaymentCapitalAmount},		
+	    	</if>
+	    	<if test="repaymentInterestAmount!= null">		
+	    		repayment_interest_amount = #{repaymentInterestAmount},		
+	    	</if>
+	    	<if test="customerBalance!= null">		
+	    		customer_balance = #{customerBalance},		
+	    	</if>
+	    	<if test="needrepayCapital!= null">		
+	    		needrepay_capital = #{needrepayCapital},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+    <update id="updateRepaymentdetailById" parameterType="java.util.HashMap">
+        update pub_repaymentdetail
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+    
+    
+    <!-- ======================================= 贷后管理 ======================================= -->
+    <sql id="pendingApplicationListFrom">
+		inner join pl_borrow borrow on repayloan.borrowId=borrow.id
+		inner join pub_project proj on borrow.project_id=proj.id
+		inner join pl_consult consult on borrow.project_id=consult.project_id
+		inner join sys_dict_detail sdd	on sdd.item_code=borrow.repayment_type and sdd.parent_id=#{repaymentTypeDictId}
+		inner join pl_contract contract on contract.id=repayloan.contractId
+		inner join (select min(period) period,processInstanceId from pub_repaymentdetail where is_payoff=0 group by processInstanceId) 
+			details on details.processInstanceId=borrow.process_instance_id
+ 	</sql>
+ 	<sql id="pendingApplicationListSelect">
+ 		borrow.process_instance_id	processInstanceId,/*流程编号*/
+ 		consult.id 					consultid,
+		proj.id						projectId,		/*项目ID*/
+		proj.code					projectCode,	/*项目编号*/
+		proj.project_name			projectName,
+		repayloan.contract_no		contractNo,	/*合同编号*/
+		repayloan.customer_name		customerName,	/*客户姓名*/
+		repayloan.customer_account 	customerAccount,/*贷款账号*/
+		borrow.account				borrowAccount,/*借款金额*/
+		borrow.time_limit			timeLimit,/*借款期数*/
+		borrow.repayment_type		repaymentType,/*还款方式*/
+		sdd.item_value				repaymentTypeText,
+		details.period				period,/*目前期数*/
+		repayloan.repayment_status	repaymentStatus,
+		if(ISNULL(repayloan.end_repayTime),'--',DATE_FORMAT(repayloan.end_repayTime,'%Y-%m-%d')) as endRepayTime,/*借款到期时间*/
+		if(ISNULL(repayloan.repaymentTime),'--',DATE_FORMAT(repayloan.repaymentTime,'%Y-%m-%d')) as startRepayTime,/*借款开始时间*/
+		repayloan.capital_amount - repayloan.repayment_capital_amount as remainderAmount,/*借款剩余本金*/
+		case repayloan.repayment_status 
+		when 0 then '还款中'
+		when 1 then '结清'
+		else  '逾期'	end repaymentStatusText,/*还款状态*/
+		ifnull(consult.extension_time,0)		extensionTime/*展期次数*/
+ 	</sql>
+ 	
+ 	<sql id="pendingApplicationListWhere">
+ 		<if test="coverdOffices != null">
+			and borrow.loan_office IN
+			<foreach item="office" collection="coverdOffices" open="(" separator="," close=")" >
+				#{office}
+			</foreach>
+		</if>
+		<if test="projectCode!=null and projectCode != ''">
+			and proj.code = #{projectCode}
+		</if>
+		<if test="contractNo!=null and contractNo != ''">
+			and repayloan.contract_no = #{contractNo}
+		</if>
+		<if test="timeLimit !=null and timeLimit != ''">
+			and borrow.time_limit = #{timeLimit}
+		</if>
+		<if test="customerName!=null and customerName != ''">
+			and repayloan.customer_name like concat('%',#{customerName},'%')
+		</if>
+		<if test="isLocked !=null ">
+			and repayloan.islocked = #{isLocked}
+		</if>
+		<if test="nqRepaymentStatus !=null and nqRepaymentStatus != ''">
+			and repayloan.repayment_status != #{nqRepaymentStatus}
+		</if>
+		
+		<if test="repaymentType !=null and repaymentType != ''">
+			and borrow.repayment_type = #{repaymentType}
+		</if>
+		<if test="processingOpinion !=null and processingOpinion != ''">
+			and ppb.processing_opinion = #{processingOpinion}
+		</if>
+ 	</sql>
+    
+    
+	<select id="pendingApplicationList" parameterType="java.util.HashMap" resultType="java.util.HashMap">	
+		select 
+			<include refid="pendingApplicationListSelect"/>
+		from pub_repayloaninfo repayloan
+			<include refid="pendingApplicationListFrom"/>
+			where 1=1 
+			AND borrow.process_instance_id not in 
+			(SELECT processInstanceId FROM 
+				pub_process_branching 
+				WHERE (is_active != 2 and branching_process_type !=8)/*branching_process_type !=8是排除垫资的情况，否则展期申请查不到数据*/
+				AND ((processing_opinion = 'noprocess' and  is_active = 1) 
+						or (processing_opinion = 'pass' and  is_active = 1)
+						or (processing_opinion = '0' and  is_active = 1)
+						or (processing_opinion = '1' and  is_active = 1)  ))
+			<include refid="pendingApplicationListWhere"/>
+		order by repayloan.id desc
+	</select>
+	
+	
+	
+	<!-- 申请记录 -->
+	<sql id="postLoanChangeListSelect">
+ 		borrow.process_instance_id	mainProcessInstanceId,/*流程编号*/
+ 		ppb.branching_process_id		processInstanceId,/*分支流程*/
+ 		consult.id 					consultid,
+		proj.id						projectId,		/*项目ID*/
+		proj.code					projectCode,	/*项目编号*/
+		proj.project_name			projectName,
+		repayloan.contract_no		contractNo,	/*合同编号*/
+		repayloan.customer_name		customerName,	/*客户姓名*/
+		repayloan.customer_account 	customerAccount,/*贷款账号*/
+		borrow.account				borrowAccount,/*借款金额*/
+		borrow.time_limit			timeLimit,/*借款期数*/
+		borrow.repayment_type		repaymentType,/*还款方式*/
+		sdd.item_value				repaymentTypeText,
+		if(ISNULL(contract.borrow_end),'--',DATE_FORMAT(contract.borrow_end,'%Y-%m-%d')) as borrowEnd,/*借款到期时间*/
+		if(ISNULL(repayloan.end_repayTime),'--',DATE_FORMAT(repayloan.end_repayTime,'%Y-%m-%d'))  AS endRepayTime,
+	    /*借款到期时间*/
+	    repayloan.repaymentTime AS startRepayTime,
+	    /*借款开始时间*/
+	    repayloan.capital_amount - repayloan.repayment_capital_amount AS remainderAmount,
+	    /*借款剩余本金*/
+	    ppb.extension_count as extensionCount,
+		/*展期期限*/
+		ppb.extension_amount as extensionAmount,
+		/*展期金额*/
+		ppb.extension_fee as extensionFee,
+		/*展期费*/
+		ppb.extension_rate as extensionRate,
+		/*展期利率*/
+		ppb.extension_returnfee_rate as extensionReturnfeeRate,
+		/*展期返佣点费*/
+		CASE
+		    ppb.processing_opinion
+		    WHEN 0 
+		    THEN '展期申请' 
+		    WHEN 1 
+		    THEN '发起评估' 
+		    ELSE '' 
+		  END extendedFlag,   
+		ppb.remark1 as  remark1,            /*展期备注*/    
+		details.period				period,/*目前期数*/
+		repayloan.repayment_status	repaymentStatus,
+		case repayloan.repayment_status 
+		when 0 then '还款中'
+		when 1 then '结清'
+		else  '逾期'	end repaymentStatusText,/*还款状态*/
+		ifnull(consult.extension_time,0)		extensionTime,/*展期次数*/
+		ppb.processing_opinion			processingOpinion,/*审批状态*/
+		ppb.branching_process_type		branchingProcessType,/*变更类型*/
+			
+		case ppb.branching_process_type 
+			when 1 then '提前还款'
+			when 2 then '违约金罚息减免'
+			when 3 then '强制结清'
+			when 5 then '押品处置'
+			when 6 then '展期'
+			else '' end branchingProcessTypeText,
+		ppb.process_status				processStateCode,/*流程状态*/
+		sdd1.item_value					processStateText,
+		ppb.create_time					createTime/*申请时间*/
+ 	</sql>
+	<sql id="postLoanChangeListFrom">
+		inner join pl_borrow borrow on repayloan.borrowId=borrow.id
+		inner join pub_project proj on borrow.project_id=proj.id
+		inner join pl_consult consult on borrow.project_id=consult.project_id
+		inner join sys_dict_detail sdd	on sdd.item_code=borrow.repayment_type and sdd.parent_id=#{repaymentTypeDictId}
+		inner join pl_contract contract on contract.id=repayloan.contractId
+		left join (select min(period) period,processInstanceId from pub_repaymentdetail 
+				where is_payoff=0 group by processInstanceId) details 
+			on details.processInstanceId=borrow.process_instance_id
+		inner join pub_process_branching ppb on ppb.processInstanceId=borrow.process_instance_id 
+		inner join sys_dict_detail sdd1 on sdd1.item_code=ppb.process_status and (sdd1.parent_id=#{processStatusDictId} or sdd1.parent_id=#{extensionTypeDictId})
+ 	</sql>
+	<select id="postLoanChangeList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select 
+			<include refid="postLoanChangeListSelect"/>
+			,pub.next_assignee_name as nextAssignee
+		from pub_repayloaninfo repayloan
+			<include refid="postLoanChangeListFrom"/>
+		    LEFT JOIN pub_loanprocess pub ON pub.task_id = ppb.branching_process_id and pub.process_state = ppb.process_status
+	        LEFT JOIN sys_user suser ON suser.user_name = pub.next_assignee	
+			where 1=1 and ppb.is_active != 2 AND (ppb.branching_process_type = 1 or ppb.branching_process_type = 6)
+		<include refid="pendingApplicationListWhere"/>
+		<if test="processStatus !=null and processStatus != ''">
+			and ppb.process_status=#{processStatus}
+		</if>
+		order by ppb.id desc
+	</select>
+	
+	<select id="getItemByMap" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select 
+			*
+		from pub_repayloaninfo
+		where 
+		borrowId = #{borrowId}
+	</select>
+	
+	<!--通过ID更新会员，更新不影响其它字段值 -->
+	<update id="updatePubRepayloaninfoById" parameterType="java.util.HashMap">
+		update pub_repayloaninfo
+		<trim prefix="set" suffixOverrides=",">
+		    <if test="borrowId != null">  
+		         borrowId = #{borrowId},
+		    </if>
+		    <if test="contractNo != null">  
+		         contract_no = #{contractNo},
+		    </if>
+		    <if test="contractId != null">  
+		         contractId = #{contractId},
+		    </if>
+		    <if test="customerName != null">  
+		         customer_name = #{customerName},
+		    </if>
+		    <if test="customerId != null">  
+		         customerId = #{customerId},
+		    </if>
+		    <if test="customerAccount != null">  
+		         customer_account = #{customerAccount},
+		    </if>
+		    <if test="timeLimit != null">  
+		         time_limit = #{timeLimit},
+		    </if>
+		    <if test="borrowId != null">  
+		         officeId = #{officeId},
+		    </if>
+		    <if test="serviceFee != null">  
+		         serviceFee = #{serviceFee},
+		    </if>
+		    <if test="projectId != null">  
+		         projectId = #{projectId},
+		    </if>
+		    <if test="productId != null">  
+		         productId = #{productId},
+		    </if>
+		    <if test="mortgageType != null">  
+		         mortgage_type = #{mortgageType},
+		    </if>
+		    <if test="vouchType != null">  
+		         vouch_type = #{vouchType},
+		    </if>
+		    <if test="repaymentTime != null">  
+		         repaymentTime = #{repaymentTime},
+		    </if>
+		    <if test="repaymentCapitalAmount != null">  
+		         repayment_capital_amount = #{repaymentCapitalAmount},
+		    </if>
+		    <if test="repaymentInterestAmount != null">  
+		         repayment_interest_amount = #{repaymentInterestAmount},
+		    </if>
+		    <if test="capitalAmount != null">  
+		         capital_amount = #{capitalAmount},
+		    </if>
+		    <if test="interestAmount != null">  
+		         interest_amount = #{interestAmount},
+		    </if>
+		    <if test="repaymentStatus != null">  
+		         repayment_status = #{repaymentStatus},
+		    </if>
+		    <if test="repaymentProcess != null">  
+		         repayment_process = #{repaymentProcess},
+		    </if>
+		    <if test="isLocked != null">  
+		         islocked = #{isLocked},
+		    </if>
+		    <if test="disposalBalance != null">  
+		         disposal_balance = #{disposalBalance},
+		    </if>
+		    <if test="disposalAmount != null">  
+		         disposal_amount = #{disposalAmount},
+		    </if>
+		    <if test="riskLevel != null">  
+		         risk_level = #{riskLevel}
+		    </if>
+		</trim>
+		where
+			id = #{id}
+	</update>
+	
+	<!-- 提前还款查询 -->
+	<select id="getUnPayedRepaymentdetails"  resultMap="repaymentdetailMapResult" parameterType="java.util.HashMap">
+		select 
+		<include refid="baseRepaymentdetailSelectSql" />		
+	    from pub_repaymentdetail
+	    where 1=1 and (real_account is NULL or real_account=0)
+		<include refid="baseRepaymentdetailWhereSql"/>	
+		order by id asc
+	</select>
+	
+	
+	<!-- 押品处置查询 -->
+	<select id="getChargeDisposal"  resultType="ChargeDisposalLog" parameterType="java.util.HashMap">
+		select * from charge_disposal_log
+	    where process_instance_id = #{processInstanceId}
+	</select>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="addChargeDisposal" parameterType="ChargeDisposalLog">
+		insert into charge_disposal_log(
+        	creator,
+        	create_time,
+        	remark,
+        	process_instance_id			
+        )values(
+        	#{creator},
+        	#{createTime},
+        	#{remark},
+        	#{processInstanceId}		
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+</mapper>

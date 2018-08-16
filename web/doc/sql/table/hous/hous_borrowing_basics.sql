@@ -1,0 +1,22 @@
+CREATE TABLE `hous_borrowing_basics` (
+	`id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号id',
+	`creator` int(11) DEFAULT NULL COMMENT '创建人',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`modifier` int(11) DEFAULT NULL COMMENT '修改者',
+	`modify_time` datetime DEFAULT NULL COMMENT '修改时间',
+	`is_delete` tinyint(4) unsigned zerofill DEFAULT NULL COMMENT '0不删除1已删除',
+	`process_instance_id` varchar(64) DEFAULT NULL COMMENT '流程ID',
+	`project_id` int(11) DEFAULT NULL COMMENT '项目编号',
+	`name` varchar(64) DEFAULT NULL COMMENT '贷款人姓名',
+	`cert_number` varchar(32) DEFAULT NULL COMMENT '贷款人身份证号',
+	`phone` varchar(20) DEFAULT NULL COMMENT '贷款人联系电话',
+	`marry_status` tinyint(4) DEFAULT NULL COMMENT '婚姻状况',
+	`spouse_name` varchar(64) DEFAULT NULL COMMENT '配偶姓名',
+	`spouse_cert_number` varchar(32) DEFAULT NULL COMMENT '配偶身份证号',
+	`spouse_phone` varchar(20) DEFAULT NULL COMMENT '配偶联系电话',
+	`total_borrowed` varchar(64) DEFAULT NULL COMMENT '共借人',
+	`total_borrowed_cert_number` varchar(32) DEFAULT NULL COMMENT '共借人身份证号',
+	`residential_address_id` varchar(32) DEFAULT NULL COMMENT '居住地',
+	`residential_address` varchar(128) DEFAULT NULL COMMENT '居住地详细地址',
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='借款基本信息表';

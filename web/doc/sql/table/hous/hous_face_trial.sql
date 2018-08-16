@@ -1,0 +1,20 @@
+CREATE TABLE `hous_face_trial` (
+	`id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号id',
+	`creator` int(11) DEFAULT NULL COMMENT '创建人',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`modifier` int(11) DEFAULT NULL COMMENT '修改者',
+	`modify_time` datetime DEFAULT NULL COMMENT '修改时间',
+	`is_delete` tinyint(4) unsigned zerofill DEFAULT NULL COMMENT '0不删除1已删除',
+	`process_instance_id` varchar(64) DEFAULT NULL COMMENT '流程ID',
+	`project_id` int(11) DEFAULT NULL COMMENT '项目编号',
+	`property_address_id` varchar(32) DEFAULT NULL COMMENT '房产地址',
+	`property_address` varchar(128) DEFAULT NULL COMMENT '房产详细地址',
+	`property_certificate` varchar(64) DEFAULT NULL COMMENT '房权证号',
+	`property_properties` tinyint(4) DEFAULT NULL COMMENT '房产性质',
+	`affordable_room_time` datetime DEFAULT NULL COMMENT '经适房房本时间',
+	`purchase_invoices_time` datetime DEFAULT NULL COMMENT '经适房购房发票时间',
+	`property_listed_proof` tinyint(4) DEFAULT NULL COMMENT '房改房上市证明',
+	`planning_purposes` tinyint(4) DEFAULT NULL COMMENT '规划用途',
+	`key_disk_query` tinyint(4) DEFAULT NULL COMMENT '钥匙盘查询',
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='面审信息表';

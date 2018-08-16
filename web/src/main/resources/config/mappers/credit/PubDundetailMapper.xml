@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- pub_dundetail表:催收管理模块 -->
+<mapper namespace="com.company.modules.credit.dao.PubDundetailDao">
+	<!--返回MAP-->		
+	<resultMap id="PubDundetailResult" type="PubDundetail">
+		<id column="id" property="id" />
+		<result column="creator" property="creator" />
+		<result column="create_time" property="createTime" />
+		<result column="modifier" property="modifier" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="is_delete" property="isDelete" />
+		<result column="user_name" property="userName" />
+		<result column="repayment_id" property="repaymentId" />
+		<result column="type" property="type" />
+		<result column="dun_time" property="dunTime" />
+		<result column="remark" property="remark" />
+	</resultMap>
+	
+	<!--催收列表返回MAP-->		
+	<resultMap id="getDundetailAndRepaymentList" type="com.company.modules.credit.domain.PubRepaymentDundetail">
+		<result column="id" property="id" />
+		<result column="processInstanceId" property="processInstanceId" />
+		<result column="customerName" property="customerName" />
+		<result column="projectCode" property="projectCode" />
+		<result column="projectName" property="projectName" />
+		<result column="period" property="period" />
+		<result column="repaymentTime" property="repaymentTime" />
+		<result column="account" property="account" />
+		<result column="repaymentStatusText" property="repaymentStatusText" />
+		<result column="dunCount" property="dunCount" />
+		<result column="penalty" property="penalty" />
+		<result column="defaultInterest" property="defaultInterest" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			creator,
+			create_time,
+			modifier,
+			modify_time,
+			is_delete,
+			user_name,
+			repayment_id,
+			type,
+			dun_time,
+			remark			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="modifier !='' and modifier !=null">
+            	and modifier = #{modifier}
+            </if>
+            <if test="modifyTime !='' and modifyTime !=null">
+            	and modify_time = #{modifyTime}
+            </if>
+            <if test="isDelete !='' and isDelete !=null">
+            	and is_delete = #{isDelete}
+            </if>
+            <if test="userName !='' and userName !=null">
+            	and user_name = #{userName}
+            </if>
+            <if test="repaymentId !='' and repaymentId !=null">
+            	and repayment_id = #{repaymentId}
+            </if>
+            <if test="type !='' and type !=null">
+            	and type = #{type}
+            </if>
+            <if test="dunTime !='' and dunTime !=null">
+            	and dun_time = #{dunTime}
+            </if>
+            <if test="remark !='' and remark !=null">
+            	and remark = #{remark}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="modifier != null">		
+	    		modifier = #{modifier},		
+	    	</if>
+	    	<if test="modifyTime != null">		
+	    		modify_time = #{modifyTime},		
+	    	</if>
+	    	<if test="isDelete != null">		
+	    		is_delete = #{isDelete},		
+	    	</if>
+	    	<if test="userName != null">		
+	    		user_name = #{userName},		
+	    	</if>
+	    	<if test="repaymentId != null">		
+	    		repayment_id = #{repaymentId},		
+	    	</if>
+	    	<if test="type != null">		
+	    		type = #{type},		
+	    	</if>
+	    	<if test="dunTime != null">		
+	    		dun_time = #{dunTime},		
+	    	</if>
+	    	<if test="remark != null">		
+	    		remark = #{remark},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="PubDundetail">
+		insert into pub_dundetail(
+        	creator,
+        	create_time,
+        	modifier,
+        	modify_time,
+        	is_delete,
+        	user_name,
+        	repayment_id,
+        	type,
+        	dun_time,
+        	remark			
+        )values(
+        	#{creator},
+        	#{createTime},
+        	#{modifier},
+        	#{modifyTime},
+        	#{isDelete},
+        	#{userName},
+        	#{repaymentId},
+        	#{type},
+        	#{dunTime},
+        	#{remark}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="PubDundetail">
+        update pub_dundetail
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="PubDundetailResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from pub_dundetail
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="PubDundetailResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from pub_dundetail
+		where process_instance_id = #{processInstanceId}	
+	</select>
+
+	<sql id="listQuerySql">
+		<where>		
+			((r.repayment_staus=0 AND r.repayment_time <![CDATA[<=]]> (SELECT date_add(curdate(),INTERVAL 3 DAY) AS queryday) AND r.repayment_time <![CDATA[>=]]> curdate()) OR r.repayment_staus=2)    
+	        <!--增加查询条件  -->
+	        <if test="projectCode !='' and projectCode !=null">
+				and pp.code=#{projectCode}
+			</if>	
+			<if test="projectName !='' and projectName !=null">
+	            and pp.project_name like concat('%',#{projectName},'%') 
+			</if>
+			<if test="customerName !='' and customerName !=null">
+	            and c.name like concat('%', #{customerName}, '%')
+			</if>		
+			
+			<if test="repaymentTimeStart !=null and repaymentTimeStart != ''">
+				<![CDATA[
+				and DATE_FORMAT(r.repayment_time,'%Y-%m-%d') >= DATE_FORMAT(#{repaymentTimeStart},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="repaymentTimeEnd !=null and repaymentTimeEnd != ''">
+				<![CDATA[
+				and DATE_FORMAT(r.repayment_time,'%Y-%m-%d') <= DATE_FORMAT(#{repaymentTimeEnd},'%Y-%m-%d')
+				]]>
+			</if>
+		</where>
+	</sql>
+	
+	<!--分页列表查询,查询催收记录-->
+	<select id="getDundetailAndRepaymentList" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		SELECT r.id,
+		       r.processInstanceId,
+		       c.name AS customerName,
+		       r.period,
+		       date_format(r.repayment_time,'%Y-%m-%d') as repaymentTime,
+		       ROUND(r.account,2) as account,
+		       ROUND(r.penalty,2) as penalty,
+		       ROUND(r.default_interest,2) as defaultInterest,
+		       case r.repayment_staus
+			   when 0 then '待还'
+			   when 2 then '逾期' 
+			   end repaymentStatusText,
+		      (SELECT count(1) FROM pub_dundetail d WHERE d.repayment_id=r.id) AS dunCount,
+		       pp.`code` as projectCode,
+                  pp.project_name as projectName
+		FROM pub_repaymentdetail r 
+		INNER JOIN pl_consult cons on r.processInstanceId=cons.process_instance_id
+		INNER JOIN pub_customer c ON c.id = cons.customer_id
+		INNER JOIN pub_project_process p ON p.process_instance_id = r.processInstanceId and p.process_type='0'
+        INNER JOIN pub_project pp ON pp.id = p.project_id
+        INNER JOIN pl_borrow pb ON pb.process_instance_id = r.processInstanceId
+		INNER JOIN pub_repayloaninfo pr ON pr.borrowId = pb.id AND pr.islocked = 0
+		<include refid="listQuerySql"/>
+		ORDER BY r.repayment_time ASC
+	</select>
+	
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="PubDundetailResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from pub_dundetail
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from pub_dundetail
+        where
+        id  = #{id}
+    </delete>
+</mapper>

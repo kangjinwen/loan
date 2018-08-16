@@ -1,0 +1,1 @@
+ALTER TABLE hous_property_information ADD house_number varchar(64) DEFAULT NULL COMMENT '房本号码';

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.workflow.dao.RDZZTaskDao">
+	<!--基本的sql查询字段 公共引用... -->
+	<sql id="baseInstanceInfoTaskSelectSql">
+		task.ID_ as taskId,
+		pl_cc.id as consultId,
+		project.id as
+		projectId,
+		project.`code` as projectCode,
+		project.project_name AS
+		projectName,
+		process.process_instance_id as processInstanceId,
+		task.TASK_DEF_KEY_ as processStateCode,
+		sdd.item_value as
+		currentProcessStateCode,
+		pl_cc.name as customerName,
+		assignee.name as executor,
+		pl_cc.business_origin as businessOrigin,
+
+		case pl_cc.business_origin
+		when 0 then '赚赚'
+		when 1 then '机构'
+		when 2 then 'APP'
+		else '' end businessOriginText,
+		manager.name as name,
+		u4.name AS roleName,
+		case u4.nid
+		when 'declarationStaff' then u3.name
+		when 'customerServiceStaffB' then '无'
+		else '' end customerManager
+	</sql>
+
+	<sql id="baseInstanceInfoJoinSql">
+		INNER JOIN pub_project_process as process on
+		process.process_instance_id=task.PROC_INST_ID_ and
+		process.process_type='0'
+		INNER JOIN pub_project as project on
+		project.id=process.project_id
+		INNER JOIN pl_consult as pl_cc ON
+		pl_cc.process_instance_id=process.process_instance_id
+		INNER JOIN
+		sys_dict_detail as sdd on sdd.item_code = pl_cc.`status`
+		INNER JOIN
+		sys_user as assignee ON assignee.user_name = task.ASSIGNEE_
+		INNER JOIN
+		sys_user as manager ON manager.id = pl_cc.customer_manager
+		INNER JOIN
+		sys_user_role u2 ON manager.id = u2.user_id
+		INNER JOIN sys_role u4 ON
+		u2.role_id = u4.id
+		INNER JOIN sys_office u3 ON manager.office_id =
+		u3.id
+	</sql>
+
+	<!-- 待处理 基本的sql查询字段 -->
+	<sql id="undoneBaseInstanceInfoSelectSql">
+		<include refid="baseInstanceInfoTaskSelectSql" />
+		,task.CREATE_TIME_ as startTime
+	</sql>
+
+	<!-- 已处理 基本的sql查询字段 -->
+	<sql id="doneBaseInstanceInfoSelectSql">
+		<include refid="baseInstanceInfoTaskSelectSql" />
+		,task.START_TIME_ as startTime
+		/*,task.END_TIME_ as endTime*/
+	</sql>
+
+	<!--基本的动态过滤sql -->
+	<sql id="baseInstanceInfoDynamicQuerySql">
+		<where>
+			<if test="userId !='' and userId !=null">
+				and project.creator = #{userId}
+			</if>
+			<if test="projectCode !='' and projectCode !=null">
+				and project.code like concat('%',#{projectCode}, '%')
+			</if>
+			<if test="projectName !='' and projectName !=null">
+				and project.project_name like concat('%',#{projectName}, '%')
+			</if>
+			<if test="customerName !='' and customerName !=null">
+				and pl_cc.name like concat('%',#{customerName}, '%')
+			</if>
+			<if test="currentProcessStateCode !='' and currentProcessStateCode !=null">
+				and pl_cc.`STATUS` = #{currentProcessStateCode}
+			</if>
+			<if test="taskDefinition != '' and taskDefinition != null">
+				and task.TASK_DEF_KEY_ = #{taskDefinition}
+			</if>
+			
+			
+		</where>
+	</sql>
+
+	<!--列表模糊查询sql -->
+	<sql id="dynamicQuerySql">
+		<where>
+			<if test="projectCode !='' and projectCode !=null">
+				and consult.projectCode like concat('%',#{projectCode},
+				'%')
+			</if>
+			<if test="customerName !='' and customerName !=null">
+				and consult.customerName like concat('%',#{customerName}, '%')
+			</if>
+			<if test="customerManager !='' and customerManager !=null">
+				and consult.customerManager like concat('%',#{customerManager}, '%')
+			</if>
+
+			<!-- 增加查询条件 -->
+			<if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(startTime,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(startTime,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>
+			
+			
+		</where>
+	</sql>
+
+	<select id="queryUndoInstanceInfoTasks" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		select
+		<include refid="undoneBaseInstanceInfoSelectSql" />
+		from
+		ACT_RU_TASK task
+		<include refid="baseInstanceInfoJoinSql" />
+		<include refid="baseInstanceInfoDynamicQuerySql" />
+		order by task.CREATE_TIME_
+	</select>
+
+	<select id="queryDoneInstanceInfoTasks" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		select
+		<include refid="doneBaseInstanceInfoSelectSql" />
+		from
+		ACT_HI_TASKINST task
+		<include refid="baseInstanceInfoJoinSql" />
+		<include refid="baseInstanceInfoDynamicQuerySql" />
+		
+		<!-- 商务专员、报单专员、评估专员不能看到已结清单子 -->
+		<if test="roleNid != null and (roleNid == 'customerServiceStaffB' or roleNid == 'declarationStaff' or roleNid == 'customerServiceStaffA' )">
+			and project.id not in (select projectId from pub_repayloaninfo where repayment_status = 1)
+		</if>
+		
+		order by task.START_TIME_ desc
+	</select>
+
+	<select id="queryNewConsultList" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		select * from (
+		SELECT
+		pl_cc.create_time as declarationDate,
+		pl_cc.id AS consultId,
+		pl_cc. NAME AS customerName,
+		pl_cc.business_origin AS businessOrigin,
+		pbr.financial_advisers as financialAdvisers,
+		CASE
+		pbr.project_belongs
+		WHEN 1
+		THEN '赚赚自有'
+		WHEN 2
+		THEN '报单机构'
+		WHEN 3
+		THEN '报单个人'
+		ELSE ''
+		END businessOriginText,/*来源*/
+		pbr.institution_name as institutionName,/*机构名称*/
+		pbr.salesman as customerManager,/*报单人*/
+		project.id AS projectId,
+		project.`code` AS projectCode,
+		project.project_name AS projectName,
+		process.process_instance_id AS processInstanceId,
+		task.ID_ AS taskId,
+		task.TASK_DEF_KEY_ AS processStateCode,
+		sdd.item_value AS currentProcessStateCode,
+		assignee. NAME AS executor,
+		manager. NAME AS NAME,
+		task.START_TIME_ AS startTime
+		FROM
+		pl_consult AS pl_cc
+		INNER JOIN ACT_HI_TASKINST task ON pl_cc.process_instance_id =
+		task.PROC_INST_ID_
+		INNER JOIN pub_project_process AS process ON process.process_instance_id =
+		task.PROC_INST_ID_
+		AND process.process_type = '0'
+		INNER JOIN pub_project AS project ON project.id = process.project_id
+		INNER JOIN sys_dict_detail AS sdd ON sdd.item_code = pl_cc.`status`
+		INNER JOIN sys_user AS assignee ON assignee.user_name = task.ASSIGNEE_
+		INNER JOIN sys_user AS manager ON manager.id = pl_cc.customer_manager
+		LEFT JOIN pl_borrow_requirement pbr ON pbr.process_instance_id =
+		pl_cc.process_instance_id
+		
+		<include refid="baseInstanceInfoDynamicQuerySql" />
+
+		union
+
+		select
+		pl_cc.create_time as declarationDate,
+		pl_cc.id as consultId,
+		pl_cc.name as customerName,
+		pl_cc.business_origin as businessOrigin,
+		pbr.financial_advisers as financialAdvisers,
+		CASE
+		pbr.project_belongs
+		WHEN 1
+		THEN '赚赚自有'
+		WHEN 2
+		THEN '报单机构'
+		WHEN 3
+		THEN '报单个人'
+		ELSE ''
+		END businessOriginText,/*来源*/
+		pbr.institution_name as institutionName,/*机构名称*/
+		pbr.salesman as customerManager,/*报单人*/
+		'' as projectId,
+		'' as projectCode,
+		'' AS projectName,
+		'' as processInstanceId,
+		'' as taskId,
+		'' as processStateCode,
+		'' as currentProcessStateCode,
+		'' as executor,
+		manager.name as name,
+		'' as startTime
+		from
+		pl_consult as pl_cc
+		INNER JOIN sys_user as manager ON manager.id = pl_cc.customer_manager
+		LEFT JOIN pl_borrow_requirement pbr ON pbr.process_instance_id =
+		pl_cc.process_instance_id
+		where pl_cc.creator = #{userId} and pl_cc.status = '1'
+
+		) consult
+		<include refid="dynamicQuerySql" />
+		order by consult.consultId desc
+	</select>
+
+</mapper>

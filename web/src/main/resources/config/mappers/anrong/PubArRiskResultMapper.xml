@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- pub_ar_risk_result表:安融风控结果模块 -->
+<mapper namespace="com.company.modules.anrong.dao.PubArRiskResultDao">
+	<!--返回MAP-->		
+	<resultMap id="PubArRiskResultResult" type="PubArRiskResult">
+		<id column="id" property="id" />
+		<result column="creator" property="creator" />
+		<result column="create_time" property="createTime" />
+		<result column="risk_param" property="riskParam" />
+		<result column="risk_result" property="riskResult" />
+		<result column="project_id" property="projectId" />
+		<result column="consult_id" property="consultId" />
+		<result column="file_id" property="fileId" />
+		<result column="risk_type" property="riskType" />
+	</resultMap>
+	
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="searchSql">
+			id,
+			creator,
+			create_time,
+			risk_param,
+			risk_result,
+			project_id,
+			consult_id,
+			file_id,
+			risk_type			
+	</sql>
+	
+	<!-- 基本的sql查询条件公共引用 -->
+	<sql id="searchByPo">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id !='' and id !=null">
+                id  = #{id}
+            </if>
+            <if test="creator !='' and creator !=null">
+            	and creator = #{creator}
+            </if>
+            <if test="createTime !='' and createTime !=null">
+            	and create_time = #{createTime}
+            </if>
+            <if test="riskParam !='' and riskParam !=null">
+            	and risk_param = #{riskParam}
+            </if>
+            <if test="riskResult !='' and riskResult !=null">
+            	and risk_result = #{riskResult}
+            </if>
+            <if test="projectId !='' and projectId !=null">
+            	and project_id = #{projectId}
+            </if>
+            <if test="consultId !='' and consultId !=null">
+            	and consult_id = #{consultId}
+            </if>
+            <if test="fileId !='' and fileId !=null">
+            	and file_id = #{fileId}
+            </if>
+            <if test="riskType !='' and riskType !=null">
+            	and risk_type = #{riskType}
+            </if>
+		</trim>
+	</sql>
+	
+	<!-- 动态更新 -->
+    <sql id="updateByPo">
+       	<trim prefix="set" suffixOverrides=",">
+	    	<if test="riskParam != null">		
+	    		risk_param = #{riskParam},		
+	    	</if>
+	    	<if test="riskResult != null">		
+	    		risk_result = #{riskResult},		
+	    	</if>
+	    	<if test="projectId != null">		
+	    		project_id = #{projectId},		
+	    	</if>
+	    	<if test="consultId != null">		
+	    		consult_id = #{consultId},		
+	    	</if>
+	    	<if test="fileId != null">		
+	    		file_id = #{fileId},		
+	    	</if>
+	    	<if test="riskType != null">		
+	    		risk_type = #{riskType},		
+	    	</if>
+	    </trim>
+    </sql>
+	
+	<!-- 动态的插入,必须要创建时间 -->
+	<insert id="insert" parameterType="PubArRiskResult">
+		insert into pub_ar_risk_result(
+        	creator,
+        	create_time,
+        	risk_param,
+        	risk_result,
+        	project_id,
+        	consult_id,
+        	file_id,
+        	risk_type			
+        )values(
+        	#{creator},
+        	#{createTime},
+        	#{riskParam},
+        	#{riskResult},
+        	#{projectId},
+        	#{consultId},
+        	#{fileId},
+        	#{riskType}			
+        )
+     <!-- 重新返回给实体类,插入的id值 -->
+     <selectKey resultType="long" keyProperty="id">
+		SELECT LAST_INSERT_ID() AS ID
+	 </selectKey>
+	 </insert>
+	
+    <!-- 动态更新 -->
+    <update id="update" parameterType="PubArRiskResult">
+        update pub_ar_risk_result
+        <include refid="updateByPo"/>
+        where id = #{id}
+    </update>
+
+	<!--根据id查询-->
+	<select id="getItemInfoById" resultMap="PubArRiskResultResult" parameterType="long" >
+		select 
+		<include refid="searchSql"/>
+		from pub_ar_risk_result
+		where id = #{id}	
+	</select>
+	
+	<!--根据流程id查询-->
+	<select id="getItemInfoByProcessInstanceId" resultMap="PubArRiskResultResult" parameterType="java.lang.String" >
+		select 
+		<include refid="searchSql"/>
+		from pub_ar_risk_result
+		where process_instance_id = #{processInstanceId}	
+	</select>
+	
+	<!--分页列表查询-->
+	<select id="getPageListByMap" resultMap="PubArRiskResultResult" parameterType="java.util.HashMap" >
+		select 
+		<include refid="searchSql"/>
+		from pub_ar_risk_result
+		<include refid="searchByPo"/>	
+		order by id desc
+	</select>
+
+    <!--根据ID删除-->
+    <delete id="deleteById">
+        delete from pub_ar_risk_result
+        where
+        id  = #{id}
+    </delete>
+    
+   <select id="getItemCountsByMap" resultMap="PubArRiskResultResult" parameterType="java.util.HashMap">
+   select 
+   <include refid="searchSql"/>
+    from pub_ar_risk_result
+   <include refid="searchByPo"/>	
+   
+    <if test="enterpriseNames != null">
+            	and risk_param in
+            	 <foreach item="item" index="index" collection="enterpriseNames"
+			      open="(" separator="," close=")">
+			        #{item}
+			 	</foreach>
+     </if>
+     and file_id!='0'
+		order by id desc
+   </select>
+   
+   
+     <select id="checkStatusByMap" resultMap="PubArRiskResultResult" parameterType="java.util.HashMap">
+     select 
+   <include refid="searchSql"/>
+    from pub_ar_risk_result
+	where consult_id=#{consultId}  
+	and project_id=#{projectId}   
+	and risk_type=#{riskType}
+	and risk_result IS NULL
+     </select>
+</mapper>

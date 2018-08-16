@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.workflow.dao.RDZZTaskDao">
+	<!--基本的sql查询字段 公共引用...-->
+	<sql id="baseConnectionTaskSelectSql">
+		task.ID_ as taskId,
+		pl_cc.id as consultId,
+		project.id as projectId,
+		project.`code` as projectCode,
+		project.project_name AS projectName,
+		process.process_instance_id as processInstanceId, 
+		task.TASK_DEF_KEY_ as processStateCode,
+		sdd.item_code as currentProcessItemCode,
+		sdd.item_value as currentProcessStateCode,
+		pl_cc.name as customerName,
+  		assignee.name as executor,
+  		pl_cc.business_origin as businessOrigin,
+		pbr.financial_advisers as financialAdvisers,
+		CASE
+            pbr.project_belongs 
+            WHEN 1 
+            THEN '赚赚自有' 
+            WHEN 2 
+            THEN '报单机构' 
+            WHEN 3 
+            THEN '报单个人'
+            ELSE ''	         
+        END businessOriginText,/*来源*/ 
+	    pbr.institution_name as institutionName,/*机构名称*/ 
+	    pbr.salesman as customerManager,/*报单人*/ 
+		manager.name as name		
+	</sql>
+	
+	<sql id="baseConnectionJoinSql">
+		INNER JOIN pub_project_process as process on process.process_instance_id=task.PROC_INST_ID_ and process.process_type='0'
+		INNER JOIN pub_project as project on project.id=process.project_id
+		INNER JOIN pl_consult as pl_cc ON pl_cc.process_instance_id=process.process_instance_id
+		INNER JOIN sys_role r on r.nid = task.DESCRIPTION_
+		LEFT JOIN sys_dict_detail as sdd on sdd.item_code = pl_cc.`status`
+		INNER JOIN sys_user as assignee ON assignee.user_name = task.ASSIGNEE_
+		INNER JOIN sys_user as manager ON manager.id = pl_cc.customer_manager		
+		INNER JOIN pl_borrow_requirement pbr ON pbr.process_instance_id = pl_cc.process_instance_id
+	</sql>	
+		
+	<!-- 待处理 基本的sql查询字段-->
+	<sql id="undoneBaseConnectionSelectSql">
+		<include refid="baseConnectionTaskSelectSql" />
+		,task.CREATE_TIME_ as startTime
+	</sql>
+	
+	<!-- 已处理 基本的sql查询字段-->
+	<sql id="doneBaseConnectionSelectSql">
+		<include refid="baseConnectionTaskSelectSql" />
+		,task.START_TIME_ as startTime
+		,task.END_TIME_ as endTime
+	</sql>
+	
+	<!--基本的动态过滤sql-->
+	<sql id="baseConnectionDynamicQuerySql">
+		<where>
+			<if test="projectCode !='' and projectCode !=null">
+				and project.code like concat('%',#{projectCode}, '%')
+	        </if>
+	        <if test="projectName !='' and projectName !=null">
+	            and project.project_name like concat('%',#{projectName}, '%')
+	        </if>
+	        <if test="customerName !='' and customerName !=null">
+	            and pl_cc.name like concat('%',#{customerName}, '%')
+	        </if>	     
+	        <if test="currentProcessStateCode !='' and currentProcessStateCode !=null">
+	            and pl_cc.`STATUS` = #{currentProcessStateCode}
+	        </if>
+	        <if test="taskDefinition != '' and taskDefinition != null">
+	           and task.TASK_DEF_KEY_ = #{taskDefinition}
+	        </if>
+	        <if test="isCompleted == true ">
+	                AND task.END_TIME_ is not null
+	       </if>
+	        <if test="userName !=null or roleId !=null or coverdOffices != null" >
+		         and ((
+			        <if test="userName !='' and userName !=null">
+			                 task.ASSIGNEE_ = #{userName}
+			        </if>
+			        <if test="roleId !='' and roleId !=null">
+			                AND r.id = #{roleId}
+			        </if>
+		        	)
+		            or assignee.office_id IN
+			        <foreach item="coverdOffices" collection="coverdOffices" open="(" separator="," close=")">
+				        ${coverdOffices}
+				 	</foreach>
+			 	)
+			 </if>
+		</where>
+	</sql>
+	
+	<!--列表模糊查询sql-->
+	<sql id="listQuerySql1">
+		<where>			
+			<if test="projectCode !='' and projectCode !=null">
+				and consult.projectCode like concat('%',#{projectCode}, '%')
+	        </if>	      
+	        <if test="customerName !='' and customerName !=null">
+	            and consult.customerName like concat('%',#{customerName}, '%')
+	        </if>
+	        <if test="customerManager !='' and customerManager !=null">
+	            and consult.customerManager like concat('%',#{customerManager}, '%')
+	        </if>	
+	        <if test="flowStatus != '' and flowStatus != null">
+	           and consult.currentProcessItemCode = #{flowStatus}
+	        </if>   
+	        
+	         <!--增加查询条件  -->
+	        <if test="businessOriginText !='' and businessOriginText !=null">
+				and businessOriginText = #{businessOriginText}
+			</if>
+			<if test="institutionName !='' and institutionName !=null">
+				and institutionName like concat('%',#{institutionName}, '%')
+			</if>			
+			<if test="declarationStartDate !=null and declarationStartDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				]]>
+			</if>
+			<if test="declarationEndDate !=null and declarationEndDate != ''">
+				<![CDATA[
+				and DATE_FORMAT(declarationDate,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				]]>
+			</if>    
+		</where>
+	</sql>
+	
+	
+	<select id="queryUndoConnectionTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		select
+		pl_cc.create_time as declarationDate,
+			<include refid="undoneBaseConnectionSelectSql"/>
+			,CASE
+            plpc.type 
+            WHEN 'back' 
+            THEN '驳回' 
+            WHEN 'backCheckBank'
+            THEN '驳回'           
+            ELSE '正常'	         
+        END dataType/*数据类型*/ 
+		from
+			ACT_RU_TASK task
+		<include refid="baseConnectionJoinSql"/>
+		left join pub_loanprocess plpc on plpc.new_task_id = task.ID_
+		<include refid="baseConnectionDynamicQuerySql"/>
+		order by task.CREATE_TIME_ desc) consult
+		<include refid="listQuerySql1"/>
+		order by consult.startTime ASC
+	</select>
+	
+	<select id="queryDoneConnectionTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select * from(
+		select
+		pl_cc.create_time as declarationDate,
+			<include refid="doneBaseConnectionSelectSql"/>
+			,suser.name as nextAssignee
+			,pub.workflow_next_assignee_name as workflowNextAssigneeName
+		from
+			ACT_HI_TASKINST task
+		<include refid="baseConnectionJoinSql"/>
+		LEFT JOIN pub_loanprocess pub on pub.task_id = task.ID_
+		LEFT JOIN sys_user suser on suser.user_name = pub.next_assignee
+		<include refid="baseConnectionDynamicQuerySql"/>
+		
+		<!-- 商务专员不能看到已结清单子 -->
+		<if test="roleNid != null and roleNid == 'customerServiceStaffB' ">
+			and project.id not in (select projectId from pub_repayloaninfo where repayment_status = 1)
+		</if>
+		
+		order by task.END_TIME_ desc) consult
+		<include refid="listQuerySql1"/>
+		order by consult.endTime DESC
+	</select>
+
+</mapper>
