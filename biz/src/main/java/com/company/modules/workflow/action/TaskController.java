@@ -10,16 +10,14 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.company.modules.workflow.service.RDZZTaskService;
+import org.activiti.engine.HistoryService;
+import org.activiti.engine.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.github.pagehelper.PageInfo;
-//import com.company.contract.util.ContractUtil;
 import com.company.common.context.Constant;
 import com.company.common.utils.JsonUtil;
 import com.company.common.utils.ServletUtils;
@@ -32,6 +30,10 @@ import com.company.modules.common.utils.parser.impl.DefaultClassTypeParser;
 import com.company.modules.instance.service.HousPropertyInformationService;
 import com.company.modules.system.domain.SysUser;
 import com.company.modules.workflow.controller.WorkflowBaseController;
+import com.company.modules.workflow.service.RDZZTaskService;
+import com.github.pagehelper.PageInfo;
+
+//import com.company.contract.util.ContractUtil;
 
 
 /**
@@ -43,9 +45,11 @@ import com.company.modules.workflow.controller.WorkflowBaseController;
 @Controller
 @RequestMapping("/modules/workflow/ProcessTaskController")
 public class TaskController extends WorkflowBaseController {
+    private static final String USERTASK_REPAY_PLAN = "usertask-repay-plan";
     private String USERTASK_COLLATERALASSESS = "usertask-collateralAssess";
     private String USERTASK_CONTROL_REVIEW = "usertask-control-review";
-    private String USERTASK_XIAHU = "usertask-xiahu";
+    private String USERTASK_XIAHU = "usertask-xiahu";//下户
+    private String USERTASK_UPLOADING = "usertask-uploading";//上传资料（等同老版本下户，只是更名，同样作为流程起点）
 
     private String USERTASK_BUSINESSEXCHANGE = "usertask-businessExchange";
     private String USERTASK_CUSTOMERINVESTIGATE = "usertask-customerInvestigate";
@@ -63,6 +67,91 @@ public class TaskController extends WorkflowBaseController {
     private RDZZTaskService taskService;
     @Autowired
     private HousPropertyInformationService housPropertyInformationService;
+    @Autowired
+    TaskService myTaskService;
+    @Autowired
+    HistoryService historyService;
+
+    /**
+     * 通用流程任务查询接口
+     * @param usertask
+     * @param isCompleted
+     * @param currentPage
+     * @param pageSize
+     * @param searchParams
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    @RequestMapping("/queryCommonTasks.htm")
+    public void queryCommonTasks(@RequestParam(required = true) String usertask,
+                                      @RequestParam(required = true) boolean isCompleted,
+                                      @RequestParam(required = true) int currentPage,
+                                      @RequestParam(required = true) int pageSize,
+                                      @RequestParam(required = false) String searchParams,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        // 对json对象进行转换
+        if (!StringUtils.isEmpty(searchParams)) {
+            params = JsonUtil.parse(searchParams, Map.class);
+        }
+        Map<String, Object> res = new HashMap<String, Object>();
+        SysUser loginUser = getLoginUser(request);
+        String userName = loginUser.getUserName();
+        List<String> coverdOffices = getCoverdOffices(loginUser);
+        Long roleId = getRoleId(request);
+        params.put("coverdOffices", coverdOffices);
+        params.put("userName", userName);
+        params.put("roleId", roleId);
+        params.put("taskDefinition", usertask);
+        PageInfo<Map<String, Object>> page = taskService.queryInstanceTasks(params, currentPage, pageSize, isCompleted);
+        res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+        res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+        res.put(Constant.RESPONSE_DATA, page.getList());
+        res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
+
+        ServletUtils.writeToResponse(response, res);
+    }
+    /**
+     * 手动更改执行人
+     * @param taskId
+     * @param processInstanceId
+     * @param userId
+     * @param projectId
+     * @param request
+     * @param response
+     * @throws ServiceException
+     */
+    @RequestMapping("/modifyTaskAssigneeByAnyKey.htm")
+    public void modifyTaskAssigneeByAnyKey(@RequestParam(required = true) String taskId,
+                                           @RequestParam(required = true) String processInstanceId,
+                                           @RequestParam(required = true) String userId,
+                                           @RequestParam(required = false) int projectId,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) throws ServiceException{
+        //查询当前任务是否存在，并且是否处于待处理的状态。如若任务已经完成，再去更改执行人显然没意义
+        //去历史任务列表查询，当前任务是否已经完成
+        Map<String,Object> res = new HashMap<>();
+         Map<String,Object> hisTask = taskService.getHisTaskInfoByTaskId(taskId);
+        if (hisTask.get("END_TIME_")!=null){
+            res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+            res.put(Constant.RESPONSE_CODE_MSG, "该任务已经完成");
+
+            ServletUtils.writeToResponse(response, res);
+        }
+
+        //任务待处理，修改任务执行人（当前任务和历史任务）
+        int result = taskService.modifyTaskAssigneeByAnyKey(taskId,userId);
+        int result2 = taskService.modifyHisTaskAssigneeByAnyKey(taskId,userId);
+        if (result>0&&result2>0){
+            res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+            res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+
+            ServletUtils.writeToResponse(response, res);
+        }
+    }
 
     /**
      * 查询下户任务分配任务
@@ -175,7 +264,7 @@ public class TaskController extends WorkflowBaseController {
         response.setContentType("octets/stream");
         Map<String, Object> result = new HashMap<>();
         String sep = File.separator;
-        String rootDir = request.getRealPath("/");// 文件根目录
+		String rootDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
         String dirName = new SimpleDateFormat("yyyy-MM").format(new Date());
         String baseDestDir = new StringBuilder(rootDir).append(sep).append("siliandan").append(sep).append(dirName).toString();
         File baseDestDirFile = new File(baseDestDir);
@@ -286,7 +375,7 @@ public class TaskController extends WorkflowBaseController {
             response.setContentType("octets/stream");
             Map<String, Object> result = new HashMap<>();
             String sep = File.separator;
-            String rootDir = request.getRealPath("/");// 文件根目录
+			String rootDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
             String dirName = new SimpleDateFormat("yyyy-MM").format(new Date());
             String baseDestDir = new StringBuilder(rootDir).append(sep).append("siliandan").append(sep).append(dirName).toString();
             File baseDestDirFile = new File(baseDestDir);
@@ -591,7 +680,6 @@ public class TaskController extends WorkflowBaseController {
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, pageInfo.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, pageInfo.getTotal());
-
         ServletUtils.writeToResponse(response, res);
     }
 
@@ -931,7 +1019,9 @@ public class TaskController extends WorkflowBaseController {
 
 
     /**
-     * 查询审批任务
+     * 小贷流程放款初审
+     * 【工作台】-》【放款审核】-》【放款初审】
+     *
      */
     @RequestMapping("/queryAuditTasks")
     public void queryAuditTasks(
@@ -966,6 +1056,7 @@ public class TaskController extends WorkflowBaseController {
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, pageInfo.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, pageInfo.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
 
         ServletUtils.writeToResponse(response, res);
     }
@@ -1007,10 +1098,38 @@ public class TaskController extends WorkflowBaseController {
         ServletUtils.writeToResponse(response, res);
     }
 
+    @RequestMapping("/queryInstanceRepayPlanTasks")
+    public void queryInstanceRepayPlanTasks(@RequestParam(required = true) boolean isCompleted,
+                                        @RequestParam(required = true) int currentPage, @RequestParam(required = true) int pageSize,
+                                        @RequestParam(required = false) String searchParams, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        // 对json对象进行转换
+        if (!StringUtils.isEmpty(searchParams)) {
+            params = JsonUtil.parse(searchParams, Map.class);
+        }
+        Map<String, Object> res = new HashMap<String, Object>();
+        SysUser loginUser = getLoginUser(request);
+        String userName = loginUser.getUserName();
+        List<String> coverdOffices = getCoverdOffices(loginUser);
+        Long roleId = getRoleId(request);
+        params.put("coverdOffices", coverdOffices);
+        params.put("userName", userName);
+        params.put("roleId", roleId);
+        params.put("taskDefinition", USERTASK_REPAY_PLAN);
+        PageInfo<Map<String, Object>> page = taskService.queryInstanceTasks(params, currentPage, pageSize, isCompleted);
+        res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+        res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+        res.put(Constant.RESPONSE_DATA, page.getList());
+        res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
+
+        ServletUtils.writeToResponse(response, res);
+    }
     /**
-     * 下户任务查询
+     * 【资料上传】任务查询
      * 【工作台】-》【客户管理】-》【下户】，在此位置，点击下户请求，实际是执行
-        queryInstanceXiaHuTasks下面的方法，拉取  下户  任务列表
+     queryInstanceUploadingTasks下面的方法，拉取  需要上传资料的  任务列表
      * @param isCompleted
      * @param currentPage
      * @param pageSize
@@ -1020,8 +1139,8 @@ public class TaskController extends WorkflowBaseController {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    @RequestMapping("/queryInstanceXiaHuTasks")
-    public void queryInstanceXiaHuTasks(@RequestParam(required = true) boolean isCompleted,
+    @RequestMapping("/queryInstanceUploadingTasks")
+    public void queryInstanceUploadingTasks(@RequestParam(required = true) boolean isCompleted,
                                    @RequestParam(required = true) int currentPage, @RequestParam(required = true) int pageSize,
                                    @RequestParam(required = false) String searchParams, HttpServletRequest request,
                                    HttpServletResponse response) throws Exception {
@@ -1038,12 +1157,13 @@ public class TaskController extends WorkflowBaseController {
         params.put("coverdOffices", coverdOffices);
         params.put("userName", userName);
         params.put("roleId", roleId);
-        params.put("taskDefinition", USERTASK_XIAHU);
+        params.put("taskDefinition", USERTASK_UPLOADING);
         PageInfo<Map<String, Object>> page = taskService.queryInstanceTasks(params, currentPage, pageSize, isCompleted);
         res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, page.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
 
         ServletUtils.writeToResponse(response, res);
     }
@@ -1085,10 +1205,52 @@ public class TaskController extends WorkflowBaseController {
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, page.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
 
         ServletUtils.writeToResponse(response, res);
     }
 
+    /**
+     * 【资料上传】任务查询
+     * 【工作台】-》【客户管理】-》【下户】，在此位置，点击下户请求，实际是执行
+     queryInstanceXiaHuTasks，拉取  下户  任务列表
+     * @param isCompleted
+     * @param currentPage
+     * @param pageSize
+     * @param searchParams
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping("/queryInstanceXiaHuTasks")
+    public void queryInstanceXiaHuTasks(@RequestParam(required = true) boolean isCompleted,
+                                            @RequestParam(required = true) int currentPage, @RequestParam(required = true) int pageSize,
+                                            @RequestParam(required = false) String searchParams, HttpServletRequest request,
+                                            HttpServletResponse response) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        // 对json对象进行转换
+        if (!StringUtils.isEmpty(searchParams)) {
+            params = JsonUtil.parse(searchParams, Map.class);
+        }
+        Map<String, Object> res = new HashMap<String, Object>();
+        SysUser loginUser = getLoginUser(request);
+        String userName = loginUser.getUserName();
+        List<String> coverdOffices = getCoverdOffices(loginUser);
+        Long roleId = getRoleId(request);
+        params.put("coverdOffices", coverdOffices);
+        params.put("userName", userName);
+        params.put("roleId", roleId);
+        params.put("taskDefinition", USERTASK_XIAHU);
+        PageInfo<Map<String, Object>> page = taskService.queryInstanceTasks(params, currentPage, pageSize, isCompleted);
+        res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+        res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+        res.put(Constant.RESPONSE_DATA, page.getList());
+        res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
+
+        ServletUtils.writeToResponse(response, res);
+    }
     /**
      * 风控复审任务查询
       【风控审核】-》【风控复审】，在此位置，点击风控初审请求，实际是执行
@@ -1126,6 +1288,7 @@ public class TaskController extends WorkflowBaseController {
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, page.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
 
         ServletUtils.writeToResponse(response, res);
     }
@@ -1167,6 +1330,7 @@ public class TaskController extends WorkflowBaseController {
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, page.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
 
         ServletUtils.writeToResponse(response, res);
     }
@@ -1207,6 +1371,7 @@ public class TaskController extends WorkflowBaseController {
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, page.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
 
         ServletUtils.writeToResponse(response, res);
     }
@@ -1237,6 +1402,7 @@ public class TaskController extends WorkflowBaseController {
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         res.put(Constant.RESPONSE_DATA, page.getList());
         res.put(Constant.RESPONSE_DATA_TOTAL, page.getTotal());
+        res.put(Constant.ALLOW_REASSIGN, getRoleForLoginUser(request).isAdmin());
 
         ServletUtils.writeToResponse(response, res);
     }

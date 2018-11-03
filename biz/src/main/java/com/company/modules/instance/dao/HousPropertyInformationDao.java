@@ -46,4 +46,6 @@ public interface HousPropertyInformationDao extends BaseDao<HousPropertyInformat
 	public HousPropertyInformation getItemInfoByConsultId(Long consultId);
 
 	public String getHousAddress(Long propertyAddressId);
+
+    Map<String,Object> getWhetherLoanByHomeNum(String homeNum);
 }

@@ -35,6 +35,8 @@
 		<result column="collection_service_name" property="collectionServiceName" />
 		<result column="collection_service_card" property="collectionServiceCard" />
 		<result column="collection_service_bank" property="collectionServiceBank" />
+		<result column="mortgage_type" property="mortgageType" />
+		<result column="customer_type" property="customerType" />
 	</resultMap>
 	
 	<!--基本的sql查询字段 公共引用...-->
@@ -69,7 +71,9 @@
 			collection_rate,
 			collection_service_name,
 			collection_service_card,
-			collection_service_bank				
+			collection_service_bank,
+			mortgage_type,
+			customer_type		
 	</sql>
 	
 	<!-- 基本的sql查询条件公共引用 -->
@@ -152,6 +156,12 @@
             </if>
             <if test="mobile !='' and mobile !=null">
             	and mobile = #{mobile}
+            </if>
+            <if test="mortgageType !='' and mortgageType !=null">
+            	and mortgage_type = #{mortgageType}
+            </if>
+            <if test="customerType !='' and customerType !=null">
+            	and customer_type = #{customerType}
             </if>
 		</trim>
 	</sql>
@@ -249,6 +259,12 @@
              <if test="collectionServiceBank !='' and collectionServiceBank !=null">
             	collection_service_bank = #{collectionServiceBank},
             </if>
+            <if test="mortgageType !='' and mortgageType !=null">
+            	mortgage_type = #{mortgageType},
+            </if>
+            <if test="customerType !='' and customerType !=null">
+            	customer_type = #{customerType},
+            </if>
 	    </trim>
     </sql>
 	
@@ -284,7 +300,9 @@
 			collection_rate,
 			collection_service_name,
 			collection_service_card,
-			collection_service_bank				
+			collection_service_bank,
+			mortgage_type,
+			customer_type				
         )values(
         	#{creator},
         	#{createTime},
@@ -315,7 +333,9 @@
 			#{collectionRate},
 			#{collectionServiceName},
 			#{collectionServiceCard},
-			#{collectionServiceBank}			
+			#{collectionServiceBank},
+			#{mortgageType},
+			#{customerType}
         )
      <!-- 重新返回给实体类,插入的id值 -->
      <selectKey resultType="long" keyProperty="id">
@@ -381,7 +401,9 @@
         	requirement.collection_service_name as collectionServiceName,
         	requirement.collection_service_card as collectionServiceCard,
         	requirement.collection_service_bank as collectionServiceBank,
-        	requirement.repayment_rate as repaymentRate
+        	requirement.repayment_rate as repaymentRate,
+        	requirement.mortgage_type as mortgageType,
+        	requirement.customer_type as customerType
 		from pl_borrow_requirement requirement
 		INNER JOIN pl_feeinfo as pl_f on pl_f.process_instance_id = requirement.process_instance_id
 		where requirement.process_instance_id = #{processInstanceId}	

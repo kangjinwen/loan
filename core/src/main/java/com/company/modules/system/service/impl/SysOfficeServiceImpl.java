@@ -141,11 +141,19 @@ public class SysOfficeServiceImpl extends BaseServiceImpl implements
 	}
 
 	@Override
-	public List<Map<String,Object>> getOfficeTreeList() throws ServiceException {
+	public List<Map<String,Object>> getOfficeTreeList(Map<String, Object> param, boolean isNeedRoot) throws ServiceException {
 		List<Map<String,Object>> list ;
 		try {
-			list  = sysOfficeDao.getOfficeTreeList();
-			
+			list  = sysOfficeDao.getOfficeTreeList(param);
+			if (isNeedRoot) {
+				Map<String,Object> root = new HashMap<String,Object>();
+				root.put("parent_id","-1");
+				root.put("label","全部机构");
+				root.put("value","0");
+				root.put("key","0");
+				root.put("is_delete","0");
+				list.add(0,root);
+			}
 			list=ListUtil.list2Tree((List<Map<String,Object>>)list,"value","parent_id");
 			list=ListUtil.treeForExt(list,null,null,true);
 		} catch (Exception e) {

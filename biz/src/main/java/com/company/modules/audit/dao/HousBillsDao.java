@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.company.common.utils.annotation.RDBatisDao;
 import com.company.modules.audit.domain.HousBills;
+import com.company.modules.repay.domain.arithmetic.BaseBean;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * User:    fzc
@@ -50,4 +52,31 @@ public interface HousBillsDao extends BaseDao<HousBills,Long> {
 	public Map<String, Object> getLoanInfo(String processInstanceId);
 
 	public HousBills getItemInfoByProcessInstanceIdAndType(Map<String, Object> map);
+
+    int addAppointmentInfo(@Param("procDefId") String procDefId,
+                            @Param("name") String name,
+                           @Param("phone") String phone,
+                           @Param("type") Integer type,
+                           @Param("remark") String remark,
+                           @Param("appointTime") long appointTime,
+                           @Param("createTime") long createTime,
+                           @Param("modifyTime") long modifyTime);
+
+    List<Map<String, Object>> getAppointmentInfoByAnyKey(@Param("procDefId") String procDefId,
+                                                         @Param("name") String name,
+                                                         @Param("phone") String phone,
+                                                         @Param("type") Integer type,
+                                                         @Param("beginTime") Long beginTime,
+                                                         @Param("endTime") Long endTime,
+                                                         @Param("beginNum") int beginNum,
+                                                         @Param("checkNum") int checkNum);
+    Integer getAppointmentInfoCountByAnyKey(@Param("procDefId") String procDefId,
+                                            @Param("name") String name,
+                                            @Param("phone") String phone,
+                                            @Param("type") Integer type,
+                                            @Param("beginTime") Long beginTime,
+                                            @Param("endTime") Long endTime,
+                                            @Param("beginNum") int beginNum,
+                                            @Param("checkNum") int checkNum
+                                            );
 }

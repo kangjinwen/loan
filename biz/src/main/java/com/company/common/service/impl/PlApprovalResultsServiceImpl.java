@@ -75,6 +75,16 @@ public class PlApprovalResultsServiceImpl extends BaseServiceImpl implements PlA
 	}
 
 	@Override
+	public List<Map<String, Object>> getItemInfosByProcessInstanceId(String processInstanceId) throws Exception {
+		try {
+			return plApprovalResultsDao.getItemInfosByProcessInstanceId(processInstanceId);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+		}
+	}
+
+	@Override
 	public PlApprovalResults getInfoByProcessInstanceId(String processInstanceId) throws Exception {
 		try {
 			return plApprovalResultsDao.getInfoByProcessInstanceId(processInstanceId);

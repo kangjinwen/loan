@@ -1,10 +1,5 @@
 package com.company.modules.common.action;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -16,6 +11,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.oreilly.servlet.MultipartRequest;
 import com.company.common.context.Constant;
 import com.company.common.utils.JsonUtil;
 import com.company.common.utils.ServletUtils;
@@ -41,6 +39,9 @@ import com.company.modules.common.domain.PubContractAttachment;
 import com.company.modules.common.exception.ServiceException;
 import com.company.modules.common.service.PubContractAttachmentService;
 import com.company.modules.common.utils.ZipUtil;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.oreilly.servlet.MultipartRequest;
 
 /**
  * User: wulb DateTime:2016-08-29 10:50:06 details: 合同附件信息,Action请求层 source:
@@ -178,7 +179,7 @@ public class PubContractAttachmentAction extends BaseAction {
 			String fieldName = filedFileNames.nextElement();
 			File uploadFile = multirequest.getFile(fieldName);
 			String uri = com.company.common.utils.StringUtil.getRelativePath(uploadFile,
-					new File(request.getRealPath("/")));
+					new File(request.getSession().getServletContext().getRealPath("/")));
 			Map<String, Object> data = JSONObject.parseObject(multirequest.getParameter("data"), Map.class);
 			PubContractAttachment attachment = new PubContractAttachment();
 			byte state = 1;
@@ -207,11 +208,10 @@ public class PubContractAttachmentAction extends BaseAction {
 		ServletUtils.writeToResponse(response, res);
 	}
 
-	@SuppressWarnings("deprecation")
 	private File getSaveDir(String dirName, HttpServletRequest request) {
 		if (dirName == null)
 			dirName = new SimpleDateFormat("yyyy-MM").format(new Date());
-		final File fileDir = new File(request.getRealPath("/Contract/" + dirName));
+		final File fileDir = new File(request.getSession().getServletContext().getRealPath("/Contract/" + dirName));
 		if (!fileDir.exists()) {
 			fileDir.mkdirs();
 		}
@@ -230,7 +230,6 @@ public class PubContractAttachmentAction extends BaseAction {
 	 * @param ids
 	 * @throws Exception
 	 */
-	@SuppressWarnings("deprecation")
 	@RequestMapping(value = "/delete.htm")
 	public void delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(value = "id", required = true) Long id) throws Exception {
@@ -242,7 +241,7 @@ public class PubContractAttachmentAction extends BaseAction {
 		}else{
 			String path = pubContractAttachment.getFilePath();
 			if (path != null) {
-				File f = new File(new File(request.getRealPath("/")), path.toString());
+				File f = new File(new File(request.getSession().getServletContext().getRealPath("/")), path.toString());
 				if (f.exists()) {
 					f.delete();
 				}
@@ -274,7 +273,7 @@ public class PubContractAttachmentAction extends BaseAction {
 			@RequestParam(value = "fileExistCheck", defaultValue = "false") boolean fileExistCheck) throws Exception {
 		Map<String, Object> param = JsonUtil.parse(search, Map.class);
 		List<PubContractAttachment> list = pubContractAttachmentService.getPageListByMap(param);
-		String appDir = request.getRealPath("/");
+		String appDir = request.getSession().getServletContext().getRealPath("/");
 		if (fileExistCheck) {
 			List<File> notExists = new ArrayList<File>();
 			for (PubContractAttachment rec : list) {
@@ -308,15 +307,14 @@ public class PubContractAttachmentAction extends BaseAction {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@RequestMapping("/download/isFileExists")
 	public void isFileExists(String filename, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		logger.info("        " + request.getRealPath("/"));
+		logger.info("        " + request.getSession().getServletContext().getRealPath("/"));
 		Map<String, Object> res = new HashMap<String, Object>();
 		String name = filename.replaceFirst("^/Contract", "");
 		name = "/Contract/" + name;
-		File file = new File(request.getRealPath("/"), name);
+		File file = new File(request.getSession().getServletContext().getRealPath("/"), name);
 		boolean exists = file.exists();
 		res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
 		res.put("exists", exists);
@@ -327,7 +325,6 @@ public class PubContractAttachmentAction extends BaseAction {
 		ServletUtils.writeToResponse(response, res);
 	}
 
-	@SuppressWarnings("deprecation")
 	@RequestMapping("/download/{dir}/{fileName}")
 	public void download(@PathVariable("dir") String dir, @PathVariable("fileName") String fileName,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -336,7 +333,8 @@ public class PubContractAttachmentAction extends BaseAction {
 		java.io.BufferedInputStream bis = null;
 		java.io.BufferedOutputStream bos = null;
 		String separator = File.separator;
-		String webRoot = request.getRealPath("/Contract").replaceAll(separator + "$", "");
+		String webRoot = request.getSession().getServletContext().getRealPath("/Contract").replaceAll(separator + "$",
+				"");
 		File downLoadFile = new File(webRoot + separator + dir + separator + fileName);
 		if (!downLoadFile.exists()) {
 			JSONObject json = new JSONObject();

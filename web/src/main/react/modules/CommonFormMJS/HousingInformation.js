@@ -51,7 +51,7 @@ var HousingInformation = React.createClass({
                 this.setState({
                     propertyAddressId: result.data.areaId
                 });
-                this.props.form.setFieldsValue({propertyAddress: result.data.householdAddress})
+                this.props.form.setFieldsValue({propertyAddress: result.data.liveAddress})
             }
         });
     },

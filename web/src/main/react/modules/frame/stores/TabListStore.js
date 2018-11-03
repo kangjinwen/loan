@@ -92,7 +92,7 @@ export default Reflux.createStore({
 					{ //产品参数管理
 
 						require.ensure([], function (require) {
-							Component = require('../../SystemMng/PlproductManage/Index');
+							Component = require('../../SystemMng/PlProductManage/Index');
 							tabContent = <Component />;
 							me.updataTablist(tabId, tabName, tabContent, tablist);
 						}, 'ProductParametersManag');

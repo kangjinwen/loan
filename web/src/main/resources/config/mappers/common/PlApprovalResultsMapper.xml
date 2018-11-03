@@ -16,6 +16,7 @@
     <result column="approval_account" property="approvalAccount" />
     <result column="approval_time_limit" property="approvalTimeLimit" />
     <result column="mortgage_price" property="mortgagePrice" />
+	<result column="process_state" property="processState" />
     <result column="REMARK" property="remark" />
   </resultMap>
   
@@ -23,7 +24,7 @@
   <sql id="searchSql">
     id, creator, create_time, modifier, modify_time, is_delete, process_instance_id, 
     project_id, consult_id, customer_id, product_id, approval_account, approval_time_limit, 
-    mortgage_price, REMARK
+    mortgage_price, process_state, REMARK
   </sql>
   
   <!-- 基本的sql查询条件公共引用 -->
@@ -71,6 +72,9 @@
             <if test="mortgagePrice !='' and mortgagePrice !=null">
             	and mortgage_price = #{mortgagePrice}
             </if>
+			<if test="processState !='' and processState !=null">
+				and process_state = #{processState}
+			</if>
             <if test="remark !='' and remark !=null">
             	and REMARK = #{remark}
             </if>
@@ -113,6 +117,9 @@
 	    	<if test="mortgagePrice!= null">		
 	    		mortgage_price = #{mortgagePrice},		
 	    	</if>
+			<if test="processState!= null">
+				process_state = #{processState},
+			</if>
 	    	<if test="remark!= null">		
 	    		REMARK = #{remark},		
 	    	</if>
@@ -124,13 +131,13 @@
       modifier, modify_time, is_delete, 
       process_instance_id, project_id, consult_id, 
       customer_id, product_id, approval_account, 
-      approval_time_limit, mortgage_price, REMARK
+      approval_time_limit, mortgage_price, process_state, REMARK
       )
     values (#{id}, #{creator}, #{createTime}, 
       #{modifier}, #{modifyTime}, #{isDelete}, 
       #{processInstanceId}, #{projectId}, #{consultId}, 
       #{customerId}, #{productId}, #{approvalAccount}, 
-      #{approvalTimeLimit}, #{mortgagePrice}, #{remark}
+      #{approvalTimeLimit}, #{mortgagePrice}, #{processState}, #{remark}
       )
       <!-- 重新返回给实体类,插入的id值 -->
      <!--selectKey resultType="long" keyProperty="id">
@@ -276,7 +283,9 @@
 		select 
 		<include refid="searchSql"/>
 		from pl_approval_results
-		where process_instance_id = #{processInstanceId}	
+		where process_instance_id = #{processInstanceId}
+		ORDER BY create_time DESC
+		LIMIT 0, 1
 	</select>
 	
 	<!--根据流程id查询-->
@@ -293,6 +302,23 @@
         	approval.remark as remark        	
 		from pl_approval_results approval
 		where approval.process_instance_id = #{processInstanceId}	
+	</select>
+
+	<select id="getItemInfosByProcessInstanceId" resultType="java.util.HashMap" parameterType="java.lang.String" >
+		select
+		sysuse.name AS name,
+		app.create_time AS createTime,
+		app.approval_account AS approvalAccount,
+		app.approval_time_limit AS approvalTimeLimit,
+		app.mortgage_price AS mortgagePrice,
+		dic.item_value AS processName,
+		app.REMARK AS remark
+		from pl_approval_results app
+		LEFT JOIN sys_dict_detail dic on dic.item_code = app.process_state
+		LEFT JOIN ACT_HI_TASKINST hitask ON hitask.PROC_INST_ID_ = app.process_instance_id AND hitask.TASK_DEF_KEY_ = app.process_state
+		LEFT JOIN sys_user sysuse ON sysuse.user_name = hitask.ASSIGNEE_
+		WHERE process_instance_id = #{processInstanceId}
+		order by app.create_time desc
 	</select>
 	
 	<!--分页列表查询-->

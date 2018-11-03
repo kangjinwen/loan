@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.company.modules.system.dao.HousPropertyAttachmentDao" >
+
+    <resultMap id="BaseResultMap" type="com.company.modules.system.domain.HousPropertyAttachment" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="property_assessment_id" property="propertyAssessmentId" jdbcType="INTEGER" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+        <result column="file_name" property="fileName" jdbcType="VARCHAR" />
+        <result column="file_size" property="fileSize" jdbcType="BIGINT" />
+        <result column="file_path" property="filePath" jdbcType="VARCHAR" />
+        <result column="is_delete" property="isDelete" jdbcType="INTEGER" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        id, property_assessment_id, state, create_time, file_name, file_size, file_path,is_delete
+    </sql>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select 
+        <include refid="Base_Column_List" />
+        from hous_property_attachment
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+        delete from hous_property_attachment
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insert" parameterType="com.company.modules.system.domain.HousPropertyAttachment" >
+        insert into hous_property_attachment (id, property_assessment_id, state, 
+            create_time, file_name, file_size, 
+            file_path,is_delete)
+        values (#{id,jdbcType=INTEGER}, #{propertyAssessmentId,jdbcType=INTEGER}, #{state,jdbcType=INTEGER}, 
+            #{createTime,jdbcType=VARCHAR}, #{fileName,jdbcType=VARCHAR}, #{fileSize,jdbcType=BIGINT}, 
+            #{filePath,jdbcType=VARCHAR},#{isDelete,jdbcType=INTEGER})
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.company.modules.system.domain.HousPropertyAttachment" useGeneratedKeys="true" keyProperty="id" >
+        insert into hous_property_attachment
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="propertyAssessmentId != null" >
+                property_assessment_id,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="fileName != null" >
+                file_name,
+            </if>
+            <if test="fileSize != null" >
+                file_size,
+            </if>
+            <if test="filePath != null" >
+                file_path,
+            </if>
+                <if test="isDelete != null" >
+                is_delete,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="propertyAssessmentId != null" >
+                #{propertyAssessmentId,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=VARCHAR},
+            </if>
+            <if test="fileName != null" >
+                #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="fileSize != null" >
+                #{fileSize,jdbcType=BIGINT},
+            </if>
+            <if test="filePath != null" >
+                #{filePath,jdbcType=VARCHAR},
+            </if>
+            <if test="isDelete != null" >
+                #{isDelete,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="updateHousPropertyAttachmentByPropertyAssessmentId" >
+            UPDATE `hous_property_attachment` SET property_assessment_id = #{propertyAssessmentId}
+            where 
+            <if test="ids !=null">
+            id in 
+            <foreach collection="ids" item="ids" index="index"
+            open="(" close=")" separator=",">
+            '${ids}'
+            </foreach>
+            </if>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.company.modules.system.domain.HousPropertyAttachment" >
+        update hous_property_attachment
+        <set >
+            <if test="propertyAssessmentId != null" >
+                property_assessment_id = #{propertyAssessmentId,jdbcType=INTEGER},
+            </if>
+            <if test="state != null" >
+                state = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=VARCHAR},
+            </if>
+            <if test="fileName != null" >
+                file_name = #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="fileSize != null" >
+                file_size = #{fileSize,jdbcType=BIGINT},
+            </if>
+            <if test="filePath != null" >
+                file_path = #{filePath,jdbcType=VARCHAR},
+            </if>
+             <if test="isDelete != null" >
+                file_path = #{isDelete,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.company.modules.system.domain.HousPropertyAttachment" >
+        update hous_property_attachment
+        set property_assessment_id = #{propertyAssessmentId,jdbcType=INTEGER},
+            state = #{state,jdbcType=INTEGER},
+            create_time = #{createTime,jdbcType=VARCHAR},
+            file_name = #{fileName,jdbcType=VARCHAR},
+            file_size = #{fileSize,jdbcType=BIGINT},
+            file_path = #{filePath,jdbcType=VARCHAR},
+            is_delete = #{isDelete,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    <select id="selectPropertyAttachmentInfoBypropertyAssessmentId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select 
+        id as id,
+        property_assessment_id as propertyAssessmentId,
+        file_name as fileName,
+        file_path as filePath
+        from hous_property_attachment
+        where 1=1
+        and
+        property_assessment_id  = #{propertyAssessmentId}
+        and 
+        is_delete = 0
+    </select>
+</mapper>
+

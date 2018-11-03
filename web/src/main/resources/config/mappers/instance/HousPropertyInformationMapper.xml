@@ -29,7 +29,25 @@
 		<result column="planning_purposes" property="planningPurposes" />
 		<result column="key_disk_query" property="keyDiskQuery" />
 		<result column="remark_one" property="remarkOne" />
-		<result column="remark_two" property="remarkTwo" />
+		<result column="remark_two" property="remarkTwo" />		
+		<result column="against_one_remainder" property="againstOneRemainder" />
+		<result column="against_two_remainder" property="againstTwoRemainder" />
+		<result column="property_owner" property="propertyOwner" />
+		<result column="provinces" property="provinces" />
+		<result column="cities" property="cities" />
+		<result column="district_and_county" property="districtAndCounty" />
+		<result column="neighbourhoods" property="neighbourhoods" />
+		<result column="building_number" property="buildingNumber" />
+		<result column="total_floor" property="totalFloor" />
+		<result column="floor" property="floor" />
+		<result column="room_number" property="roomNumber" />
+		<result column="orientation" property="orientation" />
+		<result column="date_of_issuing" property="dateOfIssuing" />
+		<result column="whether_only_house" property="whetherOnlyHouse" />
+		<result column="house_type" property="houseType" />
+		<result column="house_acquisition_mode" property="houseAcquisitionMode" />
+		<result column="land_source" property="landSource" />
+		<result column="age_of_completion" property="ageOfCompletion" />
 	</resultMap>
 	
 	<!--基本的sql查询字段 公共引用...-->
@@ -59,7 +77,25 @@
         	planning_purposes,
         	key_disk_query,
         	remark_one,
-        	remark_two			
+        	remark_two,
+        	against_one_remainder,
+        	against_two_remainder,
+        	property_owner,
+        	provinces,
+        	cities,
+        	district_and_county,
+        	neighbourhoods,	
+        	building_number,
+        	total_floor,
+        	floor,
+        	room_number,
+        	orientation,
+        	date_of_issuing,
+        	whether_only_house,
+        	house_type,
+        	house_acquisition_mode,
+        	land_source,
+        	age_of_completion
 	</sql>
 	
 	<!-- 基本的sql查询条件公共引用 -->
@@ -133,6 +169,60 @@
             </if>
             <if test="keyDiskQuery !='' and keyDiskQuery !=null">
             	and key_disk_query = #{keyDiskQuery}
+            </if>
+            <if test="againstOneRemainder !='' and againstOneRemainder !=null">
+            	and against_one_remainder = #{againstOneRemainder}
+            </if>
+            <if test="againstTwoRemainder !='' and againstTwoRemainder !=null">
+            	and against_two_remainder = #{againstTwoRemainder}
+            </if>
+            <if test="propertyOwner !='' and propertyOwner !=null">
+            	and property_owner = #{propertyOwner}
+            </if>
+            <if test="provinces !='' and provinces !=null">
+            	and provinces = #{provinces}
+            </if>
+            <if test="cities !='' and cities !=null">
+            	and cities = #{cities}
+            </if>
+            <if test="districtAndCounty !='' and districtAndCounty !=null">
+            	and district_and_county = #{districtAndCounty}
+            </if>
+            <if test="neighbourhoods !='' and neighbourhoods !=null">
+            	and neighbourhoods = #{neighbourhoods}
+            </if>
+            <if test="buildingNumber !='' and buildingNumber !=null">
+            	and building_number = #{buildingNumber}
+            </if>
+            <if test="totalFloor !='' and totalFloor !=null">
+            	and total_floor = #{totalFloor}
+            </if>
+            <if test="floor !='' and floor !=null">
+            	and floor = #{floor}
+            </if>
+            <if test="roomNumber !='' and roomNumber !=null">
+            	and room_number = #{roomNumber}
+            </if>
+            <if test="orientation !='' and orientation !=null">
+            	and orientation = #{orientation}
+            </if>
+            <if test="dateOfIssuing !='' and dateOfIssuing !=null">
+            	and date_of_issuing = #{dateOfIssuing}
+            </if>
+            <if test="whetherOnlyHouse !='' and whetherOnlyHouse !=null">
+            	and whether_only_house = #{whetherOnlyHouse}
+            </if>
+            <if test="houseType !='' and houseType !=null">
+            	and house_type = #{houseType}
+            </if>
+            <if test="houseAcquisitionMode !='' and houseAcquisitionMode !=null">
+            	and house_acquisition_mode = #{houseAcquisitionMode}
+            </if>
+            <if test="landSource !='' and landSource !=null">
+            	and land_source = #{landSource}
+            </if>
+            <if test="ageOfCompletion !='' and ageOfCompletion !=null">
+            	and age_of_completion = #{ageOfCompletion}
             </if>
 		</trim>
 	</sql>
@@ -209,6 +299,60 @@
              <if test="remarkTwo !=null">
             	remark_two = #{remarkTwo},
             </if>
+             <if test="againstOneRemainder !=null">
+            	against_one_remainder = #{againstOneRemainder},
+            </if>
+            <if test="againstTwoRemainder !=null">
+            	against_two_remainder = #{againstTwoRemainder},
+            </if>
+            <if test="propertyOwner !=null">
+            	property_owner = #{propertyOwner},
+            </if>
+            <if test="provinces !=null">
+            	provinces = #{provinces},
+            </if>
+            <if test="cities !=null">
+            	cities = #{cities},
+            </if>
+            <if test="districtAndCounty !=null">
+            	district_and_county = #{districtAndCounty},
+            </if>
+            <if test="neighbourhoods !=null">
+            	neighbourhoods = #{neighbourhoods},
+            </if>
+            <if test="buildingNumber !=null">
+            	building_number = #{buildingNumber},
+            </if>
+            <if test="totalFloor !=null">
+            	total_floor = #{totalFloor},
+            </if>
+            <if test="floor !=null">
+            	floor = #{floor},
+            </if>
+            <if test="roomNumber !=null">
+            	room_number = #{roomNumber},
+            </if>
+            <if test="orientation !=null">
+            	orientation = #{orientation},
+            </if>
+            <if test="dateOfIssuing !=null">
+            	date_of_issuing = #{dateOfIssuing},
+            </if>
+            <if test="whetherOnlyHouse !=null">
+            	whether_only_house = #{whetherOnlyHouse},
+            </if>
+            <if test="houseType !=null">
+            	house_type = #{houseType},
+            </if>
+            <if test="houseAcquisitionMode !=null">
+            	house_acquisition_mode = #{houseAcquisitionMode},
+            </if>
+            <if test="landSource !=null">
+            	land_source = #{landSource},
+            </if>
+            <if test="ageOfCompletion !=null">
+            	age_of_completion = #{ageOfCompletion},
+            </if>
 	    </trim>
     </sql>
 	
@@ -239,7 +383,25 @@
         	planning_purposes,
         	key_disk_query,
         	remark_one,
-        	remark_two			
+        	remark_two,	
+        	against_one_remainder,		
+        	against_two_remainder,
+        	property_owner,
+        	provinces,
+        	cities,
+        	district_and_county,
+        	neighbourhoods,
+        	building_number,
+        	total_floor,
+        	floor,
+        	room_number,
+        	orientation,
+        	date_of_issuing,
+        	whether_only_house,
+        	house_type,
+        	house_acquisition_mode,
+        	land_source,
+        	age_of_completion
         )values(
         	#{creator},
         	#{createTime},
@@ -265,7 +427,25 @@
         	#{planningPurposes},
         	#{keyDiskQuery},	
         	#{remarkOne},
-        	#{remarkTwo}
+        	#{remarkTwo},
+        	#{againstOneRemainder},
+        	#{againstTwoRemainder},
+        	#{propertyOwner},
+        	#{provinces},
+        	#{cities},
+        	#{districtAndCounty},
+        	#{neighbourhoods},
+        	#{buildingNumber},
+        	#{totalFloor},
+        	#{floor},
+        	#{roomNumber},
+        	#{orientation},
+        	#{dateOfIssuing},
+        	#{whetherOnlyHouse},
+        	#{houseType},
+        	#{houseAcquisitionMode},
+        	#{landSource},
+        	#{ageOfCompletion}
         )
      <!-- 重新返回给实体类,插入的id值 -->
      <selectKey resultType="long" keyProperty="id">
@@ -340,5 +520,17 @@
 			) t3
 		LEFT JOIN pl_area t4 ON t3.code2 = t4.rd_pareaid
 		where t4.id = #{propertyAddressId};
+	</select>
+
+	<select id="getWhetherLoanByHomeNum" resultType="java.util.Map" parameterType="java.lang.String">
+		SELECT
+			create_time createTime
+		FROM
+			hous_property_information
+		WHERE
+			house_number = #{homeNum}
+		ORDER BY
+			id DESC
+		LIMIT 1
 	</select>
 </mapper>

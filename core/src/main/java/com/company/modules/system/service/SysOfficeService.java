@@ -78,16 +78,9 @@ public interface SysOfficeService {
 	 */
 	Map<String,Object> getOfficeInfoById(Long id) throws ServiceException;
 	
-	List<Map<String,Object>>  getOfficeTreeList() throws ServiceException;
-	/**
-     * 根据office获取子列表
-     * @param param
-     * @return 
-     * @version 1.0
-     * @author 吴国成
-     * @created 2014年12月25日
-     */
-    List<SysOffice> getListByOfficeId(Map<String, Object> param) throws ServiceException;
+	List<Map<String,Object>>  getOfficeTreeList(Map<String, Object> param, boolean isNeedRoot) throws ServiceException;
+
+	List<SysOffice> getListByOfficeId(Map<String, Object> param) throws ServiceException;
 
 	SysOffice getBusinessHallByOrganizationId(String officeId)throws ServiceException;
 

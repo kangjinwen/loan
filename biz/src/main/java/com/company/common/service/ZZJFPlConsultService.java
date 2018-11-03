@@ -15,9 +15,17 @@ public interface ZZJFPlConsultService {
 	
 	/**
      * 新增咨询
-	 * @param sysRole 
+	 * @param sysRole
      * @param preliminaryEvaluationDataBean
-     * @throws Exception
+     * @param creditConsultFrom
+	 * @throws Exception
      */
-	Map<String, Object> addPlConsult(SysRole sysRole, PreliminaryEvaluationDataBean preliminaryEvaluationDataBean) throws Exception;
+	Map<String, Object> addPlConsult(SysRole sysRole, PreliminaryEvaluationDataBean preliminaryEvaluationDataBean, String creditConsultFrom) throws Exception;
+
+	/**
+	 * 根据房产证编号查询 当前申请是否满足（每个房产证一个月仅仅可以申请一次）的要求
+	 * @param homeNum
+	 * @return
+	 */
+    Map<String, Object> getWhetherLoanByHomeNum(String homeNum);
 }

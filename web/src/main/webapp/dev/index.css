@@ -222,7 +222,7 @@ body{
 @media (max-width: 767px) {
   .main-header .navbar-right {
     float: none;
-  }   
+  }
 .navbar-custom-menu{
     display: none;
 }
@@ -293,7 +293,7 @@ body{
 .main-header .navbar-brand {
   color: #fff;
 }
- 
+
 .main-header .logo {
     background-color: #367fa9;
     color: #fff;
@@ -304,7 +304,7 @@ body{
 }
 .app-header {
     height: 60px;
-    background: #3C8DBC; 
+    background: #3C8DBC;
 }
 
 .fn-left {
@@ -444,8 +444,8 @@ body{
 .rightSide {
     margin-left: 230px;
 }
- 
- 
+
+
 
 *:before,
 *:after {
@@ -478,7 +478,7 @@ body{
     border-left:3px solid #3C8DBC;
 }
 
-.ant-menu-item-selected { 
+.ant-menu-item-selected {
     color: #5ab6df!important;
 }
 
@@ -516,7 +516,7 @@ body{
 
 .app-aside-folded ul > li > div >span span,
 .app-aside-folded .ant-menu-submenu-inline > .ant-menu-submenu-title:after {
-    display: none; 
+    display: none;
 }
 
 .app-aside-folded ul > li > ul {
@@ -547,7 +547,7 @@ body{
 }
 
 .ant-btn .anticon {
-    border-radius: 4px; 
+    border-radius: 4px;
 }
 
 .menu-text{margin-left: 7px;}
@@ -667,8 +667,8 @@ body{
 }
 
 .actionBtns button {
-    background: #fff; 
-    margin-right: 10px; 
+    background: #fff;
+    margin-right: 10px;
     font-size: 14px;
 }
 
@@ -804,18 +804,18 @@ body{
 
 .tool li:hover {
     background-color: #def0f9;
-} 
+}
 
 .tool li.active {
     margin-right: 0;
 }
- 
+
 .tool .iconfont.tool-icon{
     font-size: 40px;
     margin-top: 25px;
     display: block;
     margin-bottom: 10px;
-} 
+}
 
 .threewarp {
     height: 400px;
@@ -824,8 +824,8 @@ body{
 }
 
 
-.right { 
-    height: 60px; 
+.right {
+    height: 60px;
 }
 
 .right ul {
@@ -837,7 +837,7 @@ body{
     display: inline-block;
     position: relative;
 }
-  
+
 .right li{
     margin-right: 30px;
 }
@@ -981,7 +981,7 @@ body{
 .collapse-header .title i{
      height: 33px;
 }
-.collapse-header .title>span { 
+.collapse-header .title>span {
     display: inline-block;
     background: #fff;
     position: relative;
@@ -1004,7 +1004,7 @@ body{
     background:url(./images/border.png);
     width: 17px;
     content:"";
-    display: inline-block; 
+    display: inline-block;
     left: -10px;
     height: 33px;
 }
@@ -1012,12 +1012,12 @@ body{
     background: url(./images/border.png) -85px;
     width: 17px;
     content:"";
-    display: inline-block; 
+    display: inline-block;
     right: -10px;
     height: 33px;
 }
 .collapse-body {
-    padding:28px 20px 20px; 
+    padding:28px 20px 20px;
 }
 
 .collapseWrap.collapse .collapse-body {
@@ -1034,7 +1034,7 @@ body{
     background: #fff;
     color: #ccc;
 }
-.collapseWrap.collapse{ 
+.collapseWrap.collapse{
   padding-bottom: 0!important;
   border-width: 1px 1px 0 1px!important;
   border-left-color: transparent!important;
@@ -1045,8 +1045,8 @@ body{
 }
 .navLine-wrap{
     height: 500px;
-    overflow-y:scroll; 
-    margin-top:15px; 
+    overflow-y:scroll;
+    margin-top:15px;
 }
 
 .navLine-wrap .navLine-wrap-right{
@@ -1054,7 +1054,7 @@ body{
     position: absolute;
     top: 0;
     right: 20px;
-} 
+}
 .navLine-wrap .navLine-wrap-right .ant-timeline{
     height: 460px;
     border-left: 2px solid #ddd;
@@ -1063,13 +1063,13 @@ body{
     color:#2db7f5;
     height: 30px;
     line-height: 30px;
-    font-size: 16px; 
+    font-size: 16px;
     text-indent: 1em;
     border-left: 2px solid #2db7f5;
 
     font-weight: normal;
 }
-.navLine-wrap-left h4{ 
+.navLine-wrap-left h4{
     height: 13px;
     margin: 10px 2px 20px;
     position: relative;
@@ -1101,7 +1101,7 @@ body{
     height: 8px;
 }
 .navLine .ant-timeline-item-tail{
-    border-left: 2px solid #ddd; 
+    border-left: 2px solid #ddd;
 }
 .navLine .ant-timeline-item-head{
     background-color:#ddd;
@@ -1111,7 +1111,7 @@ body{
     background: #fff;
 }
 .navLine.activeNavLineItem .ant-timeline-item-content a{
-    color: #00aaee; 
+    color: #00aaee;
 }
 .navLine .first-dot,.navLine .last-dot {
     border: 2px solid #ccc;
@@ -1141,7 +1141,7 @@ body{
     background:#eaeaea;
 }
 .uploadwarp {
-  width: 100%; 
+  width: 100%;
   overflow: hidden;
 }
 .uploadwarp li{
@@ -1153,7 +1153,7 @@ body{
     line-height: 25px;
     font-size: 12px;
     width: 190px;
-    overflow: hidden; 
+    overflow: hidden;
     text-overflow:ellipsis;
     -o-text-overflow:ellipsis;
     white-space:nowrap;
@@ -1163,7 +1163,7 @@ body{
     height: 230px;
     border: 1px solid #e7e6e4;
     border-radius: 3px;
-    background: #efefef url(./images/upload.png) no-repeat center; 
+    background: #efefef url(./images/upload.png) no-repeat center;
 }
 .uploadwarp .img img{
     width: 190px;
@@ -1171,7 +1171,7 @@ body{
 }
 
 .uploadwarp li{
-    margin-left:20px; 
+    margin-left:20px;
     margin-bottom: 20px;
 }
 .uploadwarp .ant-btn{
@@ -1205,7 +1205,7 @@ body{
 }
 .uploadFile .img{
     width: 190px;
-    height: 280px;   
+    height: 280px;
     display: inline-block;
     margin-right: 5px;
     margin-top: 5px;
@@ -1215,18 +1215,18 @@ body{
     width: 190px;
     height: 230px;
     border: 1px solid #e7e6e4;
-    border-radius: 3px; 
-}  
-.uploadBg{    
+    border-radius: 3px;
+}
+.uploadBg{
     display:inline-block;
     width: 190px;
     height: 230px;
     verticalAlign: top;
     border-radius: 6px;
-    background:#efefef url(./images/upload.png) no-repeat center; 
+    background:#efefef url(./images/upload.png) no-repeat center;
 }
- 
-.uploadPlus .ant-upload{ 
+
+.uploadPlus .ant-upload{
     width: 190px;
     height: 230px;
     border:1px dashed #d9d9d9;
@@ -1236,8 +1236,8 @@ body{
 .uploadPlus .ant-upload > span{
     height: 230px;
 }
-.uploadPlus .ant-upload:hover{ 
-    border:1px dashed #2db7f5; 
+.uploadPlus .ant-upload:hover{
+    border:1px dashed #2db7f5;
 }
 .ant-upload.ant-upload-drag  {
     background: #efefef;
@@ -1256,12 +1256,12 @@ body{
     width: 84px;
     float: left;
 }
- 
+
 .form-input{
     display: inline-block;
     width: 145px;
 }
- 
+
 /*a  upload */
  .a-upload {
     padding: 4px 10px;
@@ -1314,7 +1314,7 @@ body{
     width: 60px;
 }
 .app-aside-folded .main-header .logo>.logo-mini {
-    display: block; 
+    display: block;
     font-size: 18px;
 }
 .app-aside-folded .main-header .logo>.logo-lg {
@@ -1324,7 +1324,7 @@ body{
     margin-left: 60px;
 }
 .logo-mini{
-    background: url(./images/logo-mini.png); 
+    background: url(./images/logo-mini.png);
     width: 31px;
     height: 31px;
     background-size: 100%;
@@ -1332,9 +1332,9 @@ body{
 }
 .logo-lg{
     background: url(./images/logo.png) center no-repeat;
-    width: 178px; 
+    width: 178px;
     text-indent: -100em;
-    background-size: 100%; 
+    background-size: 100%;
     line-height: 48px;
 }
 .system-name{
@@ -1367,8 +1367,8 @@ body{
     padding: 15px;
     background: #ECF0F5;
 }
-.ant-tabs-content .ant-tabs-tab{ 
-    border-right: 0 ; 
+.ant-tabs-content .ant-tabs-tab{
+    border-right: 0 ;
 }
 .ant-tabs-content .ant-tabs-ink-bar{
   height: 3px;
@@ -1425,13 +1425,13 @@ body{
 } */
 .addTable{
    width: 100%;
-   height: auto; 
+   height: auto;
    border-collapse: collapse;
-   text-align: center;  
+   text-align: center;
 }
 .addTable td{
     height: 30px;
-    border:1px solid #e9e9e9; 
+    border:1px solid #e9e9e9;
     background: #fff;
 }
 .addTable td input{
@@ -1442,13 +1442,13 @@ body{
 }
 .addTable2{
    width: 100%;
-   height: auto; 
+   height: auto;
    border-collapse: collapse;
-   text-align: center;  
+   text-align: center;
 }
 .addTable2 td{
     height: 30px;
-    border:1px solid #e9e9e9; 
+    border:1px solid #e9e9e9;
     background: #fff;
 }
 .addTable2 td input{
@@ -1557,9 +1557,9 @@ body{
    border-collapse: collapse;
     border: 1px solid #e9e9e9;
     margin-top: 5px;
-} 
+}
 .addTable td{
-    border: 1px solid #e9e9e9; 
+    border: 1px solid #e9e9e9;
     padding:5px;
     height: 25px;
     text-align: center;
@@ -1588,7 +1588,7 @@ body{
 .longTableWarp{
     width: 100%;
     overflow-x: auto;
-    overflow-y: hidden; 
+    overflow-y: hidden;
 }
 .longTable{
     width: 1800px;
@@ -1600,7 +1600,21 @@ body{
 .longWords{
     display:block;
     color: #666;
-    white-space:nowrap; 
-    overflow:hidden; 
+    white-space:nowrap;
+    overflow:hidden;
     text-overflow:ellipsis;
+}
+
+.image-wrapper{
+    position: relative;
+}
+
+.image-layer{
+    background-color: transparent;
+    position: absolute;
+    z-index: 999 !important;
+    top: 0;
+    right: 0;
+    bottom: 44px;
+    left: 0;
 }

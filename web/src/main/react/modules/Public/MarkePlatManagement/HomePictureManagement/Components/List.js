@@ -1,30 +1,31 @@
 var React = require('react');
-import antd from 'antd';  
-var Table = antd.Table; 
+import antd from 'antd';
+var Table = antd.Table;
 var  Reflux = require('reflux');
-var  ListStore = require('../stores/ListStore'); 
-var  Actions = require('../actions/Actions'); 
+var  ListStore = require('../stores/ListStore');
+var  Actions = require('../actions/Actions');
 var reqwest = require('reqwest');
-export default React.createClass({ 
+export default React.createClass({
     mixins: [
       Reflux.connect(ListStore, 'dataSource')
     ],
     getInitialState() {
       return {
          userType:{},
-         dataSource: null 
+         dataSource: null
        };
-    },   
-    componentDidMount() { 
+    },
+    componentDidMount() {
         Actions.initStore();
         var me = this ;
         reqwest({
                 url: '/modules/system/general/getSysUserList.htm',
-                method: 'get', 
+                method: 'get',
                 type: 'json',
                 data:{
-                  start : 0, 
-                  limit: 9999
+                  start: 0,
+                  limit: 9999,
+                  userName:window.roleId
                 },
                 success: (result) => {
                   var items  = result.datas.map((item)=>{
@@ -36,20 +37,20 @@ export default React.createClass({
                 }
               });
     },
-    shouldComponentUpdate(nextProps, nextState) { 
+    shouldComponentUpdate(nextProps, nextState) {
       return nextState.dataSource !== this.state.dataSource;
-    }, 
+    },
     onClickRow(record){
       Actions.setSelectData(record,true);
     },
     rowKey(record){
       return record.id;
-    }, 
-    render() { 
+    },
+    render() {
       var me=this;
       var columns =[{
        title: '序号',
-       dataIndex: 'sort' 
+       dataIndex: 'sort'
        },{
          title: '名称',
          dataIndex: "title"
@@ -62,27 +63,27 @@ export default React.createClass({
        },{
          title: '发布人',
          dataIndex: "addUserid",
-         render: function(value) { 
+         render: function(value) {
            var userType = me.state.userType;
            var name="";
            userType.forEach((item,index)=>{
               if(value==item.id){
                 name = item.name;
               }
-           }); 
+           });
            return name;
-         }  
+         }
        },{
          title: '跳转链接',
          dataIndex: "url"
        }];
         if(!this.state.dataSource)
-          return <div className="tableListStore"></div>  
-        else return ( 
+          return <div className="tableListStore"></div>
+        else return (
             <div className="tableListStore">
                 <Table rowKey={this.rowKey}   columns={columns} dataSource={this.state.dataSource} bordered={true} onClickRow={this.onClickRow}/>
-            </div>  
+            </div>
         );
     }
 });
- 
+

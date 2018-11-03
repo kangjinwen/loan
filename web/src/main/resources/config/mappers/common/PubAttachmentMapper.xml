@@ -18,7 +18,8 @@
         <result column="consult_id" property="consultId" />
         <result column="process_instance_id" property="processInstanceId" />
         <result column="project_id" property="projectId" />
-	</resultMap>
+        <result column="thumbnail_blob" jdbcType="LONGVARBINARY" property="thumbnailBlob"  typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>
+    </resultMap>
 	
 	<!-- 动态查询 -->
 	<sql id="selectWhere">
@@ -65,6 +66,9 @@
             <if test="projectId !='' and projectId !=null">
                 and project_id = #{projectId}
             </if>
+            <if test="thumbnailBlob !='' and thumbnailBlob !=null">
+                and thumbnail_blob = #{thumbnailBlob}
+            </if>
             <!-- 根据业务区分文件类型 -->
             <if test="bizFileTypes !=null and bizFileTypes.size!=0">
               	and btype IN
@@ -92,6 +96,7 @@
             <if test="consultId !='' and consultId != null">		consult_id,		</if>
             <if test="processInstanceId !='' and processInstanceId != null">		process_instance_id,		</if>
             <if test="projectId !='' and projectId != null">		project_id,		</if>
+            <if test="thumbnailBlob !='' and thumbnailBlob != null">		thumbnail_blob,		</if>
         </trim> 
     </sql>
 
@@ -111,6 +116,7 @@
             <if test="consultId !='' and consultId != null" >		#{consultId},		</if>
             <if test="processInstanceId !='' and processInstanceId != null" >		#{processInstanceId},		</if>
             <if test="projectId !='' and projectId != null" >		#{projectId},		</if>
+            <if test="thumbnailBlob !='' and thumbnailBlob != null" >		#{thumbnailBlob},		</if>
         </trim>
     </sql>
     
@@ -131,6 +137,7 @@
             <if test="consultId != '' and consultId!= null">		consult_id=#{consultId},		</if>
             <if test="processInstanceId != '' and processInstanceId!= null">		process_instance_id=#{processInstanceId},		</if>
             <if test="projectId != '' and projectId!= null">		project_id=#{projectId},		</if>
+            <if test="thumbnailBlob != '' and thumbnailBlob!= null">		thumbnail_blob=#{thumbnailBlob},		</if>
        </trim>
     </sql>
     

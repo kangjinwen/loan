@@ -35,7 +35,7 @@ public interface PlProductService {
      * @return
      * @throws Exception
      */
-    public List<PlProduct> getPageListByMap(Map<String , Object> data) throws Exception;
+	public List<Map<String, Object>> getPageListByMap(Map<String, Object> data) throws Exception;
     
 	/**
      * 产品信息表,根据id查询数据

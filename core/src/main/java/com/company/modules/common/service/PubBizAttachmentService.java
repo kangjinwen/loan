@@ -77,5 +77,5 @@ public interface PubBizAttachmentService {
 	 * @return void
 	 * @since  1.0.0
 	*/
-	public void deletes(List<Long> idList, File file) throws Exception;
+	public void deletes(List<Long> idList) throws Exception;
 }

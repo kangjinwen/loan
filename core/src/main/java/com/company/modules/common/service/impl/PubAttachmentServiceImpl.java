@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.company.modules.system.service.ChannelPartnerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class PubAttachmentServiceImpl extends BaseServiceImpl implements PubAtta
 	 */
     @Autowired
     private PubAttachmentDao pubAttachmentDao;
+	@Autowired
+	private ChannelPartnerService channelPartnerService;
 
 	/**
 	 * 附件表,插入数据
@@ -102,16 +105,16 @@ public class PubAttachmentServiceImpl extends BaseServiceImpl implements PubAtta
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void deletes(List<Long> ids, File webRoot) throws ServiceException {
+	public void deletes(List<Long> ids) throws ServiceException {
 		for (Long id : ids) {
-			PubAttachment file = pubAttachmentDao.getByPrimary(id);
+			PubAttachment pubAttachment = pubAttachmentDao.getByPrimary(id);
 			Map<String, Object> param = new HashMap<String, Object>();
 			param.put("id", id);
 			pubAttachmentDao.delete(param);
-			String path= file.getFilePath();
-            if(path!=null){
-                File f=new File(webRoot,path.toString());
-                if(f.exists())f.delete();
+            String filePath = pubAttachment.getFilePath().replace(channelPartnerService.getUploadFileURL(), channelPartnerService.getUploadPath());
+			if(filePath!=null){
+                File f=new File(filePath);
+                if(f.exists()) f.delete();
             }
 		}
 	}

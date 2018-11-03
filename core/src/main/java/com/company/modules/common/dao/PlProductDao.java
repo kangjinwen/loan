@@ -6,6 +6,7 @@ import java.util.Map;
 import com.company.common.dao.BaseDao;
 import com.company.common.utils.annotation.RDBatisDao;
 import com.company.modules.common.domain.PlProduct;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * User:    wulb
@@ -21,7 +22,7 @@ public interface PlProductDao extends BaseDao<PlProduct,Long> {
      * @param map
      * @return List<PlProduct>
      */
-    public List<PlProduct> getPageListByMap(Map<String, Object> map);
+	public List<Map<String, Object>> getPageListByMap(Map<String, Object> map);
     
     /**
      * 产品信息表,根据id查询数据
@@ -45,5 +46,7 @@ public interface PlProductDao extends BaseDao<PlProduct,Long> {
     public int deleteById(long id);
 
 	public Map<String, Object> getItemMapById(long productId);
+
+	Integer getChannelIdByProductId(@Param("productId") Integer productId);
 
 }

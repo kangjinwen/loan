@@ -17,13 +17,17 @@
 	<select id="getAllProductSimpleInfos" parameterType="java.util.HashMap" resultType="java.util.HashMap">
 		SELECT
 			name 	text,
-			id		value
+			id		value,
+			channel_partner_id channelPartnerId,
+		  doc_filepath filePath 
 		from pl_product product
 		where
 		is_delete=0 and isopen=1
-		<if test="officeId != null and officeId != ''">
-			and find_in_set(#{officeId},office_ids)
+		
+		<if test="channelPartnerId != null and channelPartnerId != ''">
+		and ((channel_partner_id IS NULL) OR (channel_partner_id = #{channelPartnerId}))
 		</if>
+		
 		<if test="ptype != null and ptype != ''">
 			and product.ptype = #{ptype}
 		</if>

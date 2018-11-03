@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -58,12 +60,12 @@ public class LoginAction extends BaseAction {
 	/**
 	 * 登陆处理
 	 * 
-	 * @param error
-	 * @param model
+	 * @param response
+	 * @param request
 	 */
 	@RequestMapping("/login.htm")
 	public void login(HttpServletResponse response, HttpServletRequest request) throws Exception{
-		response.sendRedirect("/dev/index.html");
+		response.sendRedirect("/");
 	}
 
 	@RequestMapping("/index.htm")
@@ -97,8 +99,7 @@ public class LoginAction extends BaseAction {
 							username, password);
 					Authentication authentication = authenticationManager
 							.authenticate(authenticationToken);
-					SecurityContextHolder.getContext().setAuthentication(
-							authentication);
+					SecurityContextHolder.getContext().setAuthentication(authentication);
 					session.setAttribute("SPRING_SECURITY_CONTEXT",
 							SecurityContextHolder.getContext());
 					logger.info("==================role="
@@ -107,6 +108,25 @@ public class LoginAction extends BaseAction {
 					session.setAttribute(Constant.ROLEID, Long.valueOf(roleId));
 
 					session.setAttribute("SysUser", sysUser);
+//                    Cookie cookie = new Cookie("JSESSIONID",request.getSession().getId());
+//                    cookie.setMaxAge(3600);
+//                    cookie.setPath("/");
+//                    response.addCookie(cookie);
+					if (session.getId()==null&&request.getSession().getId()==null){
+						throw new RuntimeException("sessionid is null 空空空");
+					}
+					String sid = null;
+					if (request.getSession().getId()!=null){
+						sid = request.getSession().getId();
+					}else {
+						session.setMaxInactiveInterval(3600);
+						sid = session.getId();
+					}
+
+					response.setHeader("Set-Cookie","JSESSIONID="+sid);
+					/*logger.info("=======session id=============" + session.getId());
+
+					servletContext.setAttribute("sessionId",session.getId());*/
 
 					// response.addHeader("Location","/index.htm");
 

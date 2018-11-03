@@ -204,7 +204,7 @@ public class ExportAction extends BaseAction {
 	 */
 	public void downLoadProjectForm(HttpServletResponse response, 
     		HttpServletRequest request,String filePath) throws FileNotFoundException, IOException{
-		String rootDir = request.getRealPath("/");// 文件根目录
+		String rootDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
 		String sep = File.separator;
 		String file = new StringBuilder(rootDir).append(sep).append("siliandan").append(sep).append(filePath).toString();
 		response.setHeader("Content-Disposition", "attachment;filename=" + new File(file).getName());
@@ -230,7 +230,7 @@ public class ExportAction extends BaseAction {
     	Map<String, Object> result = new HashMap<>();
     	String sep = File.separator;
     	SysUser loginUser = getLoginUser(request);
-    	String rootDir = request.getRealPath("/");// 文件根目录
+		String rootDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
     	String dirName = new SimpleDateFormat("yyyy-MM").format(new Date());
     	String baseDestDir = new StringBuilder(rootDir).append(sep).append("siliandan").append(sep).append(dirName).toString();
     	File baseDestDirFile =  new File(baseDestDir);
@@ -569,7 +569,7 @@ public class ExportAction extends BaseAction {
 	 */
 	public void downLoadFinancialForm(HttpServletResponse response, 
     		HttpServletRequest request,String filePath) throws FileNotFoundException, IOException{
-		String rootDir = request.getRealPath("/");// 文件根目录
+		String rootDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
 		String sep = File.separator;
 		String file = new StringBuilder(rootDir).append(sep).append("siliandan").append(sep).append(filePath).toString();
 		response.setHeader("Content-Disposition", "attachment;filename=" + new File(file).getName());
@@ -594,7 +594,7 @@ public class ExportAction extends BaseAction {
     	Map<String, Object> result = new HashMap<>();
     	String sep = File.separator;
     	SysUser loginUser = getLoginUser(request);
-    	String rootDir = request.getRealPath("/");// 文件根目录
+		String rootDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
     	String dirName = new SimpleDateFormat("yyyy-MM").format(new Date());
     	String baseDestDir = new StringBuilder(rootDir).append(sep).append("siliandan").append(sep).append(dirName).toString();
     	File baseDestDirFile =  new File(baseDestDir);

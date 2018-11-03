@@ -205,8 +205,14 @@
     </select>
     <select id="getOfficeCombo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
     
-    select id as value ,name as text
-    from sys_office where is_delete='0'
-    
+    select
+		id as value ,
+		name as text,
+		type as type
+    from sys_office
+		where is_delete='0'
+		<if test="type != '' and type!= null">
+		and type=#{type}
+		</if>
     </select>
 </mapper> 

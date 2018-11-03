@@ -15,6 +15,7 @@
 		<result column="operator_id" property="operatorId" />
 		<result column="biz_type" property="bizType" />
 		<result column="relation_id" property="relationId" />
+		<result column="thumbnail_blob" jdbcType="LONGVARBINARY" property="thumbnailBlob"  typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>
 	</resultMap>
 	
 	<!-- 基本的sql查询条件公共引用 -->
@@ -53,6 +54,9 @@
             <if test="relationId !='' and relationId !=null">
             	and relation_id = #{relationId}
             </if>
+            <if test="thumbnailBlob !='' and thumbnailBlob !=null">
+                and thumbnail_blob = #{thumbnailBlob}
+            </if>
 		</trim>
 	</sql>
 	
@@ -86,6 +90,9 @@
 	    	<if test="relationId!= null">		
 	    		relation_id = #{relationId},		
 	    	</if>
+	    	<if test="thumbnailBlob !=null">
+        	thumbnail_blob = #{thumbnailBlob},
+        </if>
 	    </trim>
     </sql>
 	
@@ -101,7 +108,8 @@
         	signcod,		
         	operator_id,		
         	biz_type,		
-        	relation_id,		
+        	relation_id,	
+        	thumbnail_blob,	
 			id
         )values(
         	#{state},
@@ -114,6 +122,7 @@
         	#{operatorId},
         	#{bizType},
         	#{relationId},
+        	#{thumbnailBlob},
         	#{id}
         )
      <!-- 重新返回给实体类,插入的id值 -->

@@ -2,13 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Top from './frame/Top';
 import Sider from './frame/Sider';
-import NavTab from './frame/NavTab';    
+import NavTab from './frame/NavTab';
 import ComboData from './utils/ComboData'
 
 ComboData.initDic();
-console.log(ComboData);
 
-const App = React.createClass({ 
+const App = React.createClass({
   getInitialState() {
     return {
         activeKey:'工作台',
@@ -40,7 +39,7 @@ const App = React.createClass({
               });
             }
           }
-        });  
+        });
   },
   render() {
     var fold = this.state.fold ;

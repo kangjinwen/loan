@@ -7,6 +7,7 @@ import com.company.common.dao.BaseDao;
 import com.company.common.utils.annotation.RDBatisDao;
 import com.company.modules.common.exception.PersistentDataException;
 import com.company.modules.system.domain.SysOffice;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 
@@ -70,7 +71,7 @@ public interface SysOfficeDao extends BaseDao<SysOffice,Long>{
 	String getRoleNameByMap(Map<String,Object> params) ;
 	
 	
-	List<Map<String,Object>> getOfficeTreeList() ;
+	List<Map<String,Object>> getOfficeTreeList(Map<String,Object> params) ;
 
 	List<SysOffice> getListByOfficeId(Map<String, Object> param);
 
@@ -85,4 +86,6 @@ public interface SysOfficeDao extends BaseDao<SysOffice,Long>{
 	 * @since  1.0.0
 	 */
 	List<Map<String,Object>> getOfficeListByTypeAndParentId(Map<String,Object> params);
+
+	Map<String,Object> listOrganByProductId(@Param("productId")String productId);
 }

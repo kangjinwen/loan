@@ -1,23 +1,13 @@
 //借款需求
 import React from 'react';
-import {
-    Button,
-    Form,
-    Input,
-    Modal,
-    Select,
-    Row,
-    Col,
-    InputNumber,
-    DatePicker
-} from 'antd';
+import {Col, Form, Input, InputNumber, Modal, Row, Select} from 'antd';
+import ComboData from '../utils/ComboData'; //获取字典
+import MicroInput from '../utils/MicroInput'; //数字金额加逗号
 const createForm = Form.create;
 const FormItem = Form.Item;
 const Option = Select.Option;
 const objectAssign = require('object-assign');
 const NavLine = require("../utils/NavLine");
-import ComboData from '../utils/ComboData';//获取字典
-import MicroInput from '../utils/MicroInput';//数字金额加逗号
 var repaymentTypelist = ComboData.getIntCombo('REPAYMENT_TYPE');//还款方式：
 var roleId = window.roleId;
 
@@ -55,7 +45,7 @@ var BorrowingNeeds = React.createClass({
                     return (<Option key={item.value} value={item.value}>{item.text}</Option>);
                 });
                 ProductIdList = items;
-                me.setState({ ProductIdList: ProductIdList });
+                me.setState({ProductIdList: ProductIdList});
             }
         });
     },
@@ -74,21 +64,24 @@ var BorrowingNeeds = React.createClass({
                 },
                 type: 'json',
                 callback: (result) => {
-                    console.log(result)
-                    result.data.repaymentRate = (result.data.repaymentRate * 100).toFixed(2),
+                    if (result.data) {
+                        result.data.repaymentRate = (result.data.repaymentRate * 100).toFixed(2)
                         this.props.form.setFieldsValue(result.data)
+                    }
                 }
+
+
             });
         }
     },
     geInstitutionNamelist() {
         return InstitutionNamelist.map((item, index) => {
-            return <Option key={item.name} >{item.name}</Option>
+            return <Option key={item.name}>{item.name}</Option>
         })
     },
     getProjectBelongslist() {
         return ProjectBelongslist.map((item, index) => {
-            return <Option key={item.value} >{item.text}</Option>
+            return <Option key={item.value}>{item.text}</Option>
         })
     },
     remarkValidator(rule, value, callback) {
@@ -152,8 +145,9 @@ var BorrowingNeeds = React.createClass({
                 organ = (
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="机构名称：">
-                            <Select  disabled={!props.canEdit} showSearch optionFilterProp="children" notFoundContent="无法找到" {...getFieldProps('institutionName', ) } >
-                                {this.geInstitutionNamelist() }
+                            <Select disabled={!props.canEdit} showSearch optionFilterProp="children"
+                                    notFoundContent="无法找到" {...getFieldProps('institutionName',)} >
+                                {this.geInstitutionNamelist()}
                             </Select>
                         </FormItem>
                     </Col>
@@ -164,8 +158,8 @@ var BorrowingNeeds = React.createClass({
                 organ = (
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="机构名称：">
-                            <Select  disabled={!props.canEdit} {...getFieldProps('institutionName', ) } >
-                                {this.geInstitutionNamelist() }
+                            <Select disabled={!props.canEdit} {...getFieldProps('institutionName',)} >
+                                {this.geInstitutionNamelist()}
                             </Select>
                         </FormItem>
                     </Col>
@@ -176,7 +170,8 @@ var BorrowingNeeds = React.createClass({
                 organ = (
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="机构名称：">
-                            <Input disabled={!props.canEdit}  {...getFieldProps('institutionName') } type="text" autoComplete="off"  />
+                            <Input disabled={!props.canEdit}  {...getFieldProps('institutionName')} type="text"
+                                   autoComplete="off"/>
                         </FormItem>
                     </Col>
                 );
@@ -187,7 +182,8 @@ var BorrowingNeeds = React.createClass({
             organ = (
                 <Col span="7">
                     <FormItem  {...formItemLayout} label="机构名称：">
-                        <Input disabled={!props.canEdit}  {...getFieldProps('institutionName') } type="text" autoComplete="off"  />
+                        <Input disabled={!props.canEdit}  {...getFieldProps('institutionName')} type="text"
+                               autoComplete="off"/>
                     </FormItem>
                 </Col>
             );
@@ -201,12 +197,14 @@ var BorrowingNeeds = React.createClass({
                     {organ}
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="报单人：">
-                            <Input disabled={!props.canEdit}  {...getFieldProps('salesman') } type="text" autoComplete="off" />
+                            <Input disabled={!props.canEdit}  {...getFieldProps('salesman')} type="text"
+                                   autoComplete="off"/>
                         </FormItem>
                     </Col>
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="联系电话(报单机构)：">
-                            <Input disabled={!props.canEdit}  {...getFieldProps('mobile') } type="text" autoComplete="off" />
+                            <Input disabled={!props.canEdit}  {...getFieldProps('mobile')} type="text"
+                                   autoComplete="off"/>
                         </FormItem>
                     </Col>
                 </Row>
@@ -216,48 +214,57 @@ var BorrowingNeeds = React.createClass({
                 <Row>
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="报单人：">
-                            <Input disabled={!props.canEdit}  {...getFieldProps('salesman') } type="text" autoComplete="off" />
+                            <Input disabled={!props.canEdit}  {...getFieldProps('salesman')} type="text"
+                                   autoComplete="off"/>
                         </FormItem>
                     </Col>
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="联系电话(报单人)：">
-                            <Input disabled={!props.canEdit}  {...getFieldProps('mobile') } type="text" autoComplete="off" />
+                            <Input disabled={!props.canEdit}  {...getFieldProps('mobile')} type="text"
+                                   autoComplete="off"/>
                         </FormItem>
                     </Col>
                 </Row>
             )
         }
         return (
-            <Form horizontal  form={this.props.form} style={{ marginTop: "20px" }}>
-                <Input {...getFieldProps('id') } type="hidden" autoComplete="off" />
+            <Form horizontal form={this.props.form} style={{marginTop: "20px"}}>
+                <Input {...getFieldProps('id')} type="hidden" autoComplete="off"/>
                 <Row>
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="申请额度(元)：">
-                            <MicroInput disabled={disabledaAccount} style={{ width: "100%" }} {...getFieldProps('account',
+                            <MicroInput disabled={disabledaAccount} style={{width: "100%"}} {...getFieldProps('account',
                                 {
                                     rules: [
-                                        { required: true, message: '必填只能是数字', type: 'float' },
-                                        { message: '不能为负数,保留2位小数,不能大于10位数', pattern: /^(\d{1,10})(\.\d{0,2})?$/ },
+                                        {required: true, message: '必填只能是数字', type: 'float'},
+                                        {message: '不能为负数,保留2位小数,不能大于10位数', pattern: /^(\d{1,10})(\.\d{0,2})?$/},
                                     ]
-                                }) }  autoComplete="off" />
+                                })} autoComplete="off"/>
                         </FormItem>
                     </Col>
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="借款期限(月)：">
-                            <InputNumber disabled={!props.canEdit} max="250" style={{ width: "100%" }} {...getFieldProps('timeLimit',
+                            <InputNumber disabled={!props.canEdit} max="250"
+                                         style={{width: "100%"}} {...getFieldProps('timeLimit',
                                 {
 
                                     rules: [
-                                        { required: true, message: '必填只能是数字', type: 'number' },
-                                        { message: '不能为负数', pattern: /^\d+(\.\d+)?$/ },
+                                        {required: true, message: '必填只能是数字', type: 'number'},
+                                        {message: '不能为负数', pattern: /^\d+(\.\d+)?$/},
                                     ]
-                                }) }  autoComplete="off" />
+                                })} autoComplete="off"/>
                         </FormItem>
                     </Col>
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="产品：">
-                            <Select  disabled={!props.canEdit} {...getFieldProps('productId', { rules: [{ required: true, message: '必填', type: "number" }], onChange: this.onChange.bind(this, "productId") }) } >
-                                {this.state.ProductIdList }
+                            <Select disabled={!props.canEdit} {...getFieldProps('productId', {
+                                rules: [{
+                                    required: true,
+                                    message: '必填',
+                                    type: "number"
+                                }], onChange: this.onChange.bind(this, "productId")
+                            })} >
+                                {this.state.ProductIdList}
                             </Select>
                         </FormItem>
                     </Col>
@@ -265,7 +272,7 @@ var BorrowingNeeds = React.createClass({
                 <Row>
                     <Col span="7">
                         <FormItem  {...formItemLayout} label="项目来源：">
-                            <Select disabled={!props.canEdit} {...getFieldProps('projectBelongs') } >
+                            <Select disabled={!props.canEdit} {...getFieldProps('projectBelongs')} >
                                 <Option value={1}>自有</Option>
                                 <Option value={2}>机构</Option>
                                 <Option value={3}>其他</Option>
@@ -277,38 +284,44 @@ var BorrowingNeeds = React.createClass({
                 {instit}
                 <Row>
                     <Col span="7">
-                        <FormItem  {...formItemLayout}  label="借款用途：" style={{ width: "800px" }} labelCol={{ span: "3" }}>
-                            <Input disabled={!props.canEdit}  {...getFieldProps('borrowUse', { rules: [{ validator: this.remarkValidator }] }) } type="textarea" autoComplete="off" />
+                        <FormItem  {...formItemLayout} label="借款用途：" style={{width: "800px"}} labelCol={{span: "3"}}>
+                            <Input
+                                disabled={!props.canEdit}  {...getFieldProps('borrowUse', {rules: [{validator: this.remarkValidator}]})}
+                                type="textarea" autoComplete="off"/>
                         </FormItem>
                     </Col>
                 </Row>
                 <Row>
                     <Col span="7">
-                        <FormItem  {...formItemLayout} label="还款来源：" style={{ width: "800px" }} labelCol={{ span: "3" }}>
-                            <Input disabled={!props.canEdit}  {...getFieldProps('repaymentSource', { rules: [{ validator: this.remarkValidator }] }) } type="textarea" autoComplete="off" />
+                        <FormItem  {...formItemLayout} label="还款来源：" style={{width: "800px"}} labelCol={{span: "3"}}>
+                            <Input
+                                disabled={!props.canEdit}  {...getFieldProps('repaymentSource', {rules: [{validator: this.remarkValidator}]})}
+                                type="textarea" autoComplete="off"/>
                         </FormItem>
                     </Col>
                 </Row>
                 <Row>
                     <Col span="7">
-                        <FormItem  {...formItemLayout} label="代收服务费利率(%)：" labelCol={{ span: "12" }} wrapperCol={{ span: "11" }}>
+                        <FormItem  {...formItemLayout} label="代收服务费利率(%)：" labelCol={{span: "12"}}
+                                   wrapperCol={{span: "11"}}>
                             <Input disabled={!props.canEdit}  {...getFieldProps('collectionRate',
                                 {
                                     rules: [
-                                        { message: '不能为负数，不能大于100,保留两位小数', pattern: /^(\d{1,2}(\.\d{0,2})?|100)$/ },
+                                        {message: '不能为负数，不能大于100,保留两位小数', pattern: /^(\d{1,2}(\.\d{0,2})?|100)$/},
                                     ]
-                                }) } autoComplete="off" />
+                                })} autoComplete="off"/>
                         </FormItem>
                     </Col>
                     <Col span="7">
-                        <FormItem  {...formItemLayout} label="代收服务费金额(元)：" labelCol={{ span: "12" }} wrapperCol={{ span: "11" }}>
+                        <FormItem  {...formItemLayout} label="代收服务费金额(元)：" labelCol={{span: "12"}}
+                                   wrapperCol={{span: "11"}}>
                             <MicroInput disabled={!props.canEdit}  {...getFieldProps('collectionServiceFee',
                                 {
                                     rules: [
-                                        { message: '不能为负数,保留2位小数,不能大于10位数', pattern: /^(\d{1,10})(\.\d{0,2})?$/ },
+                                        {message: '不能为负数,保留2位小数,不能大于10位数', pattern: /^(\d{1,10})(\.\d{0,2})?$/},
                                     ]
                                 }
-                            ) } type="text" autoComplete="off" />
+                            )} type="text" autoComplete="off"/>
                         </FormItem>
                     </Col>
                 </Row>

@@ -154,6 +154,17 @@
 		</trim>
 	</sql>
 
+	<sql id="searchByMap">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="name !='' and name !=null">
+				cus.name  = #{name}
+			</if>
+			<if test="status !='' and status !=null">
+				and cus.status = #{status}
+			</if>
+		</trim>
+	</sql>
+
 	<!-- 退费、垫资申请where条件 -->
 	<sql id="searchByPoFee">
 		<trim prefix="where" prefixOverrides="and|or">
@@ -597,6 +608,18 @@
 		INNER JOIN pub_project proj on proj.id=cons.project_id
 		INNER JOIN pub_customer cus on cus.id=cons.customer_id
 		INNER JOIN sys_dict_detail sd on sd.item_code = cons.status and sd.parent_id=23
+		<if test="userName !=null or coveredOffices != null" >
+			INNER JOIN sys_user us ON us.id = cus.creator AND (
+			<if test="userName !='' and userName !=null">
+				(us.user_name = #{userName}) OR
+			</if>
+			(us.office_id IN
+			<foreach item="coveredOffices" collection="coveredOffices" open="(" separator="," close=")">
+				${coveredOffices}
+			</foreach>
+			))
+		</if>
+		<include refid="searchByMap"/>
 		ORDER BY cons.create_time DESC
     </select>
 

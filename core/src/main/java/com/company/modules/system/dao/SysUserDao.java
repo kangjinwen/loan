@@ -7,6 +7,7 @@ import com.company.common.dao.BaseDao;
 import com.company.common.utils.annotation.RDBatisDao;
 import com.company.modules.common.exception.PersistentDataException;
 import com.company.modules.system.domain.SysUser;
+import org.apache.ibatis.annotations.Param;
 
 
 /**
@@ -67,6 +68,8 @@ public interface SysUserDao extends BaseDao<SysUser, Long>{
 
 	List<Map<String, Object>> getUserInfoOracle(Map<String, Object> mapdata);
 
+	List<Map<String, Object>> getCoveredUserList(Map<String, Object> mapdata);
+
 	Map<String, Object> queryTheLeastBusyUserByMap(Map<String, Object> params);
 
 	Map<String, Object> queryTheUserWhoDidThisTask(Map<String, Object> paramMap);
@@ -74,4 +77,6 @@ public interface SysUserDao extends BaseDao<SysUser, Long>{
 	SysUser getUserByMap(Map<String, Object> paramMap);
 
 	List<Map<String, Object>> getUserInfo(Map<String, Object> params);
+
+	Map<String,Object> getUserByChannelId(@Param("channelId")Integer channelId);
 }

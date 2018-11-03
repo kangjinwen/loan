@@ -92,7 +92,7 @@
        <trim prefix="set" suffixOverrides=",">
 				<if test="id != '' and id!= null">		 ID=#{id}		</if>
             	<if test="productType != '' and productType!= null">		,PRODUCT_TYPE=#{productType}		</if>
-            	<if test="formulaId != '' and formulaId!= null">		,FORMULA_ID=#{formulaId}		</if>
+            	<if test="formulaId!= null">		,FORMULA_ID=#{formulaId}		</if>
             	<if test="ptype != '' and ptype!= null">		,PTYPE=#{ptype}		</if>
             	<if test="createDate != '' and createDate!= null">		,CREATE_DATE=#{createDate}		</if>
             	<if test="createName != '' and createName!= null">		,CREATE_NAME=#{createName}		</if>

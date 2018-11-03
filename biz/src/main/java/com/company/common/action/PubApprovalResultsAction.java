@@ -27,6 +27,10 @@ import com.company.common.utils.JsonUtil;
 import com.company.common.utils.ServletUtils;
 import com.company.common.web.action.BaseAction;
 
+import org.activiti.engine.TaskService;
+import org.activiti.engine.task.Task;
+import com.company.modules.common.utils.ApplicationContextHelperBean;
+
 @RequestMapping("/modules/common/PubApprovalResultsAction")
 @Controller
 public class PubApprovalResultsAction extends BaseAction {
@@ -69,37 +73,47 @@ public class PubApprovalResultsAction extends BaseAction {
                 returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_FAIL);
             }
         }  else {
-            PlBorrowRequirement plBorrowRequirement = plBorrowRequirementService.getInfoByProcessInstanceId(processInstanceId);
-            if (plBorrowRequirement != null) {
-                PlApprovalResults newplApprovalResults = new PlApprovalResults();
-                newplApprovalResults.setCreator(plBorrowRequirement.getCreator().intValue());
-                newplApprovalResults.setCreateTime(new Date());
-                newplApprovalResults.setProcessInstanceId(processInstanceId);
-                newplApprovalResults.setProjectId(plBorrowRequirement.getProjectId().intValue());
-                newplApprovalResults.setConsultId(plBorrowRequirement.getConsultId().intValue());
-                if (plBorrowRequirement.getCustomerId() != null) {
-                    newplApprovalResults.setCustomerId(plBorrowRequirement.getCustomerId().intValue());
-                }
-                newplApprovalResults.setProductId(plBorrowRequirement.getProductId().intValue());
-                newplApprovalResults.setApprovalAccount(approvalaccount);
-                newplApprovalResults.setApprovalTimeLimit(approvaltimelimit);
-                newplApprovalResults.setMortgagePrice(mortgageprice);
-                influence = plApprovalResultsService.insert(newplApprovalResults);
-                if (influence > 0) {
-                    returnMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
-                    returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+            // 比对是否流程操作员
+            TaskService taskService = ApplicationContextHelperBean.getBean(TaskService.class);
+            List<Task> task = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+            if (sysUser.getUserName().equals(task.get(0).getAssignee())) {
+
+                PlBorrowRequirement plBorrowRequirement = plBorrowRequirementService.getInfoByProcessInstanceId(processInstanceId);
+                if (plBorrowRequirement != null) {
+                    PlApprovalResults newplApprovalResults = new PlApprovalResults();
+                    newplApprovalResults.setCreator(plBorrowRequirement.getCreator().intValue());
+                    newplApprovalResults.setCreateTime(new Date());
+                    newplApprovalResults.setProcessInstanceId(processInstanceId);
+                    newplApprovalResults.setProjectId(plBorrowRequirement.getProjectId().intValue());
+                    newplApprovalResults.setConsultId(plBorrowRequirement.getConsultId().intValue());
+                    if (plBorrowRequirement.getCustomerId() != null) {
+                        newplApprovalResults.setCustomerId(plBorrowRequirement.getCustomerId().intValue());
+                    }
+                    newplApprovalResults.setProductId(plBorrowRequirement.getProductId().intValue());
+                    newplApprovalResults.setApprovalAccount(approvalaccount);
+                    newplApprovalResults.setApprovalTimeLimit(approvaltimelimit);
+                    newplApprovalResults.setMortgagePrice(mortgageprice);
+                    influence = plApprovalResultsService.insert(newplApprovalResults);
+                    if (influence > 0) {
+                        returnMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+                        returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+                    } else {
+                        returnMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
+                        returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_FAIL);
+                    }
                 } else {
                     returnMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
                     returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_FAIL);
                 }
             } else {
                 returnMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
-                returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_FAIL);
+                returnMap.put(Constant.RESPONSE_CODE_MSG, "非当前流程操作人员 不可操作");
             }
         }
         ServletUtils.writeToResponse(response, returnMap);
     }
 
+    /**
     @RequestMapping("/queryPubApprovalResults.htm")
     public void QueryPubApprovalResults(HttpServletResponse response, HttpServletRequest request,
                                       @RequestParam(value = "processInstanceId", required = true) String processInstanceId) throws Exception{
@@ -110,9 +124,11 @@ public class PubApprovalResultsAction extends BaseAction {
 
         PlApprovalResults plApprovalResults = plApprovalResultsService.getInfoByProcessInstanceId(processInstanceId);
         if (plApprovalResults != null) {
-            returnMap.put("approvalaccount", plApprovalResults.getApprovalAccount().toString());
-            returnMap.put("approvaltimelimit", plApprovalResults.getApprovalTimeLimit().toString());
-            returnMap.put("mortgageprice", plApprovalResults.getMortgagePrice().toString());
+            int resApprovalAccount = plApprovalResults.getApprovalAccount().intValue();
+            returnMap.put("approvalaccount", resApprovalAccount);
+            returnMap.put("approvaltimelimit", plApprovalResults.getApprovalTimeLimit());
+            int resMortgagePrice = plApprovalResults.getMortgagePrice().intValue();
+            returnMap.put("mortgageprice", resMortgagePrice);
             returnMap.put("remark", plApprovalResults.getRemark());
             returnMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
             returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
@@ -122,4 +138,27 @@ public class PubApprovalResultsAction extends BaseAction {
         }
         ServletUtils.writeToResponse(response, returnMap);
     }
+    **/
+
+    //@RequestMapping("/queryApprovalResultsByProcessId.htm")
+    @RequestMapping("/queryPubApprovalResults.htm")
+    public void queryApprovalResultsByProcessId(HttpServletResponse response, HttpServletRequest request,
+        @RequestParam(value = "processInstanceId") String processInstanceId) throws Exception{
+
+        Map<String, Object> returnMap = new HashMap<String, Object>();
+        PageHelper.startPage(1, 10);
+        List<Map<String,Object>> plApprovalResults = plApprovalResultsService.getItemInfosByProcessInstanceId(processInstanceId);
+        if (plApprovalResults != null) {
+            PageInfo<Map<String,Object>> page = new PageInfo<Map<String,Object>>(plApprovalResults);
+            returnMap.put(Constant.RESPONSE_DATA, page.getList());
+            returnMap.put(Constant.RESPONSE_DATA_TOTALCOUNT, page.getTotal());
+            returnMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+            returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+        } else {
+            returnMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
+            returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_FAIL);
+        }
+        ServletUtils.writeToResponse(response, returnMap);
+    }
+
 }

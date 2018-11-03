@@ -50,13 +50,27 @@ public class SysRoleAction extends BaseAction {
 	 * @created 2014年10月15日
 	 */
 	@RequestMapping(value = "/modules/system/getRoleList.htm")
-	public void getRoleList(HttpServletRequest request, HttpServletResponse response) throws Exception{
+	public void getRoleList(HttpServletRequest request, HttpServletResponse response,
+							@RequestParam(value = "currentPage", required = false, defaultValue = "0") int currentPage,
+							@RequestParam(value = "pageSize", required = false, defaultValue = "0") int pageSize) throws Exception{
 		Map<String, Object> res = new HashMap<String, Object>();
-		Map<String, Object> param = new HashMap<>();
-		param.put("isDelete", "0");
-		List<SysRole> sysRoleList = sysRoleService.getListByMap(param);
+
+        SysUser loginUser = getLoginUser(request);
+        String userName = loginUser.getUserName();
+
+		//系统管理员管理员 不做过滤
+		if (getRoleForLoginUser(request).isAdmin()) {
+			userName = null;
+		};
+		if (currentPage > 0 && pageSize > 0){
+			PageHelper.startPage(currentPage, pageSize);
+		}
+
+		List<SysRole> sysRoleList = sysRoleService.getRoleListByUsername(userName);
+		Map<String, Object> param = new HashMap<String, Object>();
+		int totalCount = sysRoleService.getRolecount(param);
 		res.put("data", sysRoleList);
-		res.put("totalCount", sysRoleList.size());
+		res.put("totalCount", totalCount);
 		res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
 		res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
 		ServletUtils.writeToResponse(response, res);
@@ -84,6 +98,7 @@ public class SysRoleAction extends BaseAction {
 		param.put("delete", "0");
 		int roleNum = sysUserService.queryRoleUserIsUse(param);
 		if (roleNum >= 1) {
+			// TODO: 2018/9/21 需要执行两次删除操作，第一：删除角色和用户的关联   第二：删除角色和菜单的关联 
 			res.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
 			res.put(Constant.RESPONSE_CODE_MSG, "角色有用户在使用，删除失败");
 			ServletUtils.writeToResponse(response, res);
@@ -133,13 +148,24 @@ public class SysRoleAction extends BaseAction {
 			role.setName(dataMap.get("name") != null ? String.valueOf(dataMap.get("name")) :"");
 			role.setNid(dataMap.get("nid") != null ? String.valueOf(dataMap.get("nid")) :"");
 			role.setRemark(dataMap.get("remark") != null ? String.valueOf(dataMap.get("remark")) :"");
-			long n = sysRoleService.addRole(role);
-			if (n > 0) {
-				responseMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
-				responseMap.put(Constant.RESPONSE_CODE_MSG, "保存成功");
-			} else {
+
+			Map<String, Object> param = new HashMap<>();
+			param.put("nid",role.getNid());
+			List<SysRole> sysRoles = (List<SysRole>) sysRoleService.getRolePageList(param);
+			if (sysRoles.size() == 0) {
+				long n = sysRoleService.addRole(role);
+				if (n > 0) {
+					responseMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+					responseMap.put(Constant.RESPONSE_CODE_MSG, "保存成功");
+				} else {
+					responseMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
+					responseMap.put(Constant.RESPONSE_CODE_MSG, "保存失败");
+				}
+			}
+			else
+			{
 				responseMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
-				responseMap.put(Constant.RESPONSE_CODE_MSG, "保存失败");
+				responseMap.put(Constant.RESPONSE_CODE_MSG, "角色唯一标志已经存在");
 			}
 		} else if ("update".equals(status)) {
 			int total = sysRoleService.updateRole(dataMap);

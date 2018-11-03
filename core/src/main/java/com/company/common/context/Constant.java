@@ -19,7 +19,7 @@ public class Constant {
 
 	public static final String RESPONSE_CODE_MSG = "msg";
 
-	
+
 	public static final String INSERT = "create";
 	
 	public static final String UPDATE = "update";
@@ -85,4 +85,7 @@ public class Constant {
 	 * @since 1.0.0
 	 */
 	public static final int MIN_CARDISPOSALSCHEME_COUNT=3;
+
+	public static final String ALLOW_REASSIGN="allowReAssign";
+
 }

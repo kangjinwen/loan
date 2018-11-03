@@ -73,7 +73,7 @@ public class PlProductServiceImpl extends BaseServiceImpl implements PlProductSe
 	 * @throws Exception
 	 */
 	@Override
-	public List<PlProduct> getPageListByMap(Map<String , Object> data) throws Exception {
+	public List<Map<String, Object>> getPageListByMap(Map<String, Object> data) throws Exception {
 		try {
 			return plProductDao.getPageListByMap(data);
 		} catch (Exception e) {

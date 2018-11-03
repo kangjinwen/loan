@@ -23,21 +23,21 @@ public class Base64 {
         }
     }
 
-    public static String encodeStr(String newStr) {
+	public static String encodeStr(String newStr) throws Exception {
         if (newStr == null || newStr.length() == 0)
             return null;
         String encoded = encode(newStr.getBytes());
         if (encoded == null || encoded.length() == 0)
             return null;
 
-        return java.net.URLEncoder.encode(encoded);
+		return java.net.URLEncoder.encode(encoded, "utf-8");
 
     }
     
-    public static String decodeStr(String newStr) {
+	public static String decodeStr(String newStr) throws Exception {
         if (newStr == null || newStr.length() == 0)
             return null;
-        String urlDecode = java.net.URLDecoder.decode(newStr);
+		String urlDecode = java.net.URLDecoder.decode(newStr, "utf-8");
 
         byte[] decode = decode(urlDecode);
         if (decode == null || decode.length == 0)

@@ -18,8 +18,8 @@ module.exports = {
     proxy: {
       '/api': {
         // target: 'http://192.168.1.136:8080/',
-        target: 'http://192.168.1.141:8080/',
-          // target: 'http://123.206.6.152:8082/',
+          // target: 'http://192.168.1.141:8080/',
+          target: 'http://localhost:8080/',
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''
@@ -27,8 +27,8 @@ module.exports = {
       },
       '/modules': {
           // target: 'http://192.168.1.136:8080/',
-          target: 'http://192.168.1.141:8080/',
-          // target: 'http://123.206.6.152:8082/',
+          //target: 'http://192.168.1.141:8080/',
+          target: 'http://localhost:8080/',
           changeOrigin: true
       }
     }

@@ -127,4 +127,8 @@ public interface SysMenuDao extends BaseDao<SysMenu,Long>{
 	 * @since  1.0.0
 	*/
 	List<Map<String, Object>> fetchAllMenu();
+
+	Map<String, Object> getRouteInfoByScriptid(String scriptid);
+
+	Map<String, Object> getRouteInfoByProcessState(String processState);
 }

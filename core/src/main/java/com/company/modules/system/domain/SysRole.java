@@ -236,4 +236,8 @@ public class SysRole implements Serializable {
 	public void setNid(String nid) {
 		this.nid = nid;
 	}
+
+	public boolean isAdmin() {
+		return getId() == 1;//特殊处理
+	}
 }

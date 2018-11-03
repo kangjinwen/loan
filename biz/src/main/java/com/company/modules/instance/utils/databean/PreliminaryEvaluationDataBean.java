@@ -3,6 +3,7 @@ package com.company.modules.instance.utils.databean;
 import java.io.Serializable;
 import java.util.List;
 
+import com.company.common.domain.PlApprovalResults;
 import com.company.common.domain.PlBorrowRequirement;
 import com.company.modules.common.utils.databean.BasicServiceDataBean;
 import com.company.modules.instance.domain.HousAssessmentAgencies;
@@ -26,6 +27,8 @@ public class PreliminaryEvaluationDataBean extends BasicServiceDataBean implemen
 	public String getCustomerId() {
 		return customerId;
 	}
+	private PlApprovalResults plApprovalResults;
+
 
 	public void setCustomerId(String customerId) {
 		this.customerId = customerId;
@@ -102,5 +105,12 @@ public class PreliminaryEvaluationDataBean extends BasicServiceDataBean implemen
 	public void setBranchingProcessId(String branchingProcessId) {
 		this.branchingProcessId = branchingProcessId;
 	}
-	
+
+	public PlApprovalResults getPlApprovalResults() {
+		return plApprovalResults;
+	}
+
+	public void setPlApprovalResults(PlApprovalResults plApprovalResults) {
+		this.plApprovalResults = plApprovalResults;
+	}
 }

@@ -33,11 +33,9 @@ public class AdvanceConfirmServiceImpl extends HistoryRecorderService implements
 	private PubProcessBranchingDao pubProcessBranchingDao;
 
 	@Override
-	protected void preCheckCurrentWorkflowState(
-			ProjectWorkflowDataBean projectWorkflowDataBean)
+	protected void preCheckCurrentWorkflowState(ProjectWorkflowDataBean projectWorkflowDataBean)
 			throws ServiceException {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -47,31 +45,31 @@ public class AdvanceConfirmServiceImpl extends HistoryRecorderService implements
 	@Override
 	public void advanceConfirmTask(AdvanceConfirmTaskDataBean serviceDataBean, DelegateTask delegateTask)
 			throws Exception {
-		HousAdvanceApply housAdvanceApply=serviceDataBean.getHousAdvanceApply();
+		HousAdvanceApply housAdvanceApply = serviceDataBean.getHousAdvanceApply();
 		try {
 			PubProcessBranching pubProcessBranching = new PubProcessBranching();
 			pubProcessBranching.setProcessingOpinion(serviceDataBean.getNextStep());
 			pubProcessBranching.setRemark2(serviceDataBean.getRemarkComment());
-			Map map = new HashMap();
+			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("branchingProcessId", serviceDataBean.getProcessInstanceId());
-			map.put("isActive",WorkFlowConstant.IS_ACTIVE_TRUE);
+			map.put("isActive", WorkFlowConstant.IS_ACTIVE_TRUE);
 			PubProcessBranching pb = null;
-			List<PubProcessBranching> list= pubProcessBranchingDao.getPageListByMap(map);
-			if(list==null || list.size()==0){
+			List<PubProcessBranching> list = pubProcessBranchingDao.getPageListByMap(map);
+			if (list == null || list.size() == 0) {
 				throw new ServiceException("查询不到指定的分支流程");
 			}
 			pb = list.get(0);
 			pb.setProcessingOpinion(pubProcessBranching.getProcessingOpinion());
 			pb.setRemark2(pubProcessBranching.getRemark2());
-			
+
 			pb.setModifier(serviceDataBean.getUserName());
 			pb.setModifyTime(new Date());
 			pb.setTaskId(serviceDataBean.getTaskId());
-			
-			//如果驳回，分支流程除了结束，而且也不再显示（但通过查询历史等，是应该可以查询的）
-			if(WorkFlowConstant.NEXT_STEP_REFUSE.equalsIgnoreCase(serviceDataBean.getNextStep())){
+
+			// 如果驳回，分支流程除了结束，而且也不再显示（但通过查询历史等，是应该可以查询的）
+			if (WorkFlowConstant.NEXT_STEP_REFUSE.equalsIgnoreCase(serviceDataBean.getNextStep())) {
 				pb.setIsActive((byte) 0);
-			}else if(WorkFlowConstant.NEXT_STEP_PASS.equalsIgnoreCase(serviceDataBean.getNextStep())){
+			} else if (WorkFlowConstant.NEXT_STEP_PASS.equalsIgnoreCase(serviceDataBean.getNextStep())) {
 				pb.setProcessStatus(HousAdvanceApply.USERTASK_LOANING_NOTARIZE);
 				housAdvanceApply.setStatus(HousAdvanceApply.USERTASK_LOANING_NOTARIZE);
 			}
@@ -80,8 +78,8 @@ public class AdvanceConfirmServiceImpl extends HistoryRecorderService implements
 		} catch (Exception e) {
 			throwServiceExceptionAndLog(logger, "数据库操作失败。", e, Constant.OTHER_CODE_VALUE);
 		}
-		recordLoanProcessHistory(serviceDataBean);//记录审批历史
-		
+		recordLoanProcessHistory(serviceDataBean);// 记录审批历史
+
 	}
 
 	/**
@@ -89,34 +87,33 @@ public class AdvanceConfirmServiceImpl extends HistoryRecorderService implements
 	 */
 	@Transactional
 	@Override
-	public void advanceCustomerServiceConfirmTask(
-			AdvanceConfirmTaskDataBean serviceDataBean,
-			DelegateTask delegateTask) throws Exception {
-		HousAdvanceApply housAdvanceApply=serviceDataBean.getHousAdvanceApply();
+	public void advanceCustomerServiceConfirmTask(AdvanceConfirmTaskDataBean serviceDataBean, DelegateTask delegateTask)
+			throws Exception {
+		HousAdvanceApply housAdvanceApply = serviceDataBean.getHousAdvanceApply();
 		try {
 			PubProcessBranching pubProcessBranching = new PubProcessBranching();
 			pubProcessBranching.setProcessingOpinion(serviceDataBean.getNextStep());
 			pubProcessBranching.setRemark2(serviceDataBean.getRemarkComment());
-			Map map = new HashMap();
+			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("branchingProcessId", serviceDataBean.getProcessInstanceId());
-			map.put("isActive",WorkFlowConstant.IS_ACTIVE_TRUE);
+			map.put("isActive", WorkFlowConstant.IS_ACTIVE_TRUE);
 			PubProcessBranching pb = null;
-			List<PubProcessBranching> list= pubProcessBranchingDao.getPageListByMap(map);
-			if(list==null || list.size()==0){
+			List<PubProcessBranching> list = pubProcessBranchingDao.getPageListByMap(map);
+			if (list == null || list.size() == 0) {
 				throw new ServiceException("查询不到指定的分支流程");
 			}
 			pb = list.get(0);
 			pb.setProcessingOpinion(pubProcessBranching.getProcessingOpinion());
 			pb.setRemark2(pubProcessBranching.getRemark2());
-			
+
 			pb.setModifier(serviceDataBean.getUserName());
 			pb.setModifyTime(new Date());
 			pb.setTaskId(serviceDataBean.getTaskId());
-			
-			//如果驳回，分支流程除了结束，而且也不再显示（但通过查询历史等，是应该可以查询的）
-			if(WorkFlowConstant.NEXT_STEP_CUSTOMERGIVEUP.equalsIgnoreCase(serviceDataBean.getNextStep())){
+
+			// 如果驳回，分支流程除了结束，而且也不再显示（但通过查询历史等，是应该可以查询的）
+			if (WorkFlowConstant.NEXT_STEP_CUSTOMERGIVEUP.equalsIgnoreCase(serviceDataBean.getNextStep())) {
 				pb.setIsActive((byte) 0);
-			}else if(WorkFlowConstant.NEXT_STEP_PASS.equalsIgnoreCase(serviceDataBean.getNextStep())){
+			} else if (WorkFlowConstant.NEXT_STEP_PASS.equalsIgnoreCase(serviceDataBean.getNextStep())) {
 				pb.setProcessStatus(HousAdvanceApply.USERTASK_LOANING);
 				housAdvanceApply.setStatus(HousAdvanceApply.USERTASK_LOANING);
 			}
@@ -124,10 +121,10 @@ public class AdvanceConfirmServiceImpl extends HistoryRecorderService implements
 			housAdvanceApplyDao.update(housAdvanceApply);
 		} catch (Exception e) {
 			throwServiceExceptionAndLog(logger, "数据库操作失败。", e, Constant.OTHER_CODE_VALUE);
-		}		
-		recordLoanProcessHistory(serviceDataBean);//记录审批历史
-		
-	}	
+		}
+		recordLoanProcessHistory(serviceDataBean);// 记录审批历史
+
+	}
 
 	/**
 	 * 垫资操作
@@ -135,20 +132,19 @@ public class AdvanceConfirmServiceImpl extends HistoryRecorderService implements
 	 */
 	@Transactional
 	@Override
-	public void advanceDisposeServiceConfirmTask(
-			AdvanceConfirmTaskDataBean serviceDataBean,
-			DelegateTask delegateTask) throws Exception {
-		HousAdvanceApply housAdvanceApply=serviceDataBean.getHousAdvanceApply();
+	public void advanceDisposeServiceConfirmTask(AdvanceConfirmTaskDataBean serviceDataBean, DelegateTask delegateTask)
+			throws Exception {
+		HousAdvanceApply housAdvanceApply = serviceDataBean.getHousAdvanceApply();
 		try {
 			PubProcessBranching pubProcessBranching = new PubProcessBranching();
 			pubProcessBranching.setProcessingOpinion(serviceDataBean.getNextStep());
 			pubProcessBranching.setRemark2(serviceDataBean.getRemarkComment());
-			Map map = new HashMap();
+			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("branchingProcessId", serviceDataBean.getProcessInstanceId());
-			map.put("isActive",WorkFlowConstant.IS_ACTIVE_TRUE);
+			map.put("isActive", WorkFlowConstant.IS_ACTIVE_TRUE);
 			PubProcessBranching pb = null;
-			List<PubProcessBranching> list= pubProcessBranchingDao.getPageListByMap(map);
-			if(list==null || list.size()==0){
+			List<PubProcessBranching> list = pubProcessBranchingDao.getPageListByMap(map);
+			if (list == null || list.size() == 0) {
 				throw new ServiceException("查询不到指定的分支流程");
 			}
 			pb = list.get(0);
@@ -161,9 +157,9 @@ public class AdvanceConfirmServiceImpl extends HistoryRecorderService implements
 			housAdvanceApplyDao.update(housAdvanceApply);
 		} catch (Exception e) {
 			throwServiceExceptionAndLog(logger, "数据库操作失败。", e, Constant.OTHER_CODE_VALUE);
-		}		
-		recordLoanProcessHistory(serviceDataBean);//记录审批历史
-		
-	}	
-	
+		}
+		recordLoanProcessHistory(serviceDataBean);// 记录审批历史
+
+	}
+
 }

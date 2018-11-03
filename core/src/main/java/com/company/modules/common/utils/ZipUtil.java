@@ -1,10 +1,6 @@
 package com.company.modules.common.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -61,6 +57,6 @@ public class ZipUtil {
             zipFile.close();
         } catch (Exception e) {  
             e.printStackTrace();  
-        }  
+        }
     }
 }

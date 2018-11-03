@@ -62,15 +62,19 @@ let SeachForm = React.createClass({
     } = this.props.form;
     return (
       <Form inline >
-        <FormItem label="客户状态：">
-          <Input  {...getFieldProps('projectCode') } />
-        </FormItem>
-        <FormItem label="客户名称：">
-          <Input  {...getFieldProps('customerName') } />
-        </FormItem>
+          <FormItem label="客户状态：">
+              {/*<Input  {...getFieldProps('status') } />*/}
+              <Select style={{width: 150}} {...getFieldProps('status')}>
+                  <Option value="0">正常用户</Option>
+                  <Option value="1">黑名单用户</Option>
+              </Select>
+          </FormItem>
+          <FormItem label="客户名称：">
+              <Input  {...getFieldProps('name')} />
+          </FormItem>
         {/* <FormItem label="来源：">
           <Select style={{ width: 150 }} {...getFieldProps('businessOriginText') }>
-            <Option  value="赚赚自有">赚赚自有</Option>
+
             <Option  value="报单机构">报单机构</Option>
             <Option  value="报单个人">报单个人</Option>
           </Select>

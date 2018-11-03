@@ -33,6 +33,8 @@ public class PlApprovalResults implements Serializable {
 
     private BigDecimal mortgagePrice;
 
+    private String processState;
+
     private String remark;
 
     public Integer getId() {
@@ -145,6 +147,14 @@ public class PlApprovalResults implements Serializable {
 
     public void setMortgagePrice(BigDecimal mortgagePrice) {
         this.mortgagePrice = mortgagePrice;
+    }
+
+    public String getProcessState() {
+        return processState;
+    }
+
+    public void setProcessState(String processState) {
+        this.processState = processState == null ? null : processState.trim();
     }
 
     public String getRemark() {

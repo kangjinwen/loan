@@ -90,9 +90,6 @@ public class ProductParamAction extends BaseAction {
      * @param currentPage   当前页数
      * @param pageSize      每页限制
      * @param searchParam   查询条件
-     * @param whereSql      直接的sql
-     * @param fields        排序字段
-     * @param rule          排序方式
      * @throws ServiceException
      */
     @RequestMapping("/getProductParamList.htm")
@@ -151,12 +148,15 @@ public class ProductParamAction extends BaseAction {
 	  /**
      * 机构下拉框
      * @throws ServiceException
+	   * 0:冠润；1：渠道；2：机构
      */
     @RequestMapping("/getOfficeCombo.htm")
-    public void getOfficeCombo ( HttpServletRequest request,HttpServletResponse response)
+    public void getOfficeCombo ( HttpServletRequest request,HttpServletResponse response,@RequestParam(value = "type", required = false) String type)
     throws Exception{
     Map<String, Object> paramap=new HashMap<String, Object>();
-    
+		if (type != null &type != "") {
+			paramap.put("type",type);
+		}
         //返回页面的json参数
       List<Map<String, Object>> comboList=productParamService.getOfficeCombo(paramap);
       Map<String,Object> returnMap=new HashMap<String,Object>();

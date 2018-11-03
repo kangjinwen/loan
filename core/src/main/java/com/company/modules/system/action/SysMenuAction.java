@@ -111,15 +111,20 @@ public class SysMenuAction extends BaseAction {
 			long roleId
 			) throws Exception{
 		List<Map<String, Object>> list=sysMenuService.fetchRoleMenuHas(roleId);
-		for (Map<String, Object> rec : list) {
-			if(rec.get("checked").toString().equals("1")){
-				rec.put("checked",true);
-			}else{
-				rec.put("checked",false);
-			}
-		}
+
 		list=ListUtil.list2Tree(list,"value","parentId");
 		list=ListUtil.treeForExt(list, null, null, true);
+
+		for (Map<String, Object> rec : list) {
+			if(rec.containsKey("leaf") && rec.get("leaf").toString().equals("true")) {
+				if (rec.get("checked").toString().equals("1")) {
+					rec.put("checked", true);
+				} else {
+					rec.put("checked", false);
+				}
+			}
+		}
+
 		Map<String, Object> res = new HashMap<String, Object>();
 		res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
 		res.put(Constant.RESPONSE_DATA, list);

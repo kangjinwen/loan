@@ -2,15 +2,13 @@ package com.company.common.service.impl;
 
 import java.io.Serializable;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.company.common.dao.BaseDao;
 import com.company.common.service.BaseService;
 
-public abstract class BaseServiceImpl<T, ID extends Serializable> implements
-		BaseService<T, ID> {
+public abstract class BaseServiceImpl<T, ID extends Serializable> implements BaseService<T, ID> {
 	public int deleteByID(ID id) {
 		return getMapper().deleteByPrimary(id);
 	}
@@ -29,15 +27,9 @@ public abstract class BaseServiceImpl<T, ID extends Serializable> implements
 
 	public abstract BaseDao<T, ID> getMapper();
 
-	@Autowired
-	private BaseDao<T, ID> baseDao;
-	
 	protected String getLoginName() {
-		// TODO; 增加用户登录判断
-		UserDetails user = (UserDetails) SecurityContextHolder.getContext()
-				.getAuthentication().getPrincipal();
+		UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return user.getUsername();
 	}
-	
 
 }

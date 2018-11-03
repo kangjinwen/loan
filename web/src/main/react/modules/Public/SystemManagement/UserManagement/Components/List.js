@@ -2,21 +2,21 @@ var React = require('react');
 import ReactDOM from 'react-dom';
 import { Table,Icon,Popover,Button,Modal } from 'antd';
 var confirm = Modal.confirm;
-import reqwest from 'reqwest';  
-import UserWin from './UserWin';  
-export default React.createClass({ 
+import reqwest from 'reqwest';
+import UserWin from './UserWin';
+export default React.createClass({
     getInitialState() {
       return {
         selectedRowKeys: [],  // 这里配置默认勾选列
         loading: false,
         data: [],
-        pagination: {}, 
+        pagination: {},
         canEdit:true,
         visible: false,
       };
     },
     componentWillReceiveProps(nextProps, nextState) {
-      console.log(nextProps.params);  
+      console.log(nextProps.params);
       this.fetch(nextProps.params);
     },
     handleTableChange(pagination, filters, sorter) {
@@ -30,14 +30,15 @@ export default React.createClass({
         currentPage: pagination.current,
         sortField: sorter.field,
         sortOrder: sorter.order,
+        userName:window.roleId,
         ...filters,
       });
     },
-    fetch(params = {page:1,start:0,limit:10,pageSize:10,currentPage:1}) {
+    fetch(params = {page:1,start:0,limit:10,pageSize:10,currentPage:1,userName:window.roleId}) {
       console.log('请求参数：', params);
       this.setState({ loading: true });
       reqwest({
-        url: "/modules/system/general/getSysUserList.htm", 
+        url: "/modules/system/general/getSysUserList.htm",
         method: 'get',
         data: params,
         type: 'json',
@@ -59,19 +60,19 @@ export default React.createClass({
       this.setState({
         visible: false
       });
-      this.fetch(); 
+      this.fetch();
     },
     showAddModal(title,record,canEdit) {
-      this.setState({ 
-        canEdit: canEdit, 
+      this.setState({
+        canEdit: canEdit,
         visible: true,
         title: title,
         record:record
       });
-      
+
       if(title!='新增'){
          var newRecord = record;
-         newRecord.roleId = [Number(record.roleId)]; 
+         newRecord.roleId = [Number(record.roleId)];
          this.refs.UserWin.setFieldsValue(newRecord);
       }
       else {
@@ -142,21 +143,21 @@ export default React.createClass({
       var me = this;
       const { loading, selectedRowKeys } = this.state;
       const rowSelection = {
-       type:"radio", 
+       type:"radio",
        selectedRowKeys,
        onChange: this.onSelectChange,
       };
       const hasSelected = selectedRowKeys.length > 0;
       var columns = [{
             title: '主键',
-            dataIndex: 'id' 
+            dataIndex: 'id'
             },{
               title: '真实姓名',
-              dataIndex: 'name' 
+              dataIndex: 'name'
             },
             {
               title: '用户名称',
-              dataIndex: 'userName' 
+              dataIndex: 'userName'
             },{
               title: '工号',
               dataIndex: "number"
@@ -178,17 +179,17 @@ export default React.createClass({
                 if(value==1)
                   return "锁定";
                 else return "正常";
-              } 
+              }
             },
             {
               title: '操作',
               key: 'operation',
               render(text, record) {
                 var content = <div style={{textAlign: "center"}}><button className="ant-btn" style={{marginRight: 16}}  onClick={me.showAddModal.bind(me,'修改',record,true)}>修改 </button><button className="ant-btn"  onClick={me.showAddModal.bind(me,'查看',record,false)}>查看 </button></div> ;
-                return ( 
+                return (
                     <Popover overlay={content}  trigger="hover">
                        <Icon type="edit" />
-                    </Popover> 
+                    </Popover>
                 );
               }
             }];
@@ -196,16 +197,16 @@ export default React.createClass({
       return (
         <div className="block-panel">
           <div className="actionBtns" style={{ marginBottom: 16 }}>
-            <button className="ant-btn"  onClick={this.showAddModal.bind(this,'新增',null,true)}> 
+            <button className="ant-btn"  onClick={this.showAddModal.bind(this,'新增',null,true)}>
               新增
             </button>
-            <button className="ant-btn" disabled={!hasSelected}   onClick={this.handleClick.bind(this,'锁定',false)}> 
+            <button className="ant-btn" disabled={!hasSelected}   onClick={this.handleClick.bind(this,'锁定',false)}>
               锁定
-            </button> 
-            <button className="ant-btn" disabled={!hasSelected}   onClick={this.handleClick.bind(this,'解锁',false)}> 
+            </button>
+            <button className="ant-btn" disabled={!hasSelected}   onClick={this.handleClick.bind(this,'解锁',false)}>
               解锁
-            </button> 
-            <button className="ant-btn" disabled={!hasSelected}   onClick={this.handleClick.bind(this,'密码重置',false)}> 
+            </button>
+            <button className="ant-btn" disabled={!hasSelected}   onClick={this.handleClick.bind(this,'密码重置',false)}>
               密码重置
             </button>
           </div>
@@ -213,10 +214,10 @@ export default React.createClass({
             dataSource={this.state.data}
             pagination={this.state.pagination}
             loading={this.state.loading}
-            onChange={this.handleTableChange}  /> 
+            onChange={this.handleTableChange}  />
           <UserWin ref='UserWin' visible={state.visible} title={state.title} hideAddModal={me.hideAddModal} record={state.record} canEdit={state.canEdit}/>
         </div>
-      ) 
+      )
     }
 });
- 
+

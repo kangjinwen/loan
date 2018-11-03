@@ -271,6 +271,9 @@
 			sys_office
 		WHERE
 			is_delete = 0
+			<if test="parentOfficeId !=null and parentOfficeId !='' ">
+				AND	id like concat('',#{parentOfficeId}, '%')
+			</if>
 		ORDER BY
 			sort,
 			name
@@ -475,5 +478,12 @@
 			)
 		</if>
     </select>
-    
+    <select id="listOrganByProductId" resultType="java.util.Map" >
+		select
+		office_ids
+		from
+		pl_product
+		where 1=1 and
+		pl_product.id = #{productId}
+	</select>
 </mapper>

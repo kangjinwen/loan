@@ -295,4 +295,95 @@
         where
         id  = #{id}
     </delete>
+
+	<insert id="addAppointmentInfo">
+		INSERT INTO sys_appointment_info (
+		NAME,
+		phone,
+		remark,
+		type,
+		create_time,
+		appoint_time,
+		modify_time,
+		proc_inst_id
+	)
+	VALUES
+		(#{name},
+		 #{phone},
+		 #{remark},
+		 #{type},
+		 #{createTime},
+		 #{appointTime},
+		 #{modifyTime},
+		 #{procDefId})
+	</insert>
+
+	<select id="getAppointmentInfoCountByAnyKey" resultType="java.lang.Integer">
+		select count(*)
+		from
+		sys_appointment_info
+		where 1=1
+		<if test="procDefId!= null">
+			and proc_inst_id = #{procDefId}
+		</if>
+		<if test="name!= null">
+			and name = #{name}
+		</if>
+		<if test="phone!= null">
+			and phone = #{phone}
+		</if>
+		<if test="type!= null">
+			and type = #{type}
+		</if>
+		<if test="beginTime!= null">
+			and appoint_time &gt; #{beginTime}
+		</if>
+		<if test="endTime!= null">
+			and appoint_time &lt; #{endTime}
+		</if>
+
+		<!--<if test="beginNum!= null">
+			limit ${beginNum},${checkNum}
+		</if>-->
+
+
+	</select>
+	<select id="getAppointmentInfoByAnyKey" resultType="java.util.Map">
+		select
+		create_time AS createTime,
+		phone,
+		modify_time AS modifyTime,
+		name,
+		proc_inst_id AS processInstanceId,
+		remark,
+		id,
+		type,
+		appoint_time AS appointTime
+		from
+		sys_appointment_info
+		where 1=1
+		<if test="procDefId!= null">
+			and proc_inst_id = #{procDefId}
+		</if>
+		<if test="name!= null">
+			and name = #{name}
+		</if>
+		<if test="phone!= null">
+			and phone = #{phone}
+		</if>
+		<if test="type!= null">
+			and type = #{type}
+		</if>
+		<if test="beginTime!= null">
+			and appoint_time &gt; #{beginTime}
+		</if>
+		<if test="endTime!= null">
+			and appoint_time &lt; #{endTime}
+		</if>
+		ORDER BY
+		id DESC
+		<if test="beginNum!= null">
+			limit ${beginNum},${checkNum}
+		</if>
+	</select>
 </mapper>

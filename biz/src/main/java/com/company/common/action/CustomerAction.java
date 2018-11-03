@@ -26,20 +26,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.company.common.context.Constant;
 import com.company.common.domain.Customer;
-import com.company.common.service.CustomerService;
 import com.company.common.utils.DateUtil;
 import com.company.common.utils.JsonUtil;
 import com.company.common.utils.ServletUtils;
-import com.company.common.utils.StringUtil;
-import com.company.common.utils.UUIDGenerator;
 import com.company.common.web.action.BaseAction;
 import com.company.modules.system.domain.SysRole;
 import com.company.modules.system.service.SysRoleService;
-import com.company.modules.system.service.SysUserService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 
 /**
  * 客户管理模块
@@ -50,23 +46,11 @@ import com.company.modules.system.service.SysUserService;
 @RequestMapping("/modules/common/action/CustomerAction")
 @Controller
 public class CustomerAction extends BaseAction {
-	private static final int CUSTOMER_BLACK_FLAG_1 = 1; //黑名单客户
-
 	private Logger logger = LoggerFactory.getLogger(CustomerAction.class);
-	
-	@Autowired
-	private CustomerService customerService;
 	@Autowired
 	private SysRoleService sysRoleService;
-	@Autowired
-	private SysUserService sysUserService;
-
-
-
 	@RequestMapping("/saveOrUpdate.htm")
 	public void saveOrUpdate(HttpServletResponse response, final HttpServletRequest request, final String json) {
-		final Long curUser = getLoginUser(request).getId();
-		
 	}
 	/**
 	 * 客户列表

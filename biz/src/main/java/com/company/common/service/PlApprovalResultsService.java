@@ -18,6 +18,8 @@ public interface PlApprovalResultsService {
 
     public Map<String, Object> getItemInfoByProcessInstanceId(String processInstanceId) throws Exception;
 
+    public List<Map<String, Object>> getItemInfosByProcessInstanceId(String processInstanceId) throws Exception;
+
     public int deleteById(long id) throws Exception;
 
 	public PlApprovalResults getItemInfoByConsultId(Long consultId);

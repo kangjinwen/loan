@@ -23,7 +23,6 @@ public class PubPartnerInfoAction extends BaseAction {
     @Autowired
     private ChannelPartnerService channelPartnerService;
 
-
     @RequestMapping("/getPubPartnerInfo.htm")
     public void getPubPartnerInfo(HttpServletResponse response, HttpServletRequest request,
         @RequestParam(value = "partnername") String partnername) throws Exception{

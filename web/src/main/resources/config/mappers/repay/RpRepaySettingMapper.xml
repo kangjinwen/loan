@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.company.modules.repay.dao.RpRepaySettingDao">
+
+	<resultMap id="BaseResultMap"
+		type="com.company.modules.repay.domain.RpRepaySetting">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<id column="project_id" property="projectId" jdbcType="INTEGER" />
+		<result column="customer_id" property="customerId"
+			jdbcType="INTEGER" />
+		<result column="hous_property_information_id"
+			property="housPropertyInformationId" jdbcType="INTEGER" />
+		<result column="borrow_requirement_id"
+			property="borrowRequirementId" jdbcType="INTEGER" />
+		<result column="term" property="term" jdbcType="INTEGER" />
+		<result column="account" property="account" jdbcType="DOUBLE" />
+		<result column="repay_day" property="repayDay" jdbcType="INTEGER" />
+		<result column="repay_rate" property="repayRate"
+			jdbcType="DOUBLE" />
+		<result column="is_skip_first_month"
+			property="isSkipFirstMonth" jdbcType="BIT" />
+		<result column="repay_type" property="repayType"
+			jdbcType="VARCHAR" />
+		<result column="is_calc_service_fee"
+			property="isCalcServiceFee" jdbcType="BIT" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="ahead_repay_setting"
+			property="aheadRepaySetting" jdbcType="INTEGER" />
+		<result column="over_due_penalty_rate"
+			property="overDuePenaltyRate" jdbcType="DOUBLE" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, project_id,customer_id, hous_property_information_id,
+		borrow_requirement_id,
+		term, account,
+		repay_day, repay_rate,
+		is_skip_first_month, repay_type, is_calc_service_fee,
+		status,
+		ahead_repay_setting, over_due_penalty_rate
+	</sql>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from rp_repay_setting
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<delete id="deleteByPrimaryKey"
+		parameterType="java.lang.Integer">
+		delete from rp_repay_setting
+		where id =
+		#{id,jdbcType=INTEGER}
+	</delete>
+
+	<insert id="insert"
+		parameterType="com.company.modules.repay.domain.RpRepaySetting">
+		insert into rp_repay_setting (id,project_id, customer_id,
+		hous_property_information_id,
+		borrow_requirement_id, term, account,
+		repay_day, repay_rate, is_skip_first_month,
+		repay_type,
+		is_calc_service_fee, status,
+		ahead_repay_setting,
+		over_due_penalty_rate)
+		values (#{id,jdbcType=INTEGER},
+		#{projectId,jdbcType=INTEGER},
+		#{customerId,jdbcType=INTEGER},
+		#{housPropertyInformationId,jdbcType=INTEGER},
+		#{borrowRequirementId,jdbcType=INTEGER}, #{term,jdbcType=INTEGER},
+		#{account,jdbcType=DOUBLE},
+		#{repayDay,jdbcType=INTEGER},
+		#{repayRate,jdbcType=DOUBLE}, #{isSkipFirstMonth,jdbcType=BIT},
+		#{repayType,jdbcType=VARCHAR}, #{isCalcServiceFee,jdbcType=BIT},
+		#{status,jdbcType=INTEGER},
+		#{aheadRepaySetting,jdbcType=INTEGER},
+		#{overDuePenaltyRate,jdbcType=DOUBLE})
+	</insert>
+
+	<insert id="insertSelective" useGeneratedKeys="true"
+		keyProperty="id"
+		parameterType="com.company.modules.repay.domain.RpRepaySetting">
+
+
+		insert into rp_repay_setting
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="projectId != null">
+				project_id,
+			</if>
+			<if test="customerId != null">
+				customer_id,
+			</if>
+			<if test="housPropertyInformationId != null">
+				hous_property_information_id,
+			</if>
+			<if test="borrowRequirementId != null">
+				borrow_requirement_id,
+			</if>
+			<if test="term != null">
+				term,
+			</if>
+			<if test="account != null">
+				account,
+			</if>
+			<if test="repayDay != null">
+				repay_day,
+			</if>
+			<if test="repayRate != null">
+				repay_rate,
+			</if>
+			<if test="isSkipFirstMonth != null">
+				is_skip_first_month,
+			</if>
+			<if test="repayType != null">
+				repay_type,
+			</if>
+			<if test="isCalcServiceFee != null">
+				is_calc_service_fee,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="aheadRepaySetting != null">
+				ahead_repay_setting,
+			</if>
+			<if test="overDuePenaltyRate != null">
+				over_due_penalty_rate,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="projectId != null">
+				#{projectId,jdbcType=INTEGER},
+			</if>
+			<if test="customerId != null">
+				#{customerId,jdbcType=INTEGER},
+			</if>
+			<if test="housPropertyInformationId != null">
+				#{housPropertyInformationId,jdbcType=INTEGER},
+			</if>
+			<if test="borrowRequirementId != null">
+				#{borrowRequirementId,jdbcType=INTEGER},
+			</if>
+			<if test="term != null">
+				#{term,jdbcType=INTEGER},
+			</if>
+			<if test="account != null">
+				#{account,jdbcType=DOUBLE},
+			</if>
+			<if test="repayDay != null">
+				#{repayDay,jdbcType=INTEGER},
+			</if>
+			<if test="repayRate != null">
+				#{repayRate,jdbcType=DOUBLE},
+			</if>
+			<if test="isSkipFirstMonth != null">
+				#{isSkipFirstMonth,jdbcType=BIT},
+			</if>
+			<if test="repayType != null">
+				#{repayType,jdbcType=VARCHAR},
+			</if>
+			<if test="isCalcServiceFee != null">
+				#{isCalcServiceFee,jdbcType=BIT},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="aheadRepaySetting != null">
+				#{aheadRepaySetting,jdbcType=INTEGER},
+			</if>
+			<if test="overDuePenaltyRate != null">
+				#{overDuePenaltyRate,jdbcType=DOUBLE},
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="insertSelectiveByProjectId" useGeneratedKeys="true"
+		keyProperty="record.id" >
+		insert into
+		rp_repay_setting (id, project_id,customer_id,
+		hous_property_information_id,
+		borrow_requirement_id, term, account,
+		repay_day, repay_rate,
+		is_skip_first_month,
+		repay_type,
+		is_calc_service_fee, status,
+		ahead_repay_setting,
+		over_due_penalty_rate)
+		values
+		(#{record.id,jdbcType=INTEGER},
+		#{projectId},
+		(SELECT `customer_id` FROM `pl_consult`
+		WHERE
+		`project_id` =#{projectId}),
+		(SELECT `id` FROM `hous_property_information` WHERE
+		`project_id`
+		= #{projectId}),
+		(SELECT `id` FROM `pl_borrow_requirement` WHERE
+		`project_id` =
+		#{projectId}), #{record.term,jdbcType=INTEGER},
+		#{record.account,jdbcType=DOUBLE},
+		#{record.repayDay,jdbcType=INTEGER},
+		#{record.repayRate,jdbcType=DOUBLE},
+		#{record.isSkipFirstMonth,jdbcType=BIT},
+		#{record.repayType,jdbcType=VARCHAR},
+		#{record.isCalcServiceFee,jdbcType=BIT},
+		#{record.status,jdbcType=INTEGER},
+		#{record.aheadRepaySetting,jdbcType=INTEGER},
+		#{record.overDuePenaltyRate,jdbcType=DOUBLE})
+	</insert>
+
+
+
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.company.modules.repay.domain.RpRepaySetting">
+		update rp_repay_setting
+		<set>
+		    <if test="projectId != null">
+				project_id = #{projectId,jdbcType=INTEGER},
+			</if>
+			<if test="customerId != null">
+				customer_id = #{customerId,jdbcType=INTEGER},
+			</if>
+			<if test="housPropertyInformationId != null">
+				hous_property_information_id =
+				#{housPropertyInformationId,jdbcType=INTEGER},
+			</if>
+			<if test="borrowRequirementId != null">
+				borrow_requirement_id =
+				#{borrowRequirementId,jdbcType=INTEGER},
+			</if>
+			<if test="term != null">
+				term = #{term,jdbcType=INTEGER},
+			</if>
+			<if test="account != null">
+				account = #{account,jdbcType=DOUBLE},
+			</if>
+			<if test="repayDay != null">
+				repay_day = #{repayDay,jdbcType=INTEGER},
+			</if>
+			<if test="repayRate != null">
+				repay_rate = #{repayRate,jdbcType=DOUBLE},
+			</if>
+			<if test="isSkipFirstMonth != null">
+				is_skip_first_month = #{isSkipFirstMonth,jdbcType=BIT},
+			</if>
+			<if test="repayType != null">
+				repay_type = #{repayType,jdbcType=VARCHAR},
+			</if>
+			<if test="isCalcServiceFee != null">
+				is_calc_service_fee = #{isCalcServiceFee,jdbcType=BIT},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="aheadRepaySetting != null">
+				ahead_repay_setting =
+				#{aheadRepaySetting,jdbcType=INTEGER},
+			</if>
+			<if test="overDuePenaltyRate != null">
+				over_due_penalty_rate =
+				#{overDuePenaltyRate,jdbcType=DOUBLE},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<update id="updateByPrimaryKey"
+		parameterType="com.company.modules.repay.domain.RpRepaySetting">
+		update rp_repay_setting
+		set 
+		project_id =
+		#{projectId,jdbcType=INTEGER},
+		customer_id =
+		#{customerId,jdbcType=INTEGER},
+		hous_property_information_id =
+		#{housPropertyInformationId,jdbcType=INTEGER},
+		borrow_requirement_id =
+		#{borrowRequirementId,jdbcType=INTEGER},
+		term =
+		#{term,jdbcType=INTEGER},
+		account = #{account,jdbcType=DOUBLE},
+		repay_day = #{repayDay,jdbcType=INTEGER},
+		repay_rate =
+		#{repayRate,jdbcType=DOUBLE},
+		is_skip_first_month =
+		#{isSkipFirstMonth,jdbcType=BIT},
+		repay_type =
+		#{repayType,jdbcType=VARCHAR},
+		is_calc_service_fee =
+		#{isCalcServiceFee,jdbcType=BIT},
+		status = #{status,jdbcType=INTEGER},
+		ahead_repay_setting = #{aheadRepaySetting,jdbcType=INTEGER},
+		over_due_penalty_rate = #{overDuePenaltyRate,jdbcType=DOUBLE}
+		where id
+		= #{id,jdbcType=INTEGER}
+	</update>
+
+
+	<!--查询customerId,housPropertyInformationId,borrowQequirementId -->
+	<select id="getForeignKeyByProjectId"
+		resultType="java.util.HashMap" parameterType="java.lang.Integer">
+		SELECT
+		h.`id` AS
+		housPropertyInformationId,
+		b.`id` AS borrowRequirementId,
+		c.`customer_id` AS customerId
+		FROM
+		`hous_property_information` h,
+		`pl_borrow_requirement` b ,
+		`pl_consult` c
+		WHERE 1 = 1
+		AND h.`project_id`
+		= #{projectId}
+		AND b.`project_id` = #{projectId}
+		AND c.`project_id` =
+		#{projectId}
+	</select>
+
+</mapper>

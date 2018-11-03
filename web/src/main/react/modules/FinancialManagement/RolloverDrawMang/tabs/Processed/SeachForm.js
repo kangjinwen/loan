@@ -86,7 +86,7 @@ let SeachForm = React.createClass({
         </FormItem>
         <FormItem label="来源：">
           <Select style={{ width: 150 }} {...getFieldProps('businessOriginText') }>
-            <Option  value="赚赚自有">赚赚自有</Option>
+
             <Option  value="报单机构">报单机构</Option>
             <Option  value="报单个人">报单个人</Option>
           </Select>
@@ -103,7 +103,7 @@ let SeachForm = React.createClass({
           <FormItem label="报单结束时间：">
             <DatePicker disabledDate={this.disabledEndDate}  {...getFieldProps('declarationEndDate', { onChange: this.onEndChange }) } />
           </FormItem>
-           
+
           <FormItem label="流程状态：">
           <Select style={{ width: "160px" }} {...getFieldProps('flowStatus') }>
             {this.state.payChannelList}

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.company.modules.common.exception.RDRuntimeException;
+import com.company.modules.system.service.SysMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,11 +54,33 @@ public class RDZZTaskServiceImpl implements RDZZTaskService {
 	private static final String finalAuditStaffID= "272";//终审专员roleid
 	private static final String customerServiceStaffBID= "267";//商务专员roleid
 	private static final String systemID= "1";//管理员roleid
-	
 	@Autowired
 	private SysRoleDao sysRoleDao;
 	@Autowired
 	private RDZZTaskDao taskDao;
+	@Autowired
+	private SysMenuService sysMenuService;
+
+
+	@Override
+	public Map<String, Object> getHisTaskInfoByTaskId(String taskId) {
+		Map<String, Object> map = taskDao.getHisTaskInfoByTaskId(taskId);
+		if (null==map){
+			throw new RDRuntimeException("该任务不存在");
+		}
+		return map;
+	}
+
+	@Override
+	public int modifyHisTaskAssigneeByAnyKey(String taskId, String userId) {
+		int res = taskDao.modifyHisTaskAssigneeByAnyKey(taskId,userId);
+		return res;
+	}
+
+	public  int modifyTaskAssigneeByAnyKey(String taskId, String userId){
+		int res = taskDao.modifyTaskAssigneeByAnyKey(taskId,userId);
+		return res;
+	}
 	
 	@Override
 	public PageInfo<Map<String, Object>> queryHouseholdTasks(long roleId, Map<String, Object> params, boolean isCompleted,int currentPage,int pageSize) throws ServiceException {
@@ -396,6 +420,30 @@ public class RDZZTaskServiceImpl implements RDZZTaskService {
 		return page;
 	}
 
+	@Override
+	public PageInfo<Map<String, Object>> queryPreSetRepayPlanTasks(Long roleId,
+														 Map<String, Object> params, boolean isCompleted, int currentPage,
+														 int pageSize, String type) throws ServiceException {
+		if(USERTASK_FACE_AUDIT.equals(type)) {//放款管理
+			params.put("taskDefinition", USERTASK_LOAN);
+		}
+
+		List<Map<String,Object>> householdTasks = new ArrayList<Map<String,Object>>();
+		try {
+
+			PageHelper.startPage(currentPage, pageSize);
+			if (isCompleted) {
+				params.put("isCompleted", isCompleted);
+				householdTasks = taskDao.queryDoneAuditTasks(params);
+			} else {
+				householdTasks = taskDao.queryUndoAuditTasks(params);
+			}
+		} catch (Exception e) {
+			throw new ServiceException("任务查询失败:" + e.getMessage(), e);
+		}
+		PageInfo<Map<String, Object>> page = new PageInfo<>(householdTasks);
+		return page;
+	}
 
 	@Override
 	public PageInfo<Map<String, Object>> queryHousAdvanceApply(long roleId, Map<String, Object> params,
@@ -560,25 +608,25 @@ public class RDZZTaskServiceImpl implements RDZZTaskService {
 
 	@Override
 	public PageInfo<Map<String, Object>> queryMyTaskStatistic(
-			Map<String, Object> params,int currentPage,int pageSize) throws ServiceException {
+			Map<String, Object> params,int currentPage,int pageSize) throws ServiceException
+	{
 		// TODO Auto-generated method stub
 		PageHelper.startPage(currentPage, pageSize);
 		List<Map<String,Object>> myTask = taskDao.queryMyTaskStatistic(params);
 		PageInfo<Map<String, Object>> page = new PageInfo<>(myTask);
 		List<Map<String,Object>> pageList = page.getList();
-		Properties properties = MenuNodeProperties.properties;
 		for(Map taskMap : pageList){
-			String nodeDef = (String)taskMap.get("taskNode");
-			String nodeValue = properties.getProperty(nodeDef);
-		    if(nodeValue != null){
-		    	String[] mennuDef = nodeValue.split(",");
-		    	taskMap.put("scriptId", mennuDef[0]);
-		    	taskMap.put("label", mennuDef[1]);
-		    }
+			String processState = (String)taskMap.get("taskNode");
+			Map<String, Object> menuInfo = sysMenuService.getRouteInfoByProcessState(processState);
+			if (menuInfo != null) {
+				taskMap.put("menuIcon", menuInfo.get("menuIcon"));
+				taskMap.put("routePath", menuInfo.get("routePath"));
+				taskMap.put("routeName", menuInfo.get("routeName"));
+				taskMap.put("label", menuInfo.get("menuName"));
+			}
 		}
 		return page;
 	}
-
 
 	@Override
 	public PageInfo<Map<String, Object>> queryExtendedfeeTasks(long roleId, Map<String, Object> params,

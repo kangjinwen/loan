@@ -11,7 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,7 +35,6 @@ import com.company.modules.system.service.SysUserService;
  * 认证管理器: 用户角色信息Provider
  * @author zhangyz 
  */
-@SuppressWarnings("deprecation")
 @Service
 public class UserRoleDetailProvider implements UserDetailsService {
 
@@ -75,14 +74,14 @@ public class UserRoleDetailProvider implements UserDetailsService {
 			 // 用户授权集合
 	        Collection<GrantedAuthority> auths = new ArrayList<GrantedAuthority>();
 	        // 设置默认权限
-	        auths.add(new GrantedAuthorityImpl(SystemConstant.ROLE_DEFAULT));
+			auths.add(new SimpleGrantedAuthority("ROLE_DEFAULT"));
 	        // 用户资源映射<资源名称, 资源属性集合>
 	        Map<String, UserFunction> functionMap = null;
 	        if (roleList != null && !roleList.isEmpty()) {
 	    	    List<Long> roleIdList = new ArrayList<Long>();
 	            // 转换用户的角色为用户授权, 并记录用户角色Id列表
 	        	for (SysRole role : roleList) {
-	        		GrantedAuthorityImpl auth = new GrantedAuthorityImpl(role.getId().toString());
+					SimpleGrantedAuthority auth = new SimpleGrantedAuthority(role.getId().toString());
 	                auths.add(auth);
 	                roleIdList.add(role.getId());
 	        	}

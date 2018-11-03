@@ -13,4 +13,5 @@ public interface TaskDistributer {
 	 * @param task 那个需要被分配执行人员的任务
 	 */
 	void assignTask(TaskWrapper task) throws ServiceException;
+
 }

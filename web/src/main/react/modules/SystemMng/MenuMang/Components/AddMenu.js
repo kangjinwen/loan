@@ -115,53 +115,68 @@ var AddMenu = React.createClass({
               <Col span="12">
                 <FormItem  {...formItemLayout} label="脚本名称：">
                   <Input disabled={!props.canEdit}  {...getFieldProps('scriptid')} type="text" />
-                </FormItem> 
+                </FormItem>
               </Col>
               <Col span="12">
                 <FormItem  {...formItemLayout} label="菜单名称：">
                   <Input disabled={!props.canEdit}  {...getFieldProps('text')} type="text" />
-                </FormItem> 
+                </FormItem>
                </Col>
               <Col span="12">
                 <FormItem  {...formItemLayout} label="父节点：">
                 <div  className="clearfix">
-                  <TreeSelect  dropdownStyle={{ maxHeight: 400, overflow: 'auto' }} treeData={treeData} 
+                  <TreeSelect  dropdownStyle={{ maxHeight: 400, overflow: 'auto' }} treeData={treeData}
                   {...getFieldProps('parentId')}
                   placeholder="请选择" treeDefaultExpandAll />
                   </div>
-                </FormItem> 
-              </Col>                
+                </FormItem>
+              </Col>
               <Col span="12">
                 <FormItem  {...formItemLayout} label="图标：">
                   <Input disabled={!props.canEdit}  {...getFieldProps('iconCls')} type="text"  />
-                </FormItem> 
-              </Col> 
+                </FormItem>
+              </Col>
               <Col span="12">
                 <FormItem  {...formItemLayout} label="菜单说明：">
-                  <Input disabled={!props.canEdit}  {...getFieldProps('remark')} type="text" /> 
+                  <Input disabled={!props.canEdit}  {...getFieldProps('remark')} type="text" />
                 </FormItem>
               </Col>
               <Col span="12">
                 <FormItem  {...formItemLayout} label="排序：">
-                  <Input disabled={!props.canEdit}  {...getFieldProps('sort')} type="text" /> 
+                  <Input disabled={!props.canEdit}  {...getFieldProps('sort')} type="text" />
                 </FormItem>
               </Col>
               <Col span="12">
                 <FormItem  {...formItemLayout}  label="是否删除：">
                   <Select id="select" size="large"  disabled={!props.canEdit} {...getFieldProps('isDelete')} >
-                        <Option value={1}>是</Option> 
+                        <Option value={1}>是</Option>
                         <Option value={0}>否</Option>
-                  </Select> 
+                  </Select>
                 </FormItem>
-              </Col> 
+              </Col>
               <Col span="12">
                 <FormItem  {...formItemLayout}  label="是否菜单：">
                   <Select id="select" size="large" disabled={!props.canEdit} {...getFieldProps('isMenu')} >
-                        <Option value={1}>是</Option> 
+                        <Option value={1}>是</Option>
                         <Option value={0}>否</Option>
-                  </Select> 
+                  </Select>
                 </FormItem>
-              </Col> 
+              </Col>
+              <Col span="12">
+                  <FormItem  {...formItemLayout} label="路由名称：">
+                      <Input disabled={!props.canEdit}  {...getFieldProps('routeName')} type="text" />
+                  </FormItem>
+              </Col>
+              <Col span="12">
+                  <FormItem  {...formItemLayout} label="路由路径：">
+                      <Input disabled={!props.canEdit}  {...getFieldProps('routePath')} type="text" />
+                  </FormItem>
+              </Col>
+              <Col span="12">
+                 <FormItem  {...formItemLayout} label="路由图标：">
+                      <Input disabled={!props.canEdit}  {...getFieldProps('menuIcon')} type="text" />
+                  </FormItem>
+              </Col>
           </Form>
       </Modal>
     );

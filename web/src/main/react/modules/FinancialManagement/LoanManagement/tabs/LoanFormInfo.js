@@ -39,7 +39,6 @@ var LoanFormInfo = React.createClass({
         this.setState(this.getInitialState());
     },
     chooseDate(date, dateString) {
-        console.log(date, dateString);
         this.props.form.setFieldsValue({loanTime:dateString})
     },
     render() {

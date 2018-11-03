@@ -17,8 +17,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -89,7 +91,7 @@ public class BatchFileDownloadAction {
 		mapParam.put("relationId", (String)param.get("processInstanceId"));
 		List<PubBizAttachment> pubBizAttachmentList = pubBizAttachmentService.queryAll(mapParam);
 		
-		String appDir = request.getRealPath("/");// 文件根目录
+		String appDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
 
 		Path rootDir = Paths.get(appDir); // 获取路径path
 		final Path tempDir = Files.createTempDirectory(rootDir, ""); //创建一层临时文件夹

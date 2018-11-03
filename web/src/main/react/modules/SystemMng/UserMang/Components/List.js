@@ -50,6 +50,9 @@ export default React.createClass({
     }, () => {
       Utils.ajaxData({
         url: '/modules/system/getRoleList.htm',
+        data:{
+          username:window.roleId
+        },
         method: 'get',
         type: 'json',
         callback: (result) => {
@@ -84,7 +87,9 @@ export default React.createClass({
       var params = {};
       params = {
         pageSize: 10,
-        currentPage: 1
+        currentPage: 1,
+        parentofficeId: localStorage.officeId,
+        userName:window.roleId
       }
     }
     Utils.ajaxData({
@@ -115,7 +120,9 @@ export default React.createClass({
     var pagination = this.state.pagination;
     var params = objectAssign({}, this.props.params, {
       currentPage: pagination.current,
-      pageSize: pagination.pageSize
+      pageSize: pagination.pageSize,
+      parentofficeId: localStorage.officeId,
+      userName:window.roleId
     });
     this.fetch(params);
   },

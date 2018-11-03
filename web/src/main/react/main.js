@@ -20,6 +20,7 @@ if (localStorage.isLogin) {
 					 Home = App;
 					 localStorage.isReceiveOrder = result.isReceiveOrder?result.isReceiveOrder:1;//接单设置
 					 localStorage.rolename=result.rolename;
+					 localStorage.officeId=result.officeId;
 					 window.roleId=result.nid;
                   	 window.rolename=result.rolename;
 				 }

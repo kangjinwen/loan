@@ -57,6 +57,8 @@ public class PubBizAttachment implements Serializable {
     * 关联id
     */
     private Long relationId;
+
+    private byte[] thumbnailBlob;
     
     /**
     * 获取id
@@ -256,4 +258,11 @@ public class PubBizAttachment implements Serializable {
         this.relationId = relationId;
     }
 
+    public byte[] getThumbnailBlob() {
+        return thumbnailBlob;
+    }
+
+    public void setThumbnailBlob(byte[] thumbnailBlob) {
+        this.thumbnailBlob = thumbnailBlob;
+    }
 }

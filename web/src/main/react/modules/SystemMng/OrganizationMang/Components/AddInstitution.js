@@ -98,9 +98,9 @@ var AddInstitution = React.createClass({
       },
     };
     var Cols = 12;
-    if (this.props.form.getFieldValue("parentId") == 0) {
-      Cols = 0
-    }
+    // if (this.props.form.getFieldValue("parentId") == 0) {
+    //   Cols = 0
+    // }
     return (
       <Modal title={props.title} visible={props.visible} onCancel={this.handleCancel} width="800"  footer={modalBtns} >
         <Form horizontal  form={this.props.form}>
@@ -157,7 +157,7 @@ var AddInstitution = React.createClass({
             </Col>
             <Col span="12">
               <FormItem  {...formItemLayout}  label="区号：">
-                <Input disabled={!props.canEdit} {...getFieldProps('area') } type="text"/>
+                <Input disabled={!props.canEdit} {...getFieldProps('area',{ rules: [{required:true, message: '必填' }] }) } type="text"/>
               </FormItem>
             </Col>
           </Row>

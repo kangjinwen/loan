@@ -1258,18 +1258,36 @@ CREATE TABLE `hous_property_information` (
   `whether_one_contact` tinyint(4) DEFAULT NULL COMMENT '是否一抵',
   `against_one_mortgagee` varchar(64) DEFAULT NULL COMMENT '一抵抵押权人',
   `against_one_amount` decimal(20,2) DEFAULT NULL COMMENT '一抵金额',
+  `against_one_remainder` decimal(20,2) DEFAULT NULL COMMENT '一压剩余金额',
   `whether_two_contact` tinyint(4) DEFAULT NULL COMMENT '是否二抵',
   `against_two_mortgagee` varchar(64) DEFAULT NULL COMMENT '二抵抵押权人',
   `against_two_amount` decimal(20,2) DEFAULT NULL COMMENT '二抵金额',
+  `against_two_remainder` decimal(20,2) DEFAULT NULL COMMENT '二压剩余金额',
   `house_number` varchar(64) DEFAULT NULL COMMENT '房本号码',
   `mortgage_situation` tinyint(4) DEFAULT NULL COMMENT '房屋抵押情况',
   `key_disk_query` tinyint(4) DEFAULT NULL COMMENT '钥匙盘查询',
   `planning_purposes` tinyint(4) DEFAULT NULL COMMENT '规划用途',
   `remark_one` varchar(64) DEFAULT NULL COMMENT '一抵备注',
   `remark_two` varchar(64) DEFAULT NULL COMMENT '二抵备注',
+  `property_owner` varchar(64) DEFAULT NULL COMMENT '产权人姓名',
+  `provinces` varchar(64) DEFAULT NULL COMMENT '省',
+  `cities` varchar(64) DEFAULT NULL COMMENT '市',
+  `district_and_county` varchar(64) DEFAULT NULL COMMENT '区县',
+  `neighbourhoods` varchar(256) DEFAULT NULL COMMENT '小区名',
+  `building_number` varchar(64) DEFAULT NULL COMMENT '楼栋号',
+  `total_floor` varchar(64) DEFAULT NULL COMMENT '总楼层',
+  `floor` varchar(64) DEFAULT NULL COMMENT '楼层',
+  `room_number` varchar(64) DEFAULT NULL COMMENT '室号',
+  `orientation` varchar(64) DEFAULT NULL COMMENT '朝向',
+  `date_of_issuing` datetime DEFAULT NULL COMMENT '房产发证日期',
+  `whether_only_house` tinyint(4) DEFAULT NULL COMMENT '是否抵押人唯一住房',
+  `house_type` tinyint(4) DEFAULT NULL COMMENT '房屋类型',
+  `house_acquisition_mode` tinyint(4) DEFAULT NULL COMMENT '房产获得方式',
+  `land_source` tinyint(4) DEFAULT NULL COMMENT '土地来源',
+  `age_of_completion` varchar(64) DEFAULT NULL COMMENT '建成年代',
   PRIMARY KEY (`id`),
   KEY `hous_property_information_process_instance_id` (`process_instance_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1349 DEFAULT CHARSET=utf8 COMMENT='房产信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=1443 DEFAULT CHARSET=utf8 COMMENT='房产信息表';
 
 /*Table structure for table `hous_quick_information` */
 
@@ -1344,6 +1362,7 @@ CREATE TABLE `pl_approval_results` (
   `approval_account` decimal(18,2) DEFAULT '0.00' COMMENT '审批额度',
   `approval_time_limit` int(11) DEFAULT NULL COMMENT '审批期限',
   `mortgage_price` decimal(18,2) DEFAULT '0.00' COMMENT '抵押物价格',
+  `process_state` varchar(64) DEFAULT NULL,
   `REMARK` varchar(128) DEFAULT NULL COMMENT '备注信息',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1454,12 +1473,14 @@ CREATE TABLE `pl_borrow_requirement` (
   `collection_service_name` varchar(64) DEFAULT NULL COMMENT '代收服务费姓名',
   `collection_service_card` varchar(64) DEFAULT NULL COMMENT '代收服务费卡号',
   `collection_service_bank` varchar(64) DEFAULT NULL COMMENT '代收服务费开户行',
+  `mortgage_type` tinyint(4) DEFAULT NULL COMMENT '0 一压  1 二压',
+  `customer_type` tinyint(4) DEFAULT NULL COMMENT '0老客户 1新客户',
   PRIMARY KEY (`id`),
   KEY `consult_id` (`consult_id`) USING BTREE,
   KEY `project_id` (`project_id`) USING BTREE,
   KEY `process_instance_id` (`process_instance_id`) USING BTREE,
   KEY `creatorIndex` (`creator`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1271 DEFAULT CHARSET=utf8 COMMENT='借款需求表';
+) ENGINE=InnoDB AUTO_INCREMENT=1363 DEFAULT CHARSET=utf8 COMMENT='借款需求表';
 
 /*Table structure for table `pl_consult` */
 
@@ -1572,6 +1593,7 @@ DROP TABLE IF EXISTS `pl_product`;
 CREATE TABLE `pl_product` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   `name` varchar(100) DEFAULT NULL COMMENT '产品名',
+  `channel_partner_id` int(12) DEFAULT NULL COMMENT '产品创建渠道的id',
   `ptype` tinyint(3) DEFAULT NULL COMMENT '担保类型1信贷  2抵押-车贷',
   `maxmlimit` decimal(18,2) DEFAULT '0.00',
   `maxtlimit` int(4) DEFAULT NULL COMMENT '期限上限',
@@ -1603,9 +1625,9 @@ CREATE TABLE `pl_product` (
   `carloan_type` tinyint(3) DEFAULT NULL COMMENT '车贷类型：0-分期 1-短期',
   `minmlimit` decimal(18,2) DEFAULT '0.00',
   `ahead_repay_rate` decimal(10,4) DEFAULT '0.0000' COMMENT '提前还款罚息费率',
+  `doc_filepath` varchar(2048) DEFAULT '' COMMENT '说明文档相对路径',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
-
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
 /*Table structure for table `pl_settlementfee` */
 
 DROP TABLE IF EXISTS `pl_settlementfee`;
@@ -1721,8 +1743,9 @@ CREATE TABLE `pub_attachment` (
   `project_id` int(11) DEFAULT NULL COMMENT '项目编号',
   `name` varchar(255) DEFAULT '' COMMENT '他项权利证名称',
   `remark` varchar(2000) DEFAULT '' COMMENT '备注',
+  `thumbnail_blob` mediumblob COMMENT '缩略图数据',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8 COMMENT='附件表';
+) ENGINE=InnoDB AUTO_INCREMENT=211 DEFAULT CHARSET=utf8 COMMENT='附件表';
 
 /*Table structure for table `pub_biz_attachment` */
 
@@ -1740,6 +1763,7 @@ CREATE TABLE `pub_biz_attachment` (
   `operator_id` int(11) DEFAULT NULL COMMENT '操作者id',
   `biz_type` varchar(32) DEFAULT '' COMMENT '所属业务类型',
   `relation_id` int(11) DEFAULT NULL COMMENT '关联id',
+  `thumbnail_blob` mediumblob COMMENT '缩略图数据',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=232 DEFAULT CHARSET=utf8 COMMENT='附件表';
 
@@ -1853,8 +1877,44 @@ CREATE TABLE `pub_customer` (
   `management_addr_type` int(10) DEFAULT NULL COMMENT '经营场所类型',
   `company_area_id` int(10) DEFAULT NULL COMMENT '单位地址ID',
   `team_manager` varchar(32) DEFAULT NULL COMMENT '团队经理',
+  `id_type` tinyint(4) DEFAULT NULL COMMENT '0身份证 1护照 2港澳台身份证',
+  `residential_address` tinyint(4) DEFAULT NULL COMMENT '0无按揭购房 1按揭购房',
+  `house_tel` varchar(20) DEFAULT NULL COMMENT '家庭电话',
+  `mail` varchar(128) DEFAULT NULL COMMENT '邮箱',
+  `wechat_id` varchar(64) DEFAULT NULL COMMENT '微信',
+  `work_type` tinyint(4) DEFAULT NULL COMMENT '0自雇人士 1无业 2受雇人士 3退休',
+  `nature_of_work` tinyint(4) DEFAULT NULL COMMENT '0民营 1私企 2国企 3外资',
+  `whether_pay_security` varchar(12) DEFAULT NULL,
+  `pay_security_term` varchar(64) DEFAULT NULL COMMENT '缴纳社保年限',
+  `user_annual_income` varchar(12) DEFAULT NULL,
+  `family_annual_income` varchar(12) DEFAULT NULL,
+  `spouse_name` varchar(64) DEFAULT NULL COMMENT '配偶姓名',
+  `spouse_sex` varchar(12) DEFAULT NULL,
+  `spouse_id_type` varchar(12) DEFAULT NULL,
+  `spouse_id_number` varchar(32) DEFAULT NULL COMMENT '配偶证件号码',
+  `spouse_education` varchar(12) DEFAULT NULL,
+  `spouse_reg_addr` varchar(128) DEFAULT NULL COMMENT '配偶户口所在地',
+  `spouse_mobile` varchar(12) DEFAULT NULL COMMENT '配偶移动电话',
+  `spouse_work_type` varchar(12) DEFAULT NULL,
+  `spouse_company_name` varchar(128) DEFAULT NULL COMMENT '配偶单位名称',
+  `families_name` varchar(64) DEFAULT NULL COMMENT '家庭成员姓名',
+  `families_mobile` varchar(12) DEFAULT NULL COMMENT '家庭成员移动电话',
+  `families_relationship` varchar(64) DEFAULT NULL COMMENT '家庭成员与借款人关系',
+  `contacts_name` varchar(64) DEFAULT NULL COMMENT '其他联系人姓名',
+  `contacts_mobile` varchar(12) DEFAULT NULL COMMENT '其他联系人移动电话',
+  `contacts_relatonship` varchar(64) DEFAULT NULL COMMENT '其他联系人与借款人关系',
+  `contacts_company_name` varchar(128) DEFAULT NULL COMMENT '其他联系人单位名称',
+  `guarantee_name` varchar(64) DEFAULT NULL COMMENT '担保人姓名',
+  `guarantee_sex` varchar(12) DEFAULT NULL,
+  `guarantee_id_type` varchar(12) DEFAULT NULL,
+  `guarantee_id_number` varchar(32) DEFAULT NULL COMMENT '配偶证件号码',
+  `guarantee_education` varchar(12) DEFAULT NULL,
+  `guarantee_relationship` varchar(64) DEFAULT NULL COMMENT '担保人与借款人关系',
+  `guarantee_marriage` varchar(12) DEFAULT NULL,
+  `guarantee_mobile` varchar(12) DEFAULT NULL COMMENT '担保人移动电话',
+  `guarantee_house_tel` varchar(20) DEFAULT NULL COMMENT '担保人家庭电话',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=115451 DEFAULT CHARSET=utf8 COMMENT='客户表';
+) ENGINE=InnoDB AUTO_INCREMENT=115532 DEFAULT CHARSET=utf8 COMMENT='客户表';
 
 /*Table structure for table `pub_customer_relation` */
 
@@ -2209,14 +2269,14 @@ DROP TABLE IF EXISTS `sys_log`;
 
 CREATE TABLE `sys_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
-  `type` char(1) DEFAULT '1' COMMENT '日志类型',
   `add_user` varchar(64) DEFAULT '' COMMENT '创建者',
   `add_time` datetime DEFAULT NULL COMMENT '创建时间',
   `remote_addr` varchar(256) DEFAULT '' COMMENT '操作IP地址',
   `request_uri` varchar(1024) DEFAULT '' COMMENT '请求URI',
   `method` varchar(1024) DEFAULT '' COMMENT '操作方式',
   `params` text COMMENT '操作提交的数据',
-  `exception` text COMMENT '异常信息',
+  `exception` text COMMENT '异常信息',  `type` char(1) DEFAULT '1' COMMENT '日志类型',
+
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8;
 
@@ -2244,9 +2304,13 @@ CREATE TABLE `sys_menu` (
   `leaf` tinyint(1) DEFAULT NULL COMMENT '是否为子节点  1 true 0 false',
   `level` tinyint(2) unsigned zerofill DEFAULT NULL COMMENT '树状层数据',
   `scriptid_old` varchar(255) DEFAULT NULL,
+  `menu_icon` varchar(128) DEFAULT NULL COMMENT '菜单icon',
+  `route_path` varchar(128) DEFAULT NULL COMMENT '路由路径',
+  `route_name` varchar(128) DEFAULT NULL COMMENT '路由名称',
   PRIMARY KEY (`id`),
   KEY `parent_id` (`parent_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=11185 DEFAULT CHARSET=utf8;
+
 
 /*Table structure for table `sys_office` */
 
@@ -2335,6 +2399,7 @@ CREATE TABLE `sys_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键标示',
   `name` varchar(128) DEFAULT '' COMMENT '姓名',
   `user_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT '' COMMENT '登陆名',
+  `channel_partner_id` char(11) DEFAULT NULL COMMENT '渠道id',
   `password` varchar(128) DEFAULT '' COMMENT '密码',
   `job_num` varchar(128) DEFAULT '' COMMENT '工号',
   `company_id` char(64) NOT NULL COMMENT '公司',
@@ -2355,9 +2420,10 @@ CREATE TABLE `sys_user` (
   `is_delete` tinyint(4) DEFAULT NULL COMMENT '是否删除:0不删除，1删除',
   `is_receive_order` varchar(4) DEFAULT '1' COMMENT '是否接单(1.接单 2.不接单)',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `user_name` (`user_name`),
   KEY `userNameIndex` (`user_name`) USING BTREE,
   KEY `officeIdIndex` (`office_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=279 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=293 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `sys_user_role` */
 
@@ -2373,6 +2439,66 @@ CREATE TABLE `sys_user_role` (
   KEY `user_id_index` (`user_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1953 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `hous_property_assessment`;
+
+CREATE TABLE `hous_property_assessment` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键，自增',
+  `CUSTOMER_NAME` varchar(11) COLLATE utf8_bin DEFAULT NULL COMMENT '客户姓名',
+  `HOUSE_NAME` varchar(128) COLLATE utf8_bin DEFAULT NULL COMMENT '房产名称',
+  `UNIT_PRICE` int(11) DEFAULT NULL COMMENT '房产评估结果:单价',
+  `TOTAL_PRICE` int(11) DEFAULT NULL COMMENT '房产评估结果:总价',
+  `STATUS` int(11) DEFAULT '0' COMMENT '评估状态：0代表待评估；1代表已评估。',
+  `CREATE_TIME` varchar(64) COLLATE utf8_bin DEFAULT NULL COMMENT '上传时间',
+  `ASSESSER_ID` int(11) DEFAULT NULL COMMENT '房产评估人员id',
+  `CREATOR_ID` int(11) DEFAULT NULL COMMENT '创建者的id',
+  `REMARK` varchar(1000) COLLATE utf8_bin DEFAULT NULL COMMENT '备注',
+  `IS_DELETE` int(11) DEFAULT '0' COMMENT '是否删除：0代表未删除，1代表已删除',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+DROP TABLE IF EXISTS `hous_property_attachment`;
+
+CREATE TABLE `hous_property_attachment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id,自增字段',
+  `property_assessment_id` int(11) DEFAULT NULL COMMENT '外键：关联hous_property_assessment表',
+  `state` int(3) DEFAULT '0' COMMENT '附件状态:0未删除,1删除',
+  `create_time` varchar(64) DEFAULT NULL COMMENT '创建时间',
+  `file_name` varchar(255) DEFAULT '' COMMENT '原文件名',
+  `file_size` bigint(10) DEFAULT NULL COMMENT '文件大小',
+  `file_path` varchar(2048) DEFAULT '' COMMENT '上传后相对路径',
+  `is_delete` int(11) DEFAULT '0' COMMENT '是否删除：0代表正常，1代表已删除。',
+  PRIMARY KEY (`id`),
+  KEY `property_assessment_id` (`property_assessment_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='附件表';
+
+
+DROP TABLE IF EXISTS `sys_appointment_info`;
+
+CREATE TABLE `sys_appointment_info` (
+  `id` int(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '预约的人',
+  `phone` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '手机号',
+  `remark` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  `type` int(20) DEFAULT NULL COMMENT '预约类型：1.预约下户 2.预约公证 3.预约办押',
+  `proc_inst_id` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '流程实例id',
+  `appoint_time` bigint(20) DEFAULT NULL COMMENT '预约时间',
+  `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
+  `modify_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='预约信息表';
+
+
+DROP TABLE IF EXISTS `sys_user_wechat`;
+
+CREATE TABLE `sys_user_wechat` (
+  `ID` int(12) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `sys_userid` varchar(128) DEFAULT NULL COMMENT '系统对应用户id',
+  `password` varchar(128) DEFAULT NULL,
+  `user_openid` varchar(256) DEFAULT NULL COMMENT '微信账号唯一身份id',
+  `device_code` varchar(256) DEFAULT NULL COMMENT '设备编码',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /* Trigger structure for table `sys_user` */
 
 DELIMITER $$
@@ -3345,37 +3471,33 @@ DELIMITER ;
 /*Data for the table `act_property` */
 insert  into `act_ge_property`(`NAME_`,`VALUE_`,`REV_`) values ('next.dbid','10000',1),('schema.history','create(5.20.0.2)',1),('schema.version','5.20.0.2',1);
 
-/*Data for the table `pl_product` */
-
-insert  into `pl_product`(`id`,`name`,`ptype`,`maxmlimit`,`maxtlimit`,`prepayment`,`tminmlimit`,`tmaxmlimit`,`opendate`,`createtime`,`overdue_penalty_rate`,`repayment_rate`,`repayment_default`,`isopen`,`is_delete`,`office_ids`,`overdue_period`,`overdue_rate`,`remark`,`period`,`three_prepayment`,`six_prepayment`,`product_type`,`margin_fee`,`one_prepayment`,`two_prepayment`,`four_prepayment`,`five_prepayment`,`repayment_type`,`delay`,`carloan_type`,`minmlimit`,`ahead_repay_rate`) values (16,'房抵贷',2,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','0.0600','0.0600',NULL,1,0,'',NULL,NULL,'1',NULL,NULL,NULL,22,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,'0.0100');
-
 /*Data for the table `sys_menu` */
 
-insert  into `sys_menu`(`id`,`sys_type`,`name`,`parent_id`,`href`,`icon_cls`,`sort`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`,`is_menu`,`scriptid`,`controller_name`,`leaf`,`level`,`scriptid_old`) values (1,0,'系统管理',0,NULL,'icon-xitongguanli',00000009999,NULL,NULL,NULL,NULL,NULL,0,1,'sysManage',NULL,NULL,NULL,NULL),(2,0,'菜单管理',1,NULL,'icon-caidanguanli',00000000005,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysMenuManage',NULL,NULL,NULL,NULL),(3,0,'用户管理',1,NULL,'icon-iconfontcolor17',00000000010,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysUserManage',NULL,NULL,NULL,NULL),(4,0,'角色管理',1,NULL,'icon-jiaoseguanli',00000000015,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysRoleManage',NULL,NULL,NULL,NULL),(5,0,'组织管理',1,NULL,'icon-zuzhiguanli',00000000020,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysOfficeManage',NULL,NULL,NULL,NULL),(7,0,'字典管理',1,NULL,'icon-zidianguanli',00000000030,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysDicManage',NULL,NULL,NULL,NULL),(45,0,'工作台',9999,NULL,'icon-gongzuotai',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'workbench',NULL,1,02,NULL),(48,0,'计算公式配置',1,NULL,'icon-gongshipeizhi',00000000035,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysFelManage',NULL,NULL,NULL,NULL),(61,0,'产品参数管理',1,NULL,'icon-chanpinguanli',00000000040,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysProductParametersManage',NULL,NULL,NULL,NULL),(66,0,'产品类型管理',1,NULL,'icon-chanpinguanli',00000000045,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'sysProductTypeManage',NULL,NULL,NULL,NULL),(11068,0,'财务管理',0,NULL,'icon-caiwuguanli',00000000008,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'FinancialManagement',NULL,NULL,NULL,NULL),(11069,0,'放款管理',11068,NULL,'icon-fangkuanguanli',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'LoanManagement',NULL,NULL,NULL,NULL),(11080,0,'贷后管理',0,NULL,'icon-daihouguanli',00000000009,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'PostLoanManagement',NULL,NULL,NULL,NULL),(11081,0,'还款管理',11080,NULL,'icon-huankuanguanli',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'RepaymentManagement',NULL,NULL,NULL,NULL),(11129,0,'我的任务',0,NULL,'icon-woderenwu',00000000002,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'MyTask',NULL,NULL,NULL,NULL),(11130,0,'我的任务',11129,NULL,'icon-woderenwu1',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'MyTaskPending',NULL,NULL,NULL,NULL),(11148,0,'客户管理',0,NULL,'icon-kehuguanli',00000000003,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustomerManageMJS',NULL,NULL,NULL,NULL),(11149,0,'客户管理',11148,NULL,'icon-gerenkehu',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustMang',NULL,NULL,NULL,NULL),(11150,0,'风控审核',0,NULL,'icon-buquanziliao ',00000000004,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'FirstTrialManageMJS',NULL,NULL,NULL,NULL),(11152,0,'机构初审',11150,NULL,'icon-buquanziliao ',00000000003,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'OrganizationTrial',NULL,NULL,NULL,NULL),(11153,0,'押品管理',0,NULL,'icon-yapinguanli',00000000005,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CollateralManageMJS',NULL,NULL,NULL,NULL),(11154,0,'抵押办理',11153,NULL,'icon-yapinguanli',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'MortgageDealt',NULL,NULL,NULL,NULL),(11155,0,'放款审核',0,NULL,'icon-shenheguanli',00000000006,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'RecheckMJS',NULL,NULL,NULL,NULL),(11156,0,'放款复审',11155,NULL,'icon-shenheguanli',00000000003,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'RiskControlReview',NULL,NULL,NULL,NULL),(11158,0,'机构放款',11155,NULL,'icon-zhongshen',00000000004,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'InstitutionalReview',NULL,NULL,NULL,NULL),(11159,0,'催收管理',11080,NULL,'icon-daihoubiangeng',00000000005,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CollectionManageMJS',NULL,NULL,NULL,NULL),(11160,0,'贷款申请',0,NULL,'icon-shenpi',00000000018,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'LoanApplicationMJS',NULL,NULL,NULL,NULL),(11161,0,'贷款申请记录',11160,NULL,'icon-shenpi',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'LoanApplicationRecord',NULL,NULL,NULL,NULL),(11162,0,'客户关系管理',0,NULL,'icon-mianshen',00000000019,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustRelationshipManageMJS',NULL,NULL,NULL,NULL),(11163,0,'客户关系管理',11162,NULL,'icon-mianshen',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustRelationship',NULL,NULL,NULL,NULL),(11172,0,'风控复审',11150,NULL,'icon-mianshenqianqueren',00000000002,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'ControlReview',NULL,NULL,NULL,NULL),(11173,0,'放款初审',11155,NULL,'icon-shenheguanli',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'FirstTrialLoan',NULL,NULL,NULL,NULL),(11183,0,'风控初审',11150,NULL,'icon-mianshenqianqueren',NULL,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'FirstTrialMJS',NULL,NULL,NULL,NULL),(11184,0,'下户',11148,NULL,'icon-mianshenqianqueren',00000000002,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'InspectMJS',NULL,NULL,NULL,NULL);
+insert  into `sys_menu`(`id`,`sys_type`,`name`,`parent_id`,`href`,`icon_cls`,`sort`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`,`is_menu`,`scriptid`,`controller_name`,`leaf`,`level`,`scriptid_old`,`menu_icon`,`route_path`,`route_name`) values (1,0,'系统管理',0,NULL,'icon-xitongguanli',00000009999,NULL,NULL,NULL,NULL,NULL,0,1,'sysManage',NULL,NULL,NULL,NULL,'md-cog',NULL,'loan-system-manage-wrap'),(2,0,'菜单管理',1,NULL,'icon-caidanguanli',00000000005,NULL,NULL,'2018-09-03 10:28:17',NULL,NULL,0,1,'sysMenuManage',NULL,NULL,NULL,NULL,'md-menu','loan/menu-settings','loan-menu-settings'),(3,0,'用户管理',1,NULL,'icon-iconfontcolor17',00000000010,NULL,NULL,'2018-09-03 10:29:41',NULL,NULL,0,1,'sysUserManage',NULL,NULL,NULL,NULL,'md-people',NULL,'loan-user-settings'),(4,0,'角色管理',1,NULL,'icon-jiaoseguanli',00000000015,NULL,NULL,'2018-09-03 10:33:08',NULL,NULL,0,1,'sysRoleManage',NULL,NULL,NULL,NULL,'ios-contacts',NULL,'loan-role-settings'),(5,0,'组织管理',1,NULL,'icon-zuzhiguanli',00000000020,NULL,NULL,'2018-09-03 10:37:21',NULL,NULL,0,1,'sysOfficeManage',NULL,NULL,NULL,NULL,'md-contacts',NULL,'loan-organization-settings'),(7,0,'字典管理',1,NULL,'icon-zidianguanli',00000000030,NULL,NULL,'2018-09-03 10:37:56',NULL,NULL,0,1,'sysDicManage',NULL,NULL,NULL,NULL,'md-book',NULL,'loan-dictionary-settings'),(45,0,'工作台',9999,NULL,'icon-gongzuotai',00000000001,NULL,NULL,'2018-09-21 16:53:05',NULL,NULL,0,1,'workbench',NULL,1,02,NULL,'md-apps','loan/work-platform','loan-work-platform'),(48,0,'计算公式配置',1,NULL,'icon-gongshipeizhi',00000000035,NULL,NULL,'2018-09-03 10:39:13',NULL,NULL,0,1,'sysFelManage',NULL,NULL,NULL,NULL,'md-calculator',NULL,'loan-calculate-settings'),(61,0,'产品参数管理',1,NULL,'icon-chanpinguanli',00000000040,NULL,NULL,'2018-09-03 10:41:21',NULL,NULL,0,1,'sysProductParametersManage',NULL,NULL,NULL,NULL,'md-medal','loan-args','loan-product-params-settings'),(66,0,'产品类型管理',1,NULL,'icon-chanpinguanli',00000000045,NULL,NULL,'2018-09-03 10:43:28',NULL,NULL,0,1,'sysProductTypeManage',NULL,NULL,NULL,NULL,'md-flower','loan-product-type-settings','loan-product-type-settings'),(11068,0,'财务管理',0,NULL,'icon-caiwuguanli',00000000008,NULL,NULL,'2018-08-31 16:33:13',NULL,NULL,0,1,'FinancialManagement',NULL,NULL,NULL,NULL,'logo-yen','loan-manage','loan-manage-wrapper'),(11069,0,'放款管理',11068,NULL,'icon-fangkuanguanli',00000000001,NULL,NULL,'2018-08-31 16:33:56',NULL,NULL,0,1,'LoanManagement',NULL,NULL,NULL,NULL,'logo-yen','loan/loan-manage','loan-loan-manage'),(11080,0,'贷后管理',0,NULL,'icon-daihouguanli',00000000010,NULL,NULL,'2018-09-28 09:51:52',NULL,NULL,0,1,'PostLoanManagement',NULL,NULL,NULL,NULL,'md-bug',NULL,NULL),(11081,0,'还款管理',11080,NULL,'icon-huankuanguanli',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'RepaymentManagement',NULL,NULL,NULL,NULL,NULL,NULL,NULL),(11129,0,'我的任务',0,NULL,'icon-woderenwu',00000000002,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'MyTask',NULL,NULL,NULL,NULL,'md-star',NULL,'loan-my-task-wrap'),(11130,0,'我的任务',11129,NULL,'icon-woderenwu1',00000000001,NULL,NULL,'2018-09-25 11:08:59',NULL,NULL,0,1,'MyTaskPending',NULL,1,NULL,NULL,'md-star','loan/my-task','loan-my-task'),(11148,0,'客户管理',0,NULL,'icon-kehuguanli',00000000003,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustomerManageMJS',NULL,NULL,NULL,NULL,'md-person-add',NULL,'loan-customer-manage-wrap'),(11149,0,'客户管理',11148,NULL,'icon-gerenkehu',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustMang',NULL,NULL,NULL,NULL,'md-person-add','loan/customer-manage','loan-customer-manage'),(11150,0,'资料审核',0,NULL,'icon-buquanziliao ',00000000004,NULL,NULL,'2018-09-06 16:16:08',NULL,NULL,0,1,'FirstTrialManageMJS',NULL,NULL,NULL,NULL,'md-checkbox','md-checkbox','loan-risk-review-wrap'),(11152,0,'终审',11150,NULL,'icon-buquanziliao ',00000000005,NULL,NULL,'2018-09-18 14:12:08',NULL,NULL,0,1,'OrganizationTrial',NULL,1,NULL,NULL,'md-checkbox-outline','loan/initial-institutional-review','loan-initial-institutional-review'),(11153,0,'押品管理',0,NULL,'icon-yapinguanli',00000000005,NULL,NULL,'2018-08-31 15:19:59',NULL,NULL,0,1,'CollateralManageMJS',NULL,NULL,NULL,NULL,'md-shuffle','loan/mortgage','loan-mortgage-wrapper'),(11154,0,'签约办押',11153,NULL,'icon-yapinguanli',00000000003,NULL,NULL,'2018-09-18 13:52:29',NULL,NULL,0,1,'MortgageDealt',NULL,NULL,NULL,NULL,'md-shuffle','loan/mortgage','loan-mortgage'),(11155,0,'放款审核',0,NULL,'icon-shenheguanli',00000000006,NULL,NULL,'2018-08-31 15:44:32',NULL,NULL,0,1,'RecheckMJS',NULL,NULL,NULL,NULL,'md-card','loan/review','loan-review-wrapper'),(11156,0,'放款复审',11155,NULL,'icon-shenheguanli',00000000003,NULL,NULL,'2018-08-31 15:52:39',NULL,NULL,0,1,'RiskControlReview',NULL,NULL,NULL,NULL,'md-card','loan/loan-review','loan-loan-review'),(11158,0,'放款终审',11155,NULL,'icon-zhongshen',00000000004,NULL,NULL,'2018-09-19 16:27:33',NULL,NULL,0,1,'InstitutionalReview',NULL,NULL,NULL,NULL,'md-swap','loan/institutional-loan','loan-institution-loan'),(11159,0,'催收管理',11080,NULL,'icon-daihoubiangeng',00000000005,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CollectionManageMJS',NULL,NULL,NULL,NULL,NULL,NULL,NULL),(11160,0,'申请记录',0,NULL,'icon-shenpi',00000000018,NULL,NULL,'2018-09-18 09:51:09',NULL,NULL,0,1,'LoanApplicationMJS',NULL,NULL,NULL,NULL,'md-print',NULL,'loan-apply-recor-wrap'),(11161,0,'申请记录',11160,NULL,'icon-shenpi',00000000001,NULL,NULL,'2018-09-18 09:51:27',NULL,NULL,0,1,'LoanApplicationRecord',NULL,NULL,NULL,NULL,'md-print','loan/apply-record','loan-apply-record'),(11162,0,'客户关系管理',0,NULL,'icon-mianshen',00000000019,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustRelationshipManageMJS',NULL,NULL,NULL,NULL,'ios-people',NULL,'loan-customer-relation-manage-wrap'),(11163,0,'客户关系管理',11162,NULL,'icon-mianshen',00000000001,NULL,NULL,'2018-01-01 00:00:00',NULL,NULL,0,1,'CustRelationship',NULL,NULL,NULL,NULL,'ios-people','loan/customer-relation-manage','loan-customer-relation-manage'),(11172,0,'风控复审',11150,NULL,'icon-mianshenqianqueren',00000000004,NULL,NULL,'2018-09-18 14:11:58',NULL,NULL,0,1,'ControlReview',NULL,1,NULL,NULL,'md-checkmark-circle-outline','loan/risk-review','loan-risk-review'),(11173,0,'放款初审',11155,NULL,'icon-shenheguanli',00000000001,NULL,NULL,'2018-08-31 15:52:08',NULL,NULL,0,1,'FirstTrialLoan',NULL,NULL,NULL,NULL,'ios-card','loan/initial-loan-review','loan-initial-loan-review'),(11183,0,'风控初审',11150,NULL,'icon-mianshenqianqueren',00000000001,NULL,NULL,'2018-08-31 09:54:43',NULL,NULL,0,1,'FirstTrialMJS',NULL,1,NULL,NULL,'md-checkmark','loan/initial-risk-review','loan-initial-risk-review'),(11184,0,'资料上传',11148,NULL,'icon-mianshenqianqueren',00000000002,NULL,NULL,'2018-09-06 15:36:45',NULL,NULL,0,1,'uploading',NULL,1,NULL,NULL,'md-cloud-upload','loan/data-upload','loan-data-upload'),(11185,0,'下户',11150,'','icon-xiahu',00000000003,NULL,'','2018-09-18 14:11:45','','1',0,1,'xiahu',NULL,1,NULL,NULL,'ios-create','loan/house-inspect','loan-house-inspect'),(11186,0,'申请评估',11187,'',NULL,00000000001,NULL,'','2018-09-18 10:50:04','','loan-apply-assess',0,1,'loan-apply-assess',NULL,1,NULL,NULL,'md-help-circle','loan/apply-assess','loan-apply-assess'),(11187,0,'房产评估',0,'',NULL,00000000002,NULL,'','2018-09-17 15:17:23','','apply-assess-review',0,1,'apply-assess-review',NULL,NULL,NULL,NULL,'md-help-circle','loan-apply-assess-review','loan-apply-assess-review'),(11188,0,'房产评估',11187,'',NULL,00000000002,NULL,'','2018-09-18 17:35:28','','房产评估',0,1,'apply-assess-handle',NULL,1,NULL,NULL,'md-paper','loan/apply-assess-handle','loan-apply-assess-handle'),(11189,0,'数据统计',0,'',NULL,00000000999,NULL,'','2018-09-18 09:47:06','','loan-statistics',0,1,'loan-statistics',NULL,NULL,NULL,NULL,'md-stats','loan/statistics','loan-statistics'),(11190,0,'数据统计',11189,'',NULL,00000000001,NULL,'','2018-09-21 09:56:52','','数据统计',0,1,'loan-statistics',NULL,NULL,NULL,NULL,'md-stats','loan/statistics','loan-statistics'),(11191,0,'预约公证',11153,'',NULL,00000000001,NULL,'','2018-09-18 16:26:22','','预约公证',0,1,NULL,NULL,NULL,NULL,NULL,'md-alarm','loan/subscribe-fair','loan-subscribe-fair'),(11192,0,'预约办押',11153,'',NULL,00000000002,NULL,'','2018-09-18 16:27:15','','预约办押',0,1,NULL,NULL,NULL,NULL,NULL,'md-alarm','loan/subscribe-mortgage','loan-subscribe-mortgage'),(11193,0,'预约下户',11150,'',NULL,00000000002,NULL,'','2018-09-18 15:40:11','','预约下户',0,1,NULL,NULL,NULL,NULL,NULL,'md-alarm','loan/subscribe-house-inspect','loan-subscribe-house-inspect'),(11194,0,'渠道',0,'',NULL,00000000009,NULL,'','2018-09-28 10:49:29','','渠道贷款流程',0,1,NULL,NULL,NULL,NULL,NULL,'md-git-branch','11','1'),(11195,0,'申请',11194,'',NULL,00000000001,NULL,'','2018-09-28 10:26:26','','申请',1,1,NULL,NULL,1,NULL,NULL,'1','1','1'),(11197,0,'风控审核',11194,'',NULL,00000000010,NULL,'','2018-09-28 11:08:00','','渠道风控审核',0,1,NULL,NULL,1,NULL,NULL,'md-checkmark','loan/risk-review-branch','loan-risk-review-branch'),(11198,0,'资料补充',11194,'',NULL,00000000015,NULL,'','2018-09-28 11:05:43','','资料补充',0,1,NULL,NULL,1,NULL,NULL,'md-document','loan/data-supply-branch','loan-data-supply-branch'),(11199,0,'贷款完成',11194,'',NULL,00000000020,NULL,'','2018-09-28 11:06:08','',NULL,0,1,NULL,NULL,1,NULL,NULL,'md-done-all','loan/loan-complete-branch','loan-loan-complete-branch');
 
 /*Data for the table `sys_office` */
 
-insert  into `sys_office`(`id`,`name`,`parent_id`,`area`,`type`,`grade`,`address`,`zip_code`,`master`,`phone`,`fax`,`email`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`,`city`,`province`,`sort`,`office_number`,`office_bank`,`office_bank_card`,`office_card`) values ('11','系统使用公司','0','1',1,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'110101',NULL,1,'100','1',NULL,'1'),('1101','部门A','11','1',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,2,'2',NULL,NULL,NULL),('1102','部门B','11','1',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,4,'4',NULL,NULL,NULL),('1103','部门C','11','1',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'110101',NULL,3,'BJ',NULL,NULL,NULL),('1104','放款机构','11',NULL,2,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,5,'5',NULL,NULL,NULL),('110401','放款机构A','1104','010',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,5,'5',NULL,NULL,NULL),('110402','放款机构B','1104','010',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,6,'6',NULL,NULL,NULL);
+insert  into `sys_office`(`id`,`name`,`parent_id`,`area`,`type`,`grade`,`address`,`zip_code`,`master`,`phone`,`fax`,`email`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`,`city`,`province`,`sort`,`office_number`,`office_bank`,`office_bank_card`,`office_card`) values ('11','系统使用公司','0','1',1,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'110101',NULL,1,'100','1',NULL,'1'),('1101','部门A','11','1',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-09-11 12:47:23','system','111',0,NULL,NULL,2,'2',NULL,NULL,NULL),('110101','1','1101','1',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-09-11 14:13:26','system',NULL,'',NULL,1,NULL,NULL,NULL,'1',NULL,NULL,NULL),('11010101','q','110101','',0,0,NULL,NULL,NULL,'',NULL,NULL,'2018-09-11 14:17:24','system',NULL,'','',1,NULL,NULL,213,'123','','',''),('110102','部门a 子集测试','1101','',0,0,NULL,NULL,NULL,'',NULL,NULL,'2018-09-11 14:31:40','system',NULL,'','',1,NULL,NULL,1,'001','','','001'),('110103','部门A 子集测试','1101','3',0,0,NULL,NULL,NULL,'4',NULL,NULL,'2018-09-11 14:34:35','system','2018-09-11 14:52:56','system','7',1,NULL,NULL,1,'1','5','6','2'),('1102','风控部','11','BJ',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-09-11 14:56:02','system','简介',0,'110101',NULL,4,'FK',NULL,NULL,NULL),('1103','部门C','11','1',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-09-11 14:55:50','system',NULL,0,'110101',NULL,3,'BJ',NULL,NULL,NULL),('1104','放款机构','11',NULL,2,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,5,'5',NULL,NULL,NULL),('110401','放款机构A','1104','010',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,5,'5',NULL,NULL,NULL),('110402','放款机构B','1104','010',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,NULL,NULL,6,'6',NULL,NULL,NULL),('1111','运营部','11','BJ',0,0,NULL,NULL,NULL,NULL,NULL,NULL,'2018-01-01 00:00:00','system','2018-09-11 17:47:35','system',NULL,0,NULL,NULL,NULL,'YY',NULL,NULL,NULL);
 
 /*Data for the table `sys_role` */
 
-insert  into `sys_role`(`id`,`name`,`nid`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`) values (1,'系统管理员','system','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','系统管理员',0),(253,'放款复审','loanStaffReview','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','放款复审',0),(254,'放款初审','loanStaffAuditor','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','放款初审',0),(255,'放款管理员','loanStaff','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','放款管理员',0),(285,'机构放款','orgWorkerLoan','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','机构放款',0),(291,'风控初审','initialAuditor','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','风控初审',0),(292,'风控复审','reviewAuditor','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','风控复审',0),(293,'机构初审','orgWorker','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','机构初审',0),(295,'抵押登记员','salesman','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','抵押登记员',0),(296,'客户经理','clientManager','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','客户经理',0),(297,'测试角色','testid','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','测试角色添加',0),(306,'下户','xiahu','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','下户',0);
+insert  into `sys_role`(`id`,`name`,`nid`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`) values (1,'系统管理员','system','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','系统管理员',0),(253,'放款复审','loanStaffReview','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','放款复审',0),(254,'放款初审','loanStaffAuditor','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','放款初审',0),(255,'放款管理员','loanStaff','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','放款管理员',0),(285,'机构放款','orgWorkerLoan','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','机构放款',0),(291,'风控初审','initialAuditor','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','风控初审',0),(292,'风控复审','reviewAuditor','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','风控复审',0),(293,'机构初审','orgWorker','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','机构初审',0),(295,'抵押登记员','salesman','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','抵押登记员',0),(296,'客户经理','clientManager','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','客户经理',0),(297,'测试角色','testid','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','测试角色添加',0),(306,'下户','xiahu','2018-01-01 00:00:00','system','2018-01-01 00:00:00','system','下户',0),(307,'房产评估','apply-assess','2018-09-17 15:04:10','system','2018-09-17 15:04:10','system','房产评估',0),(308,'预约下户','appointmentXiahu','2018-09-18 14:10:16','system','2018-09-18 14:10:16','system','预约下户',0),(309,'预约公证','appointmentNotarization','2018-09-18 14:15:50','system','2018-09-18 14:15:50','system','预约公证',0),(310,'预约办押','appointmentGuaranty','2018-09-18 14:17:00','system','2018-09-18 14:17:00','system','预约办押',0),(328,'渠道','channel','2018-09-28 10:04:11','system','2018-09-28 10:04:11','system','渠道',0),(329,'渠道资料上传','channelUploading','2018-09-28 10:10:00','system','2018-09-28 10:10:00','system','资料上传',0),(330,'渠道风控','channelAudit','2018-09-28 10:20:12','system','2018-09-28 10:20:12','system','渠道风控审核',0),(331,'资料补充','channelSupplement','2018-09-28 10:25:21','system','2018-09-28 10:25:21','system','渠道，资料补充',0),(332,'贷款完成','channelLoaned','2018-09-28 10:31:53','system','2018-09-28 10:31:53','system','',0),(333,'资料上传','usertask-uploading','2018-09-28 11:34:25','system','2018-09-28 11:34:25','system','资料上传',0),(334,'JSCS','JSCS','2018-09-30 10:06:56','system','2018-09-30 10:06:56','system','角色测试',0);
 
 /*Data for the table `sys_role_menu` */
 
-insert  into `sys_role_menu`(`id`,`role_id`,`menu_id`) values (1,1,1),(2,1,2),(3,1,3),(4,1,4),(5,1,5),(6,1,7),(7,1,45),(8,1,48),(9,1,61),(10,1,66),(11,1,11068),(12,1,11069),(13,1,11080),(14,1,11081),(15,1,11129),(16,1,11130),(17,1,11149),(18,1,11150),(19,1,11152),(20,1,11153),(21,1,11154),(22,1,11155),(23,1,11156),(24,1,11158),(25,1,11159),(26,1,11160),(27,1,11161),(28,1,11162),(29,1,11163),(30,1,11172),(31,1,11173),(32,1,11183),(33,1,11184),(34,6,2),(35,6,4),(36,253,11129),(37,253,11130),(38,253,11156),(39,254,11129),(40,254,11130),(41,254,11173),(42,255,11068),(43,255,11069),(44,255,11129),(45,255,11130),(46,285,11129),(47,285,11130),(48,285,11158),(49,291,11129),(50,291,11130),(51,291,11148),(52,291,11149),(53,291,11150),(54,291,11152),(55,291,11172),(56,291,11183),(57,291,11184),(58,292,11129),(59,292,11130),(60,292,11172),(61,293,11129),(62,293,11130),(63,293,11152),(64,295,11129),(65,295,11130),(66,295,11153),(67,295,11154),(68,296,11148),(69,296,11149),(70,296,11160),(71,296,11161),(72,296,11162),(73,296,11163),(74,296,11184),(75,305,11129),(76,305,11130),(77,305,11184),(78,306,11129),(79,306,11130),(80,306,11184);
+insert  into `sys_role_menu`(`id`,`role_id`,`menu_id`) values (135939,1,1),(135931,1,2),(135932,1,3),(135933,1,4),(135934,1,5),(135935,1,7),(135940,1,45),(135936,1,48),(135937,1,61),(135938,1,66),(135942,1,11068),(135941,1,11069),(135945,1,11080),(135943,1,11081),(135947,1,11129),(135946,1,11130),(135950,1,11148),(135948,1,11149),(135956,1,11150),(135951,1,11152),(135960,1,11153),(135957,1,11154),(135964,1,11155),(135961,1,11156),(135962,1,11158),(135944,1,11159),(135966,1,11160),(135965,1,11161),(135968,1,11162),(135967,1,11163),(135952,1,11172),(135963,1,11173),(135953,1,11183),(135949,1,11184),(135954,1,11185),(135969,1,11186),(135971,1,11187),(135970,1,11188),(135973,1,11189),(135972,1,11190),(135958,1,11191),(135959,1,11192),(135955,1,11193),(135978,1,11194),(135974,1,11196),(135975,1,11197),(135976,1,11198),(135977,1,11199),(34,6,2),(35,6,4),(36,253,11129),(37,253,11130),(38,253,11156),(39,254,11129),(40,254,11130),(41,254,11173),(42,255,11068),(43,255,11069),(44,255,11129),(45,255,11130),(46,285,11129),(47,285,11130),(48,285,11158),(135124,291,11129),(135125,291,11130),(135126,291,11148),(135127,291,11149),(135129,291,11150),(135130,291,11152),(135131,291,11172),(135132,291,11183),(135128,291,11184),(135133,291,11185),(135134,291,11188),(135136,292,11129),(135135,292,11130),(135137,292,11172),(135138,292,11188),(61,293,11129),(62,293,11130),(63,293,11152),(64,295,11129),(65,295,11130),(66,295,11153),(67,295,11154),(135446,296,11148),(135444,296,11149),(135448,296,11160),(135447,296,11161),(135450,296,11162),(135449,296,11163),(135445,296,11184),(135451,296,11186),(135453,296,11187),(135452,296,11188),(75,305,11129),(76,305,11130),(77,305,11184),(78,306,11129),(79,306,11130),(80,306,11184),(134989,307,11187),(134988,307,11188),(135140,308,11129),(135139,308,11130),(135141,308,11193),(135227,309,11129),(135226,309,11130),(135228,309,11191),(135230,310,11129),(135229,310,11130),(135231,310,11192),(135456,318,11162),(135457,318,11163),(135459,328,11194),(135458,328,11195),(135506,329,11129),(135505,329,11130),(135507,329,11196),(135982,330,11129),(135983,330,11130),(135984,330,11194),(135985,330,11197),(135986,330,11198),(135987,330,11199),(135990,332,11129),(135991,332,11130),(135979,333,11129),(135980,333,11130),(135981,333,11184),(135995,334,11197),(135996,334,11198);
 
 /*Data for the table `sys_user` */
 
-insert  into `sys_user`(`id`,`name`,`user_name`,`password`,`job_num`,`company_id`,`office_id`,`office_over`,`position`,`email`,`phone`,`mobile`,`status`,`login_ip`,`login_time`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`,`is_receive_order`) values (1,'system','system','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','1','11','11','1101,1102,1103,1104,110401,110402',001,NULL,NULL,NULL,0,NULL,NULL,NULL,'system','2018-01-01 00:00:00','system',NULL,0,'1'),(279,'user1','user1','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','001','11','11',NULL,001,NULL,NULL,NULL,0,NULL,NULL,'2018-08-10 17:30:53','system','2018-08-10 17:30:53','system',NULL,0,'1'),(280,'user2','user2','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','002','11','11',NULL,001,NULL,NULL,NULL,0,NULL,NULL,'2018-08-10 17:31:55','system','2018-08-10 17:31:55','system',NULL,0,'1'),(281,'user3','user3','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','003','11','11',NULL,001,NULL,NULL,NULL,0,NULL,NULL,'2018-08-10 17:32:31','system','2018-08-10 17:32:31','system',NULL,0,'1'),(282,'uesr4','uesr4','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','004','11','11',NULL,001,NULL,NULL,NULL,0,NULL,NULL,'2018-08-10 17:33:26','system','2018-08-10 17:33:26','system',NULL,0,'1'),(283,'user5','user5','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','005','11','11',NULL,001,NULL,NULL,NULL,0,NULL,NULL,'2018-08-10 17:34:09','system','2018-08-10 17:34:09','system',NULL,0,'1'),(284,'user6','user6','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','006','11','11',NULL,001,NULL,NULL,NULL,0,NULL,NULL,'2018-08-10 17:35:10','system','2018-08-10 17:35:10','system',NULL,0,'1');
+insert  into `sys_user`(`id`,`name`,`user_name`,`channel_partner_id`,`password`,`job_num`,`company_id`,`office_id`,`office_over`,`position`,`email`,`phone`,`mobile`,`status`,`login_ip`,`login_time`,`add_time`,`add_user`,`update_time`,`update_user`,`remark`,`is_delete`,`is_receive_order`) values (1,'system','system','10','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','1','11','11','11,1101,1102,1103,1104,110401,110402,1111',001,NULL,NULL,NULL,0,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'1'),(279,'user1','user1','','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','001','11','11','1102',001,NULL,NULL,NULL,0,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'1'),(280,'user2','user2','','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','002','11','110401','1102',001,NULL,NULL,NULL,0,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'1'),(281,'user3','user3','','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','003','11','11',NULL,001,NULL,NULL,NULL,0,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'1'),(282,'风控','user4','','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','004','11','1102','',001,NULL,NULL,NULL,0,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'1'),(283,'运营','user5',NULL,'fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','005','11','1111','',001,NULL,NULL,NULL,0,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'1'),(284,'user6','user6',NULL,'fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','006','11','11','',001,NULL,NULL,NULL,0,NULL,NULL,'2018-01-01 00:00:00','system','2018-01-01 00:00:00','system',NULL,0,'1'),(285,'user7','user7',NULL,'fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','0025','11','11','',000,NULL,'',NULL,0,NULL,NULL,'2018-09-28 10:01:42','system','2018-09-28 10:01:42','system','',0,'1'),(286,'user8','user8',NULL,'fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','001','11','11',NULL,000,NULL,'',NULL,0,NULL,NULL,'2018-09-28 11:43:58','system','2018-09-28 11:43:58','system','',0,'1'),(287,'user9','user9',NULL,'fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','001','11','11',NULL,000,NULL,'',NULL,1,NULL,NULL,'2018-09-28 11:45:41','system','2018-09-30 14:18:06','system','',0,'1'),(288,'user10','user10',NULL,'fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','001','11','11',NULL,000,NULL,'',NULL,0,NULL,NULL,'2018-09-28 12:21:58','user1','2018-09-28 12:21:58','user1','',0,'1'),(289,'user11','user11',NULL,'fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','001','11','11',NULL,000,NULL,'',NULL,0,NULL,NULL,'2018-09-28 12:23:05','user1','2018-09-28 12:23:05','user1','',0,'1'),(290,'user12','user12','','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','001','11','11',NULL,000,NULL,'',NULL,0,NULL,NULL,'2018-09-28 12:30:16','user1','2018-09-28 12:30:16','user1','',0,'1'),(291,'branch','branch','10','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','0101','11','1111','110401,1111',000,'874288011@qq.com','87428802',NULL,0,NULL,NULL,'2018-09-28 15:48:33','system','2018-09-28 15:48:33','system','',0,'1'),(292,'渠道风控','qudaofengkong','10','fpdfjj4dle2bs5znim3ih4iycqr5mtzqifs25ha','12312','11','1111',NULL,000,NULL,'',NULL,0,NULL,NULL,'2018-09-29 14:50:09','运营','2018-09-29 14:50:09','运营','',0,'1');
 
 /*Data for the table `sys_user_role` */
 
-insert  into `sys_user_role`(`id`,`role_id`,`user_id`,`level`) values (1,1,1,NULL),(2,253,1,NULL),(3,254,1,NULL),(4,255,1,NULL),(5,285,1,NULL),(6,291,1,NULL),(7,292,1,NULL),(8,293,1,NULL),(9,295,1,NULL),(10,296,1,NULL),(11,297,1,NULL),(12,306,1,NULL),(1953,1,279,NULL),(1954,253,279,NULL),(1955,254,279,NULL),(1956,255,279,NULL),(1957,285,279,NULL),(1958,291,279,NULL),(1959,292,279,NULL),(1960,293,279,NULL),(1961,295,279,NULL),(1962,296,279,NULL),(1963,297,279,NULL),(1964,306,279,NULL),(1965,285,280,NULL),(1966,292,280,NULL),(1967,291,280,NULL),(1968,1,280,NULL),(1969,253,280,NULL),(1970,254,280,NULL),(1971,255,280,NULL),(1972,293,280,NULL),(1973,295,280,NULL),(1974,296,280,NULL),(1975,297,280,NULL),(1976,306,280,NULL),(1977,1,281,NULL),(1978,253,281,NULL),(1979,254,281,NULL),(1980,255,281,NULL),(1981,285,281,NULL),(1982,291,281,NULL),(1983,292,281,NULL),(1984,293,281,NULL),(1985,295,281,NULL),(1986,296,281,NULL),(1987,297,281,NULL),(1988,306,281,NULL),(1989,1,282,NULL),(1990,253,282,NULL),(1991,254,282,NULL),(1992,255,282,NULL),(1993,285,282,NULL),(1994,291,282,NULL),(1995,292,282,NULL),(1996,293,282,NULL),(1997,295,282,NULL),(1998,296,282,NULL),(1999,297,282,NULL),(2000,306,282,NULL),(2001,1,283,NULL),(2002,253,283,NULL),(2003,254,283,NULL),(2004,255,283,NULL),(2005,285,283,NULL),(2006,291,283,NULL),(2007,292,283,NULL),(2008,293,283,NULL),(2009,295,283,NULL),(2010,296,283,NULL),(2011,297,283,NULL),(2012,306,283,NULL),(2013,1,284,NULL),(2014,253,284,NULL),(2015,254,284,NULL),(2016,255,284,NULL),(2017,285,284,NULL),(2018,291,284,NULL),(2019,292,284,NULL),(2020,293,284,NULL),(2021,295,284,NULL),(2022,296,284,NULL),(2023,297,284,NULL),(2024,306,284,NULL);
+insert  into `sys_user_role`(`id`,`role_id`,`user_id`,`level`) values (1977,1,281,NULL),(1978,253,281,NULL),(1979,254,281,NULL),(1980,255,281,NULL),(1981,285,281,NULL),(1982,291,281,NULL),(1983,292,281,NULL),(1984,293,281,NULL),(1985,295,281,NULL),(1986,296,281,NULL),(1987,297,281,NULL),(1988,306,281,NULL),(2037,1,283,NULL),(2038,253,283,NULL),(2039,254,283,NULL),(2040,255,283,NULL),(2041,285,283,NULL),(2042,291,283,NULL),(2043,292,283,NULL),(2044,293,283,NULL),(2045,295,283,NULL),(2046,296,283,NULL),(2047,297,283,NULL),(2048,306,283,NULL),(2049,1,282,NULL),(2050,253,282,NULL),(2051,254,282,NULL),(2052,255,282,NULL),(2053,285,282,NULL),(2054,291,282,NULL),(2055,292,282,NULL),(2056,293,282,NULL),(2057,295,282,NULL),(2058,296,282,NULL),(2059,297,282,NULL),(2060,306,282,NULL),(2109,1,284,NULL),(2110,253,284,NULL),(2111,254,284,NULL),(2112,255,284,NULL),(2113,285,284,NULL),(2114,291,284,NULL),(2115,292,284,NULL),(2116,293,284,NULL),(2117,295,284,NULL),(2118,296,284,NULL),(2119,297,284,NULL),(2120,306,284,NULL),(2172,1,279,NULL),(2173,253,279,NULL),(2174,254,279,NULL),(2175,255,279,NULL),(2176,285,279,NULL),(2177,291,279,NULL),(2178,292,279,NULL),(2179,293,279,NULL),(2180,295,279,NULL),(2181,296,279,NULL),(2182,297,279,NULL),(2183,306,279,NULL),(2231,1,285,NULL),(2263,1,1,NULL),(2264,253,1,NULL),(2265,254,1,NULL),(2266,255,1,NULL),(2267,285,1,NULL),(2268,291,1,NULL),(2269,292,1,NULL),(2270,293,1,NULL),(2271,295,1,NULL),(2272,296,1,NULL),(2273,297,1,NULL),(2274,306,1,NULL),(2275,307,1,NULL),(2276,328,1,NULL),(2277,330,1,NULL),(2278,329,1,NULL),(2279,333,1,NULL),(2280,1,286,NULL),(2281,1,287,NULL),(2282,1,288,NULL),(2283,1,289,NULL),(2284,1,290,NULL),(2326,330,279,NULL),(2328,330,281,NULL),(2329,330,282,NULL),(2389,1,292,NULL),(2390,330,292,NULL),(2393,254,291,NULL),(2424,285,280,NULL),(2425,292,280,NULL),(2426,291,280,NULL),(2427,1,280,NULL),(2428,253,280,NULL),(2429,254,280,NULL),(2430,255,280,NULL),(2431,293,280,NULL),(2432,295,280,NULL),(2433,296,280,NULL),(2434,297,280,NULL),(2435,306,280,NULL),(2436,330,280,NULL);
 
 
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+
+#为用户登陆名字段添加唯一性约束。
+ALTER TABLE shfddb.sys_user ADD UNIQUE (USER_name);

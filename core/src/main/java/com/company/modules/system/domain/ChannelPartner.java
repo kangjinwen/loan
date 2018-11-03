@@ -4,13 +4,22 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class ChannelPartner implements Serializable {
-    private Integer id;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private Integer id;
 
     private String partnerName;
 
-    private String logo;
+	private String logo;
 
     private String title;
+
+    private String salesman;
+
+    private String locality;
 
     private Date createTime;
 
@@ -48,6 +57,22 @@ public class ChannelPartner implements Serializable {
 
     public void setTitle(String title) {
         this.title = title == null ? null : title.trim();
+    }
+
+    public String getSalesman() {
+        return salesman;
+    }
+
+    public void setSalesman(String salesman) {
+        this.salesman = salesman;
+    }
+
+    public String getLocality() {
+        return locality;
+    }
+
+    public void setLocality(String locality) {
+        this.locality = locality;
     }
 
     public Date getCreateTime() {

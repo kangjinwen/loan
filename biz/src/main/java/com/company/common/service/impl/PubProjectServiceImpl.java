@@ -16,28 +16,26 @@ import com.company.common.service.PubProjectService;
 import com.company.modules.common.exception.ServiceException;
 
 /**
-* User:    wulb
-* DateTime:2016-08-06 11:39:36
-* details: 项目,Service实现层
-* source:  代码生成器
-*/
+ * User: wulb DateTime:2016-08-06 11:39:36 details: 项目,Service实现层 source: 代码生成器
+ */
 @SuppressWarnings("rawtypes")
 @Service(value = "pubProjectServiceImpl")
 public class PubProjectServiceImpl extends BaseServiceImpl implements PubProjectService {
 	/**
 	 * 日志操作
 	 */
-    private static final Logger log = LoggerFactory.getLogger(PubProjectServiceImpl.class);
-    /**
+	private static final Logger log = LoggerFactory.getLogger(PubProjectServiceImpl.class);
+	/**
 	 * 项目dao层
 	 */
-    @Autowired
-    private PubProjectDao pubProjectDao;
+	@Autowired
+	private PubProjectDao pubProjectDao;
 
 	/**
 	 * 项目表,插入数据
+	 * 
 	 * @param collateral 项目类
-	 * @return           返回页面map
+	 * @return 返回页面map
 	 * @throws Exception
 	 */
 	@Override
@@ -45,31 +43,33 @@ public class PubProjectServiceImpl extends BaseServiceImpl implements PubProject
 		try {
 			return pubProjectDao.insert(pubProject);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.FAIL_CODE_VALUE);
 		}
 	}
 
 	/**
-	* 项目表,修改数据
-	* @param collateral 项目类
-	* @return           返回页面map
-	* @throws Exception
-	*/
+	 * 项目表,修改数据
+	 * 
+	 * @param collateral 项目类
+	 * @return 返回页面map
+	 * @throws Exception
+	 */
 	@Override
 	public long update(PubProject pubProject) throws Exception {
 		try {
 			return pubProjectDao.update(pubProject);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.FAIL_CODE_VALUE);
 		}
 	}
-	
+
 	/**
 	 * 项目表,根据id查询数据
+	 * 
 	 * @param id
-	 * @return           返回页面map
+	 * @return 返回页面map
 	 * @throws Exception
 	 */
 	@Override
@@ -77,15 +77,16 @@ public class PubProjectServiceImpl extends BaseServiceImpl implements PubProject
 		try {
 			return pubProjectDao.getItemInfoById(id);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.FAIL_CODE_VALUE);
 		}
 	}
-	
+
 	/**
 	 * 项目表,根据流程id查询数据
+	 * 
 	 * @param processInstanceId
-	 * @return           返回页面map
+	 * @return 返回页面map
 	 * @throws Exception
 	 */
 	@Override
@@ -93,26 +94,28 @@ public class PubProjectServiceImpl extends BaseServiceImpl implements PubProject
 		try {
 			return pubProjectDao.getItemInfoByProcessInstanceId(processInstanceId);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.FAIL_CODE_VALUE);
 		}
 	}
+
 	/**
 	 * 项目表,分页查询数据
+	 * 
 	 * @param pubProject 项目类
-	 * @return           返回页面map
+	 * @return 返回页面map
 	 * @throws Exception
 	 */
 	@Override
-	public List<PubProject> getPageListByMap(Map<String , Object> data) throws Exception {
+	public List<PubProject> getPageListByMap(Map<String, Object> data) throws Exception {
 		try {
 			return pubProjectDao.getPageListByMap(data);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.FAIL_CODE_VALUE);
 		}
 	}
-	
+
 	/**
 	 * 获取项目代码最大值
 	 */
@@ -121,29 +124,41 @@ public class PubProjectServiceImpl extends BaseServiceImpl implements PubProject
 		try {
 			return pubProjectDao.getMaxProjectCode(projectCode);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.FAIL_CODE_VALUE);
 		}
 	}
-	
+
 	/**
-	* 项目表,删除数据
-	* @param id 主键
-	* @return   返回页面map
-	* @throws Exception
-	*/
+	 * 项目表,删除数据
+	 * 
+	 * @param id 主键
+	 * @return 返回页面map
+	 * @throws Exception
+	 */
 	@Override
 	public int deleteById(long id) throws Exception {
 		try {
 			return pubProjectDao.deleteById(id);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.FAIL_CODE_VALUE);
 		}
 	}
-	
+
 	@Override
 	public BaseDao getMapper() {
 		return pubProjectDao;
+	}
+
+	@Override
+	public long queryCountOfApplicationRecord() throws Exception {
+
+		try {
+			return pubProjectDao.queryCountOfApplicationRecord();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e, Constant.OTHER_CODE_VALUE);
+		}
 	}
 }

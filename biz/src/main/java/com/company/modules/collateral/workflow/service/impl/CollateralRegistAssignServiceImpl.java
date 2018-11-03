@@ -1,5 +1,6 @@
 package com.company.modules.collateral.workflow.service.impl;
 
+import com.company.common.context.WorkFlowConstant;
 import org.activiti.engine.delegate.DelegateTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +32,13 @@ public class CollateralRegistAssignServiceImpl extends HistoryRecorderService im
         if (logger.isDebugEnabled()) {
             logger.debug("参数列表：" +dataBean);
         }
-        preCheckBasicParams(dataBean);
-        preCheckWorkflowParams(dataBean);
-        preCheckCurrentWorkflowState(dataBean);
-        
+
+
+		if (WorkFlowConstant.NEXT_STEP_PASS.equals(dataBean.getNextStep())) {
+			preCheckBasicParams(dataBean);
+			preCheckWorkflowParams(dataBean);
+			preCheckCurrentWorkflowState(dataBean);
+		}
 //        String manualAssignee = dataBean.getManualAssignee();
 		//if(!StringUtils.isEmpty(manualAssignee)){
 //			delegateTask.setVariable("ManualAssignee", manualAssignee);//设置任务分配人

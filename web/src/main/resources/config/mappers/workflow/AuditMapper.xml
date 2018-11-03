@@ -10,6 +10,7 @@
 		task.TASK_DEF_KEY_ as processStateCode,
 		sdd.item_value as currentProcessStateCode,
 		sdd.item_code as currentProcessItemCode,
+		pp.id as productId,
 		<!--pi.property_area as propertyArea,
 		bb.`name` as customerName,-->
 		br.account as account,
@@ -159,7 +160,7 @@
 		<include refid="auditBaseWhere"/>
 		order by task.CREATE_TIME_ ASC) consult
 		<include refid="listQuerySql7"/>
-		order by consult.createTime ASC
+		order by consult.createTime desc
 	</select>
 	
 	<select id="queryDoneAuditTasks" parameterType="map" resultType="java.util.HashMap">
@@ -229,5 +230,29 @@
 		AND PROC_INST_ID_ = #{processInstanceId}
 		ORDER BY task.START_TIME_ desc limit 1
 	</select>
-	
+	<update id="modifyTaskAssigneeByAnyKey" >
+		update
+		ACT_RU_TASK
+		set
+		ASSIGNEE_ = (SELECT user_name FROM sys_user WHERE id = #{userId})
+		where
+		ID_ = #{taskId}
+	</update>
+	<update id="modifyHisTaskAssigneeByAnyKey" >
+		update
+		ACT_HI_TASKINST
+		set
+		ASSIGNEE_ = (SELECT user_name FROM sys_user WHERE id = #{userId})
+		where
+		ID_ = #{taskId}
+	</update>
+	<select id="getHisTaskInfoByTaskId" resultType="java.util.Map">
+		select
+		END_TIME_,
+		PROC_INST_ID_
+		from
+		ACT_HI_TASKINST
+		where
+		ID_ = #{taskId}
+	</select>
 </mapper>

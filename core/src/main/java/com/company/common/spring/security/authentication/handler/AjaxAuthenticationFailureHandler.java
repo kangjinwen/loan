@@ -14,11 +14,11 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
+import com.company.common.context.Constant;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.company.common.context.Constant;
 
 public class AjaxAuthenticationFailureHandler implements
 		AuthenticationFailureHandler {
@@ -32,8 +32,7 @@ public class AjaxAuthenticationFailureHandler implements
 			throws IOException, ServletException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		response.setHeader("Content-Type", "application/json;charset=UTF-8");
-		JsonGenerator jsonGenerator = objectMapper.getJsonFactory()
-				.createJsonGenerator(response.getOutputStream(),
+		JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(response.getOutputStream(),
 						JsonEncoding.UTF8);
 		try {
 

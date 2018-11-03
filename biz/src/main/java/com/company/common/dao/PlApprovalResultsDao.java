@@ -28,6 +28,7 @@ public interface PlApprovalResultsDao extends BaseDao<PlApprovalResults,Long> {
      */
     public Map<String, Object> getItemInfoByProcessInstanceId(String processInstanceId);
 
+    public List<Map<String, Object>> getItemInfosByProcessInstanceId(String processInstanceId);
     /**
      * 借款需求信息表,根据流程id查询数据
      * @param processInstanceId

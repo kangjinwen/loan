@@ -9,7 +9,7 @@ export default React.createClass({
     getInitialState() {
         return {
             fileList: [],
-            formData: {}
+            formData: {},
         };
     },
     queryFormData(selectRecord, idData) {
@@ -64,8 +64,6 @@ export default React.createClass({
         }
     },
     componentDidMount() {
-        console.log(this.props.canEdit)
-
         if (this.props.selectRecord || this.props.idData) {
             this.queryFormData(this.props.selectRecord, this.props.idData);
         }
@@ -85,14 +83,15 @@ export default React.createClass({
 
         if (btype == 'HOUSE') {
             var bizType = btype;
-            window.location.href = '/modules/common/PubBizAttachmentAction/downloadZip.htm?search={"relationId" : ' + idData + ', "bizType":"' + bizType + '"}';
+            // window.open(`/modules/common/PubBizAttachmentAction/downloadZip.htm?relationId=${idData}&bizType=${bizType}`);
+            window.open(`/modules/common/PubAttachmentAction/downloadZip.htm?relationId=${idData}&bizType=${bizType}`);
         } else {
             var processInstanceId = selectRecord && selectRecord.processInstanceId;
             var projectId = selectRecord && selectRecord.projectId;
             if (props.title == "他项权利证材料" || props.title == "公证材料") {
                 processInstanceId = selectRecord && selectRecord.projectId;
             }
-            window.location.href = '/modules/common/PubAttachmentAction/downloadZip.htm?search={"projectId" : ' + projectId + ', "btype":"' + btype + '", "processInstanceId":"' + processInstanceId + '"}';
+            window.open(`/modules/common/PubAttachmentAction/downloadZip.htm?projectId=${projectId}&btype=${btype}&processInstanceId=${processInstanceId}&fileExistCheck=false`);
         }
 
     },
@@ -143,9 +142,17 @@ export default React.createClass({
     lookPdf(url) {
         window.open(url);
     },
-    previewImage(e) {
-        let viewer = new Viewer(e.target);
-        viewer.show()
+    previewImage(index,btype,event) {
+        if(event.target){
+            if(this.state.preViewer){
+                this.state.preViewer.destroy()
+            }
+            this.state.preViewer = new Viewer(document.getElementById(btype),{initialViewIndex:index})
+
+
+            this.state.preViewer.show()
+        }
+
     },
     render() {
         var me = this;
@@ -165,9 +172,10 @@ export default React.createClass({
         images = this.state.fileList.map((file, index) => {
             var url = file.url;
             var fileExtension = url.substring(url.lastIndexOf('.') + 1);
-            return <div className="img" key={index}>
-                <a href="javascrript:;">{fileExtension == 'jpg' || fileExtension == 'JPG' || fileExtension == 'JPEG' || fileExtension == 'jpeg' || fileExtension == 'png' || fileExtension == 'PNG' ?
-                    <img src={url} onClick={this.previewImage}/> :
+            return <div className="img image-wrapper" key={index}>
+                <a href="javascrript:;"><div className="image-layer" onClick={()=>{this.previewImage(index,this.props.btype,event)}}></div>{fileExtension == 'jpg' || fileExtension == 'JPG' || fileExtension == 'JPEG' || fileExtension == 'jpeg' || fileExtension == 'png' || fileExtension == 'PNG' ?
+
+                    <img src={url}/> :
                     <iframe width="100%" height="230px" src={url}></iframe>}</a>
                 {fileExtension == 'pdf' ? <button key="lookPdf" type="button" className="ant-btn lookPdf"
                                                   onClick={this.lookPdf.bind(this, url)}>预览</button> : null}
@@ -244,22 +252,17 @@ export default React.createClass({
                     return false;
                 }
                 // const isJPG = (file.type === 'image/jpeg' || file.type === 'application/pdf');
-                var isJPG = file.type === 'image/png' || file.type === 'image/jpeg';
-                if (btype == "Contract_Pic") {
-                    isJPG = (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'application/pdf');
+                // var isJPG = file.type === 'image/png' || file.type === 'image/jpeg';
+                // if (btype == "Contract_Pic") {
+                let accept = (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'application/pdf');
+                // }
+                if (!accept) {
+                    message.error('只能上传 PNG、JPG 文件或者pdf文件哦！');
                 }
-                if (!isJPG) {
-                    if (btype == "Contract_Pic") {
-                        message.error('只能上传 PNG、JPG 文件或者pdf文件哦！');
-                    } else {
-                        message.error('只能上传  PNG、JPG 文件哦！');
-                    }
-
-                }
-                return isJPG;
+                return accept;
             },
         };
-        return (<div className="uploadFile">
+        return (<div className="uploadFile" id={this.props.btype}>
                 {images}
                 <div className="img">
                     <div className="uploadBg uploadPlus">

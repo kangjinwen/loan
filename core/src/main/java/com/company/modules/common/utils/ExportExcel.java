@@ -7,13 +7,29 @@
  */
 package com.company.modules.common.utils;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.text.SimpleDateFormat;
-import org.apache.poi.hssf.usermodel.*;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFPatriarch;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 
 /**
@@ -53,7 +69,7 @@ public class ExportExcel<T> {
         // 生成一个表格
         HSSFSheet sheet = workbook.createSheet(title);
         // 设置表格默认列宽度为15个字节
-        sheet.setDefaultColumnWidth((short) 20);
+		sheet.setDefaultColumnWidth(20);
         // 生成一个样式
         HSSFCellStyle style = workbook.createCellStyle();
         // 设置这些样式
@@ -98,7 +114,7 @@ public class ExportExcel<T> {
 
         // 产生表格标题行
         HSSFRow row = sheet.createRow(0);
-        for (short i = 0; i < headers.length; i++) {
+		for (int i = 0; i < headers.length; i++) {
             HSSFCell cell = row.createCell(i);
             cell.setCellStyle(style);
             HSSFRichTextString text = new HSSFRichTextString(headers[i]);
@@ -121,7 +137,7 @@ public class ExportExcel<T> {
                 	fieldList.add(field);
                 }
 			}
-            for (short i = 0; i < fieldList.size(); i++) {
+			for (int i = 0; i < fieldList.size(); i++) {
                 HSSFCell cell = row.createCell(i);
                 cell.setCellStyle(style2);
                 Field field = fieldList.get(i);              

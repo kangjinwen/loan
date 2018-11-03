@@ -26,7 +26,7 @@
 		<!-- 自动部署 -->
 		<property name="deploymentResources">
 			<list>
-                <value>classpath:config/bpm/eloan.mjs.house.version.bpmn20.bpmn</value>
+                <value>classpath:config/bpm/eloan.mjs.house.version.bpmn20.xml</value>
                 <!--<value>classpath:config/bpm/eloan.house.version.bpmn20.xml</value>-->
 			</list>
 		</property>

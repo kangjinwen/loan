@@ -60,6 +60,9 @@ public class ZZJFAssignmentTaskCreationListener extends AssignmentTaskCreationLi
     private static final String SAME_AS_BEFORE_TASK = "SAME_AS_BEFORE_TASK:";
     private static final String MANUAL_ORG="MANUAL_ORG:";
 	private static final String DEPARTMENT = "DEPART:";
+	private static final String ORGAN = "ORGAN";
+	private static final String CHANNEL = "CHANNEL";
+
 	@Override
 	public void onCreate(DelegateTask delegateTask) {
 		logger.info("开始分配任务");
@@ -143,10 +146,13 @@ public class ZZJFAssignmentTaskCreationListener extends AssignmentTaskCreationLi
 			taskDistributer = new RebateHandleTaskDistributer();
 		}else if(assignee.contains(MANUAL_ORG)){
 			taskDistributer = new ManualOrgTaskDistributer();
-		}else if (assignee.contains(DEPARTMENT)){
+		}else if (assignee.contains(DEPARTMENT)){//部门分配器
 			taskDistributer = new DepartBasedTaskDistributer();
-		}
-		else{
+		}else if(assignee.contains(ORGAN)){//机构分配器
+			taskDistributer = new OrganTaskDistributer();
+		}else if (assignee.contains(CHANNEL)){//渠道分配器
+			taskDistributer = new ChannelTaskDistributer();
+		} else{
             taskDistributer = new EmptyTaskDistributer();
         }
         return taskDistributer;

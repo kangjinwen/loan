@@ -105,6 +105,15 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
 	}
 
 	@Override
+	public List<SysRole> getRoleListByUsername(String username)throws ServiceException{
+		try {
+		return this.sysRoleDao.getRoleListByUsername(username);
+	} catch (Exception e) {
+		throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+	}
+}
+
+	@Override
 	public BaseDao getMapper() {
 		return null;
 	}

@@ -97,19 +97,20 @@ var AddlWin = React.createClass({
                 this.handleTabClick("1");
                 return;
             } else {
-                if (!ProcessInformation) {
-                    this.handleTabClick("2");
-                    return;
-                }
-                ProcessInformation.validateFields((errors, values) => {
-                    if (!!errors) {
-                        this.handleTabClick("2");
-                        return;
-                    } else {
-                        var remarkData = ProcessInformation.getFieldsValue();
+                // if (!ProcessInformation) {
+                //     this.handleTabClick("2");
+                //     return;
+                // }
+                // ProcessInformation.validateFields((errors, values) => {
+                    // if (!!errors) {
+                    //     this.handleTabClick("2");
+                    //     return;
+                    // } else {
+                    //     var remarkData = ProcessInformation.getFieldsValue();
                         var LoanData = LoanFormInfo.getFieldsValue();
                         var commentData = {};
-                        commentData.comment = remarkData.nextStep;
+                        // commentData.comment = remarkData.nextStep;
+                        commentData.comment = 'pass';
 
                         var postdata = {
                             accountHolderName: LoanData.accountHolderName,
@@ -127,9 +128,10 @@ var AddlWin = React.createClass({
                             // loanTime: LoanData.loanTime,
                             loanTime: DateFormat.formatTime("yyyy-MM-dd hh:mm:ss", LoanData.loanTime),
                             loanAmount: LoanData.loanAmount,
-                            remarkComment: remarkData.remarkComment,
+                            // remarkComment: remarkData.remarkComment,
                             consultId: selectRecord.consultId,
-                            nextStep: remarkData.nextStep,
+                            // nextStep: remarkData.nextStep,
+                            nextStep: 'pass',
                             processStateCode: selectRecord.processStateCode,
                             projectId: selectRecord.projectId,
                             processInstanceId: selectRecord.processInstanceId
@@ -159,8 +161,8 @@ var AddlWin = React.createClass({
                                 }
                             }
                         });
-                    }
-                });
+                    // }
+                // });
             }
         });
     },
@@ -251,9 +253,9 @@ var AddlWin = React.createClass({
                     <TabPane tab="审批历史" key="3">
                         <HistoryApprove ref="HistoryApprove" canEdit={props.canEdit} record={props.record}/>
                     </TabPane>
-                    <TabPane tab="处理意见" key="2">
-                        <ProcessInformation ref="ProcessInformation" canEdit={props.canEdit} record={props.record} />
-                    </TabPane>
+                    {/*<TabPane tab="处理意见" key="2">*/}
+                        {/*<ProcessInformation ref="ProcessInformation" canEdit={props.canEdit} record={props.record} />*/}
+                    {/*</TabPane>*/}
                 </Tabs>
             </Modal>
         );

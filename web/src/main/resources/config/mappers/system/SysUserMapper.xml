@@ -6,6 +6,7 @@
 		<id column="id" property="id" />
 		<result column="name" property="name" />
 		<result column="user_name" property="userName" />
+		<result column="channel_partner_id" property="channelPartnerId" />
 		<result column="password" property="password" />
 		<result column="job_num" property="number" />
 		<result column="company_id" property="companyId" />
@@ -32,6 +33,7 @@
 		<id property="id" column="id" />
 		<result property="name" column="name" />
 		<result property="userName" column="userName" />
+		<result property="channelPartnerId" column="channel_partner_id"/>
 		<result property="officeId" column="officeId" />
 		<result property="officeName" column="officeName" />
 		<result property="status" column="status" />
@@ -52,11 +54,12 @@
 		<result column="name" property="name" />
 		<result property="officeId" column="officeId" />
 	</resultMap>
-	
+		
 	<sql id="searchSql">
 		id,
 		name,
 		user_name,
+		channel_partner_id,
 		password,
 		job_num,
 		company_id,
@@ -96,6 +99,9 @@
 			</if>
 			<if test="userName!=null and userName!='' ">
 				and u.user_name=#{userName}
+			</if>
+			<if test="channelPartnerId !=null and channelPartnerId !='' ">
+				and u.channel_partner_id=#{channelPartnerId}
 			</if>
 			<if test="password!=null and password!='' ">
 				and u.password=#{password}
@@ -162,6 +168,9 @@
 			<if test="userName!=null and userName!='' ">
 				user_name=#{userName},
 			</if>
+			<if test="channelPartnerId !=null and channelPartnerId !='' ">
+				channel_partner_id = #{channelPartnerId},
+			</if>
 			<if test="password!=null and password!='' ">
 				password=#{password},
 			</if>
@@ -201,7 +210,7 @@
 			<if test="updateUser!=null and updateUser!='' ">
 				update_user=#{updateUser},
 			</if>
-			<if test="position!=null and position!='' ">
+			<if test="position!=null">
 				position=#{position},
 			</if>
 			<if test="remark!=null and remark!='' ">
@@ -226,6 +235,7 @@
 		insert into sys_user(
 		name,
 		user_name,
+		channel_partner_id,
 		password,
 		job_num,
 		company_id,
@@ -248,6 +258,7 @@
 		values (
 		#{name},
 		#{userName},
+		#{channelPartnerId},
 		#{password},
 		#{number},
 		#{companyId},
@@ -273,6 +284,7 @@
 		update sys_user
 			set
 			name=#{name},
+			channel_partner_id=#{channelPartnerId},
 			job_num=#{number},
 			company_id=#{companyId},
 			office_id=#{officeId},
@@ -420,6 +432,7 @@
         u.position as position,
 		u.name as name,
 		u.user_name as userName,
+		u.channel_partner_id as channelPartnerId,
 		u.job_num as job_num,
 		u.office_id as officeId,
 		u3.name as officeName,
@@ -447,6 +460,9 @@
 		</if>
 		<if test="email!=null and email!='' ">
 			and u.email = #{email}
+		</if>
+		<if test="channelPartnerId !=null and channelPartnerId !='' ">
+			and u.channel_partner_id = #{channelPartnerId}
 		</if>
 		<if test="phone!=null and phone!='' ">
 			and u.phone = #{phone}
@@ -568,4 +584,44 @@
 	    </foreach>
 	    </if>
     </select>
-</mapper>     
+
+	<select id="getCoveredUserList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select
+		u.id,
+		u.name,
+		u.user_name as userName
+		from sys_user u
+		<if test="officeOver != null">
+			where u.office_id in
+			<foreach item="officeOver" collection="officeOver" open="(" separator="," close=")">
+				#{officeOver}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="getUserByChannelId" resultType="java.util.Map">
+		SELECT
+			user_name,
+			count(task.ASSIGNEE_) AS "count"
+		FROM
+			sys_user u
+
+		left JOIN ACT_RU_TASK task ON task.ASSIGNEE_ = u.user_name
+		INNER JOIN sys_user_role ur ON u.id = ur.user_id
+		INNER JOIN sys_role r ON ur.role_id = r.id
+		WHERE
+			channel_partner_id = #{channelId}
+		AND (
+			r.nid = "channelAudit"
+			OR r.nid = "channelSupplement"
+			OR r.nid = "channelLoaned"
+		)
+		GROUP BY
+			u.user_name
+		ORDER BY
+			count(task.ASSIGNEE_),
+			RAND()
+		LIMIT 1
+	</select>
+
+</mapper>

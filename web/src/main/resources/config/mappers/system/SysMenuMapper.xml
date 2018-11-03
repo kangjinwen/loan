@@ -19,6 +19,9 @@
 		<result column="level" property="level" />
 		<result column="leaf" property="leaf" />
 		<result column="controller_name" property="controllerName" />
+		<result column="route_name" property="routeName" />
+		<result column="route_path" property="routePath" />
+		<result column="menu_icon" property="menuIcon" />
 	</resultMap>
 
 	<resultMap type="menuCheked" id="menuCheckedRe">
@@ -58,6 +61,9 @@
         <result column="leaf" property="leaf" />
         <result column="controller_name" property="controllerName" />
         <result column="checked" property="checked" />
+		<result column="route_name" property="routeName" />
+		<result column="route_path" property="routePath" />
+		<result column="menu_icon" property="menuIcon" />
     </resultMap>
 
 	<resultMap id="menuModelResult" type="menuModel">
@@ -123,7 +129,10 @@
 		is_menu,
 		scriptid,
 		leaf,
-		level
+		level,
+		route_name,
+		route_path,
+		menu_icon
 		)
 		values (
 		#{text},
@@ -135,7 +144,10 @@
 		#{isMenu},
 		#{scriptid},
 		#{leaf},
-		#{level}
+		#{level},
+		#{routeName},
+		#{routePath},
+		#{menuIcon}
 		)
 	</insert>
 	
@@ -157,7 +169,10 @@
 		is_menu=#{isMenu},
 		scriptid=#{scriptid},
 		leaf=#{leaf},
-		level=#{level}
+		level=#{level},
+		route_name=#{routeName},
+		route_path=#{routePath},
+		menu_icon=#{menuIcon}
 		where
 		id = #{id}
 	</update>
@@ -206,7 +221,16 @@
 				leaf = #{leaf},
 			</if>
 			<if test="level!=null">
-				level = #{level}
+				level = #{level},
+			</if>
+			<if test="routeName!=null">
+				route_name = #{routeName},
+			</if>
+			<if test="routePath!=null">
+				route_path = #{routePath},
+			</if>
+			<if test="menuIcon!=null">
+				menu_icon = #{menuIcon}
 			</if>
 		</trim>
 		where
@@ -336,15 +360,7 @@
 		JOIN sys_menu menu ON menu.id = rm.menu_id
 		WHERE
 		    rm.role_id IN ( #{0} )
-		AND NOT EXISTS (
-		    SELECT
-		        1
-		    FROM
-		        sys_menu
-		    WHERE
-		        parent_id = rm.menu_id
-		)
-		AND SYS_TYPE IN (0, #{1} )
+		AND SYS_TYPE IN (0, #{1} ) 
     </select>
     
     <select id="getMenuParentId" resultType="java.util.HashMap">
@@ -360,7 +376,20 @@
 		  </foreach>
 		    
     </select>
-    
+
+	<select id="getRouteInfoByProcessState" resultType="java.util.HashMap" parameterType="java.lang.String">
+	SELECT
+		NAME AS menuName,
+		route_name AS routeName,
+		route_path AS routePath,
+		menu_icon AS menuIcon
+	FROM
+		sys_menu menu
+	LEFT JOIN sys_dict_detail dict on dict.item_value = menu.`name`
+	WHERE
+		dict.item_code = #{processState}
+	</select>
+
     <select id="getMenuByParentIds" resultMap="menuHashMap"
         parameterType="java.lang.String">
         SELECT
@@ -370,7 +399,10 @@
 		    icon_cls,
 		    scriptid,
 		    sort,
-		    controller_name 
+		    controller_name,
+		    route_name,
+		    route_path,
+		    menu_icon
 		FROM
 		    sys_menu
 		WHERE
@@ -385,6 +417,18 @@
 		    sort,
 		    sys_type
     </select>
+
+	<select id="getRouteInfoByScriptid" resultType="java.util.HashMap"
+			parameterType="java.lang.String">
+		SELECT
+		    route_name,
+		    route_path,
+		    menu_icon
+		FROM
+		    sys_menu
+		WHERE
+		    is_delete = 0 and scriptid = #{scriptid}
+	</select>
     
     <select id="fetchRoleMenuHas" resultMap="menuHashMap"
         parameterType="long">
@@ -397,14 +441,6 @@
 		    sys_menu menu
 		LEFT JOIN sys_role_menu rm ON rm.menu_id = menu.id
 		AND role_id = #{roleId}
-		AND NOT EXISTS (
-		    SELECT
-		        1
-		    FROM
-		        sys_menu
-		    WHERE
-		        parent_id = rm.menu_id
-		)
 		WHERE
 		    menu.is_delete = 0
     </select>
@@ -421,7 +457,10 @@
 	    controller_name,
 	    level,
 	    is_delete,
-	    is_menu
+	    is_menu,
+	    route_name,
+	    route_path,
+	    menu_icon
 	FROM
 	    sys_menu
 	WHERE

@@ -248,8 +248,16 @@ public interface RDZZTaskService {
 	PageInfo<Map<String, Object>> queryhousLowerCost(Long roleId,Map<String, Object> params, boolean isCompleted, int currentPage,int pageSize) throws ServiceException;
 
 	PageInfo<Map<String, Object>> queryAuditTasks(Long roleId,Map<String, Object> params, boolean isCompleted, int currentPage,int pageSize, String type) throws ServiceException;
-	
+
+	PageInfo<Map<String, Object>> queryPreSetRepayPlanTasks(Long roleId,Map<String, Object> params, boolean isCompleted, int currentPage,int pageSize, String type) throws ServiceException;
+
 	PageInfo<Map<String, Object>> queryMyTaskStatistic(Map<String, Object> params,int currentPage,int pageSize)throws ServiceException;
 
 	List<ExportHousOritoInformation> queryHouseholdInvestigate(Long roleId, Map<String, Object> params) throws ServiceException;
+
+    int modifyTaskAssigneeByAnyKey(String taskId, String userId);
+
+	int modifyHisTaskAssigneeByAnyKey(String taskId, String userId);
+
+    Map<String,Object> getHisTaskInfoByTaskId(String taskId);
 }

@@ -88,6 +88,42 @@
 		<result column="management_addr_type" property="managementAddrType" />
 		<result column="company_area_id" property="companyAreaId" />
 		<result column="team_manager" property="teamManager" />
+		<result column="id_type" property="idType" />
+		<result column="residential_address" property="residentialAddress" />
+		<result column="house_tel" property="houseTel" />
+		<result column="mail" property="mail" />
+		<result column="wechat_id" property="wechatId" />
+		<result column="work_type" property="workType" />
+		<result column="nature_of_work" property="natureOfWork" />
+		<result column="whether_pay_security" property="whetherPaySecurity" />
+		<result column="pay_security_term" property="paySecurityTerm" />
+		<result column="user_annual_income" property="userAnnualIncome" />
+		<result column="family_annual_income" property="familyAnnualIncome" />
+		<result column="spouse_name" property="spouseName" />
+		<result column="spouse_sex" property="spouseSex" />
+		<result column="spouse_id_type" property="spouseIdType" />
+		<result column="spouse_id_number" property="spouseIdNumber" />
+		<result column="spouse_education" property="spouseEducation" />
+		<result column="spouse_reg_addr" property="spouseRegAddr" />
+		<result column="spouse_mobile" property="spouseMobile" />
+		<result column="spouse_work_type" property="spouseWorkType" />
+		<result column="spouse_company_name" property="spouseCompanyName" />
+		<result column="families_name" property="familiesName" />
+		<result column="families_mobile" property="familiesMobile" />
+		<result column="families_relationship" property="familiesRelationship" />
+		<result column="contacts_name" property="contactsName" />
+		<result column="contacts_mobile" property="contactsMobile" />
+		<result column="contacts_relatonship" property="contactsRelatonship" />
+		<result column="contacts_company_name" property="contactsCompanyName" />
+		<result column="guarantee_name" property="guaranteeName" />
+		<result column="guarantee_sex" property="guaranteeSex" />
+		<result column="guarantee_id_type" property="guaranteeIdType" />
+		<result column="guarantee_id_number" property="guaranteeIdNumber" />
+		<result column="guarantee_education" property="guaranteeEducation" />
+		<result column="guarantee_relationship" property="guaranteeRelationship" />
+		<result column="guarantee_marriage" property="guaranteeMarriage" />
+		<result column="guarantee_mobile" property="guaranteeMobile" />
+		<result column="guarantee_house_tel" property="guaranteeHouseTel" />
 	</resultMap>
 	
 	<!--基本的sql查询字段 公共引用...-->
@@ -175,7 +211,43 @@
 			employee_num,
 			management_addr_type,
 			company_area_id,
-			team_manager			
+			team_manager,
+			id_type,
+        	residential_address,
+        	house_tel,
+        	mail,
+        	wechat_id,
+        	work_type,
+        	nature_of_work,
+        	whether_pay_security,
+        	pay_security_term,
+        	user_annual_income,
+        	family_annual_income,
+        	spouse_name,
+        	spouse_sex,
+        	spouse_id_type,
+        	spouse_id_number,
+        	spouse_education,
+        	spouse_reg_addr,
+        	spouse_mobile,
+        	spouse_work_type,
+        	spouse_company_name,
+        	families_name,
+        	families_mobile,
+        	families_relationship,
+        	contacts_name,
+        	contacts_mobile,
+        	contacts_relatonship,
+        	contacts_company_name,
+        	guarantee_name,
+        	guarantee_sex,
+        	guarantee_id_type,
+        	guarantee_id_number,
+        	guarantee_education,
+        	guarantee_relationship,
+        	guarantee_marriage,
+        	guarantee_mobile,
+        	guarantee_house_tel	
 	</sql>
 	
 	<!-- 基本的sql查询条件公共引用 -->
@@ -433,9 +505,128 @@
             <if test="teamManager !='' and teamManager !=null">
             	and team_manager = #{teamManager}
             </if>
+            <if test="idType !='' and idType !=null">
+            	and id_type = #{idType}
+            </if>
+            <if test="residentialAddress !='' and residentialAddress !=null">
+            	and residential_address = #{residentialAddress}
+            </if>
+            <if test="houseTel !='' and houseTel !=null">
+            	and house_tel = #{houseTel}
+            </if>
+            <if test="mail !='' and mail !=null">
+            	and mail = #{mail}
+            </if>
+            <if test="wechatId !='' and wechatId !=null">
+            	and wechat_id = #{wechatId}
+            </if>
+            <if test="workType !='' and workType !=null">
+            	and work_type = #{workType}
+            </if>
+            <if test="natureOfWork !='' and natureOfWork !=null">
+            	and nature_of_work = #{natureOfWork}
+            </if>
+            <if test="whetherPaySecurity !='' and whetherPaySecurity !=null">
+            	and whether_pay_security = #{whetherPaySecurity}
+            </if>
+            <if test="paySecurityTerm !='' and paySecurityTerm !=null">
+            	and pay_security_term = #{paySecurityTerm}
+            </if>
+            <if test="userAnnualIncome !='' and userAnnualIncome !=null">
+            	and user_annual_income = #{userAnnualIncome}
+            </if>
+            <if test="familyAnnualIncome !='' and familyAnnualIncome !=null">
+            	and family_annual_income = #{familyAnnualIncome}
+            </if>
+            <if test="spouseName !='' and spouseName !=null">
+            	and spouse_name = #{spouseName}
+            </if>
+            <if test="spouseSex !='' and spouseSex !=null">
+            	and spouse_sex = #{spouseSex}
+            </if>
+            <if test="spouseIdType !='' and spouseIdType !=null">
+            	and spouse_id_type = #{spouseIdType}
+            </if>
+            <if test="spouseIdNumber !='' and spouseIdNumber !=null">
+            	and spouse_id_number = #{spouseIdNumber}
+            </if>
+            <if test="spouseEducation !='' and spouseEducation !=null">
+            	and spouse_education = #{spouseEducation}
+            </if>
+            <if test="spouseRegAddr !='' and spouseRegAddr !=null">
+            	and spouse_reg_addr = #{spouseRegAddr}
+            </if>
+            <if test="spouseMobile !='' and spouseMobile !=null">
+            	and spouse_mobile = #{spouseMobile}
+            </if>
+            <if test="spouseWorkType !='' and spouseWorkType !=null">
+            	and spouse_work_type = #{spouseWorkType}
+            </if>
+            <if test="spouseCompanyName !='' and spouseCompanyName !=null">
+            	and spouse_company_name = #{spouseCompanyName}
+            </if>
+            <if test="familiesName !='' and familiesName !=null">
+            	and families_name = #{familiesName}
+            </if>
+            <if test="familiesMobile !='' and familiesMobile !=null">
+            	and families_mobile = #{familiesMobile}
+            </if>
+            <if test="familiesRelationship !='' and familiesRelationship !=null">
+            	and families_relationship = #{familiesRelationship}
+            </if>
+            <if test="contactsName !='' and contactsName !=null">
+            	and contacts_name = #{contactsName}
+            </if>
+            <if test="contactsMobile !='' and contactsMobile !=null">
+            	and contacts_mobile = #{contactsMobile}
+            </if>
+            <if test="contactsRelatonship !='' and contactsRelatonship !=null">
+            	and contacts_relatonship = #{contactsRelatonship}
+            </if>
+            <if test="contactsCompanyName !='' and contactsCompanyName !=null">
+            	and contacts_company_name = #{contactsCompanyName}
+            </if>
+            <if test="guaranteeName !='' and guaranteeName !=null">
+            	and guarantee_name = #{guaranteeName}
+            </if>
+            <if test="guaranteeSex !='' and guaranteeSex !=null">
+            	and guarantee_sex = #{guaranteeSex}
+            </if>
+            <if test="guaranteeIdType !='' and guaranteeIdType !=null">
+            	and guarantee_id_type = #{guaranteeIdType}
+            </if>
+            <if test="guaranteeIdNumber !='' and guaranteeIdNumber !=null">
+            	and guarantee_id_number = #{guaranteeIdNumber}
+            </if>
+            <if test="guaranteeEducation !='' and guaranteeEducation !=null">
+            	and guarantee_education = #{guaranteeEducation}
+            </if>
+            <if test="guaranteeRelationship !='' and guaranteeRelationship !=null">
+            	and guarantee_relationship = #{guaranteeRelationship}
+            </if>
+            <if test="guaranteeMarriage !='' and guaranteeMarriage !=null">
+            	and guarantee_marriage = #{guaranteeMarriage}
+            </if>
+            <if test="guaranteeMobile !='' and guaranteeMobile !=null">
+            	and guarantee_mobile = #{guaranteeMobile}
+            </if>
+            <if test="guaranteeHouseTel !='' and guaranteeHouseTel !=null">
+            	and guarantee_house_tel = #{guaranteeHouseTel}
+            </if>
 		</trim>
 	</sql>
-	
+
+	<sql id="searchByMap">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="name !='' and name !=null">
+				cus.name  = #{name}
+			</if>
+			<if test="status !='' and status !=null">
+				and cus.status = #{status}
+			</if>
+		</trim>
+	</sql>
+
 	<!-- 动态更新 -->
     <sql id="updateByPo">
        	<trim prefix="set" suffixOverrides=",">
@@ -682,6 +873,114 @@
 	    	<if test="teamManager != null">		
 	    		team_manager = #{teamManager},		
 	    	</if>
+	  		<if test="idType !=null">
+        	id_type = #{idType},
+        </if>
+        <if test="residentialAddress !=null">
+       		residential_address = #{residentialAddress},
+        </if>
+        <if test="houseTel !=null">
+        	house_tel = #{houseTel},
+        </if>
+        <if test="mail !=null">
+        	mail = #{mail},
+        </if>
+        <if test="wechatId !=null">
+        	wechat_id = #{wechatId},
+        </if>
+        <if test="workType !=null">
+        	work_type = #{workType},
+        </if>
+        <if test="natureOfWork !=null">
+        	nature_of_work = #{natureOfWork},
+        </if>
+        <if test="whetherPaySecurity !=null">
+        	whether_pay_security = #{whetherPaySecurity},
+        </if>
+        <if test="paySecurityTerm !=null">
+        	pay_security_term = #{paySecurityTerm},
+        </if>
+        <if test="userAnnualIncome !=null">
+        	user_annual_income = #{userAnnualIncome},
+        </if>
+        <if test="familyAnnualIncome !=null">
+        	family_annual_income = #{familyAnnualIncome},
+        </if>
+        <if test="spouseName !=null">
+        	spouse_name = #{spouseName},
+        </if>
+        <if test="spouseSex !=null">
+        	spouse_sex = #{spouseSex},
+        </if>
+        <if test="spouseIdType !=null">
+        	spouse_id_type = #{spouseIdType},
+        </if>
+        <if test="spouseIdNumber !=null">
+        	spouse_id_number = #{spouseIdNumber},
+        </if>
+        <if test="spouseEducation !=null">
+        	spouse_education = #{spouseEducation},
+        </if>
+        <if test="spouseRegAddr !=null">
+        	spouse_reg_addr = #{spouseRegAddr},
+        </if>
+        <if test="spouseMobile !=null">
+         	spouse_mobile = #{spouseMobile},
+        </if>
+        <if test="spouseWorkType !=null">
+        	spouse_work_type = #{spouseWorkType},
+        </if>
+        <if test="spouseCompanyName !=null">
+       		spouse_company_name = #{spouseCompanyName},
+        </if>
+        <if test="familiesName !=null">
+        	families_name = #{familiesName},
+        </if>
+        <if test="familiesMobile !=null">
+        	families_mobile = #{familiesMobile},
+        </if>
+        <if test="familiesRelationship !=null">
+        	families_relationship = #{familiesRelationship},
+        </if>
+        <if test="contactsName !=null">
+        	contacts_name = #{contactsName},
+        </if>
+        <if test="contactsMobile !=null">
+        	contacts_mobile = #{contactsMobile},
+        </if>
+        <if test="contactsRelatonship !=null">
+        	contacts_relatonship = #{contactsRelatonship},
+        </if>
+        <if test="contactsCompanyName !=null">
+        	contacts_company_name = #{contactsCompanyName},
+        </if>
+        <if test="guaranteeName !=null">
+        	guarantee_name = #{guaranteeName},
+        </if>
+        <if test="guaranteeSex !=null">
+        	guarantee_sex = #{guaranteeSex},
+        </if>
+        <if test="guaranteeIdType !=null">
+        	guarantee_id_type = #{guaranteeIdType},
+        </if>
+        <if test="guaranteeIdNumber !=null">
+        	guarantee_id_number = #{guaranteeIdNumber},
+        </if>
+        <if test="guaranteeEducation !=null">
+        	guarantee_education = #{guaranteeEducation},
+        </if>
+        <if test="guaranteeRelationship !=null">
+        	guarantee_relationship = #{guaranteeRelationship},
+        </if>
+        <if test="guaranteeMarriage !=null">
+        	guarantee_marriage = #{guaranteeMarriage},
+        </if>
+        <if test="guaranteeMobile !=null">
+        	guarantee_mobile = #{guaranteeMobile},
+        </if>
+        <if test="guaranteeHouseTel !=null">
+        	guarantee_house_tel = #{guaranteeHouseTel},
+        </if>
 	    </trim>
     </sql>
 	
@@ -770,7 +1069,43 @@
         	employee_num,
         	management_addr_type,
         	company_area_id,
-        	team_manager			
+        	team_manager,
+        	id_type,
+        	residential_address,
+        	house_tel,
+        	mail,
+        	wechat_id,
+        	work_type,
+        	nature_of_work,
+        	whether_pay_security,
+        	pay_security_term,
+        	user_annual_income,
+        	family_annual_income,
+        	spouse_name,
+        	spouse_sex,
+        	spouse_id_type,
+        	spouse_id_number,
+        	spouse_education,
+        	spouse_reg_addr,
+        	spouse_mobile,
+        	spouse_work_type,
+        	spouse_company_name,
+        	families_name,
+        	families_mobile,
+        	families_relationship,
+        	contacts_name,
+        	contacts_mobile,
+        	contacts_relatonship,
+        	contacts_company_name,
+        	guarantee_name,
+        	guarantee_sex,
+        	guarantee_id_type,
+        	guarantee_id_number,
+        	guarantee_education,
+        	guarantee_relationship,
+        	guarantee_marriage,
+        	guarantee_mobile,
+        	guarantee_house_tel
         )values(
         	#{name},
         	#{sex},
@@ -854,7 +1189,43 @@
         	#{employeeNum},
         	#{managementAddrType},
         	#{companyAreaId},
-        	#{teamManager}			
+        	#{teamManager},
+        	#{idType},		
+        	#{residentialAddress},
+        	#{houseTel},
+        	#{mail},
+        	#{wechatId},
+        	#{workType},
+        	#{natureOfWork},
+        	#{whetherPaySecurity},
+        	#{paySecurityTerm},
+        	#{userAnnualIncome},
+        	#{familyAnnualIncome},
+        	#{spouseName},
+        	#{spouseSex},
+        	#{spouseIdType},
+        	#{spouseIdNumber},
+        	#{spouseEducation},
+        	#{spouseRegAddr},
+        	#{spouseMobile},
+        	#{spouseWorkType},
+        	#{spouseCompanyName},
+        	#{familiesName},
+        	#{familiesMobile},
+        	#{familiesRelationship},
+        	#{contactsName},
+        	#{contactsMobile},
+        	#{contactsRelatonship},
+        	#{contactsCompanyName},
+        	#{guaranteeName},
+        	#{guaranteeSex},
+        	#{guaranteeIdType},
+        	#{guaranteeIdNumber},
+        	#{guaranteeEducation},
+        	#{guaranteeRelationship},
+        	#{guaranteeMarriage},
+        	#{guaranteeMobile},
+        	#{guaranteeHouseTel}
         )
      <!-- 重新返回给实体类,插入的id值 -->
      <selectKey resultType="long" keyProperty="id">
@@ -916,8 +1287,7 @@
 		from pub_customer cus 
 		LEFT JOIN pl_consult cons on cons.customer_id= cus.id
 		LEFT JOIN sys_dict_detail sd on sd.item_code=cons.status and sd.parent_id=23
-		<include refid="searchByPo"/>	
-		
+		<include refid="searchByMap"/>
 group by id
 		order by id desc
 	</select>
@@ -1023,7 +1393,43 @@ group by id
 			cus.employee_num,
 			cus.management_addr_type,
 			cus.company_area_id,
-			cus.team_manager	
+			cus.team_manager,
+			cus.id_type,
+			cus.residential_address,
+			cus.house_tel,
+			cus.mail,
+			cus.wechat_id,
+			cus.work_type,
+			cus.nature_of_work,
+			cus.whether_pay_security,
+			cus.pay_security_term,
+			cus.user_annual_income,
+			cus.family_annual_income,
+			cus.spouse_name,
+			cus.spouse_sex,
+			cus.spouse_id_type,
+			cus.spouse_id_number,
+			cus.spouse_education,
+			cus.spouse_reg_addr,
+			cus.spouse_mobile,
+			cus.spouse_work_type,
+			cus.spouse_company_name,
+			cus.families_name,
+			cus.families_mobile,
+			cus.families_relationship,
+			cus.contacts_name,
+			cus.contacts_mobile,
+			cus.contacts_relatonship,
+			cus.contacts_company_name,
+			cus.guarantee_name,
+			cus.guarantee_sex,
+			cus.guarantee_id_type,
+			cus.guarantee_id_number,
+			cus.guarantee_education,
+			cus.guarantee_relationship,
+			cus.guarantee_marriage,
+			cus.guarantee_mobile,
+			cus.guarantee_house_tel
 		from pub_customer 
 		cus INNER JOIN pl_consult cons on cons.customer_id= cus.id where cons.process_instance_id=#{processInstanceId}
 	</select>

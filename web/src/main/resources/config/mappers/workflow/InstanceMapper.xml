@@ -114,12 +114,12 @@
 			</if>			
 			<if test="declarationStartDate !=null and declarationStartDate != ''">
 				<![CDATA[
-				and DATE_FORMAT(startTime,'%Y-%m-%d') >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
+				and declarationDate >= DATE_FORMAT(#{declarationStartDate},'%Y-%m-%d')
 				]]>
 			</if>
 			<if test="declarationEndDate !=null and declarationEndDate != ''">
 				<![CDATA[
-				and DATE_FORMAT(endTime,'%Y-%m-%d') <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
+				and declarationDate <= DATE_FORMAT(#{declarationEndDate},'%Y-%m-%d')
 				]]>
 			</if>
 		</where>
@@ -144,9 +144,9 @@
 		<include refid="baseInstanceJoinSql"/>
 		left join pub_loanprocess plpc on plpc.new_task_id = task.ID_
 		<include refid="baseInstanceDynamicQuerySql"/>
-		order by task.CREATE_TIME_ DESC) consult
+		order by task.CREATE_TIME_ asc ) consult
 		<include refid="listQuerySql"/>
-		order by consult.startTime ASC
+		order by consult.startTime desc
 	</select>
 	
 	<select id="queryDoneInstanceTasks" parameterType="java.util.HashMap" resultType="java.util.HashMap">
@@ -162,7 +162,7 @@
 		left join pub_loanprocess pub on pub.task_id = task.ID_
 		left join sys_user suser on suser.user_name = pub.next_assignee		
 		<include refid="baseInstanceDynamicQuerySql"/>
-		order by task.END_TIME_ desc) consult
+		order by task.END_TIME_ desc ) consult
 		<include refid="listQuerySql"/>
 		GROUP BY consult.processInstanceId
 		order by consult.endTime DESC

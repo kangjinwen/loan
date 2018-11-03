@@ -123,7 +123,18 @@ public class PlBorrowRequirement implements Serializable {
       */
      private String mobile;
 
-     private BigDecimal collectionServiceFee;
+	/**
+	 * 客户类型  0新客户1老客户
+	 */
+	private byte customerType;
+
+	/**
+	 * 抵押类型  0一压1二压
+	 */
+	private byte mortgageType;
+
+
+	private BigDecimal collectionServiceFee;
      private Boolean collectionServiceFeeUpdateNull;
 
      private BigDecimal collectionRate;
@@ -398,4 +409,19 @@ public class PlBorrowRequirement implements Serializable {
 		this.collectionRateUpdateNull = collectionRateUpdateNull;
 	}
 
+	public byte getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(byte customerType) {
+		this.customerType = customerType;
+	}
+
+	public byte getMortgageType() {
+		return mortgageType;
+	}
+
+	public void setMortgageType(byte mortgageType) {
+		this.mortgageType = mortgageType;
+	}
 }

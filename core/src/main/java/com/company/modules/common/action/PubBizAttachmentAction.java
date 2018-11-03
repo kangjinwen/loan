@@ -5,12 +5,9 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,21 +24,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.miemiedev.mybatis.paginator.domain.PageBounds;
-import com.oreilly.servlet.MultipartRequest;
 import com.company.common.context.Constant;
 import com.company.common.utils.JsonUtil;
 import com.company.common.utils.ServletUtils;
-import com.company.common.utils.upload.HttpServletRequestProxy;
+import com.company.common.utils.upload.CustomFileUpload;
 import com.company.common.utils.upload.ProgressUtil;
-import com.company.common.utils.upload.RenamePolicyCos;
 import com.company.common.web.action.BaseAction;
 import com.company.modules.common.domain.PubBizAttachment;
 import com.company.modules.common.service.PubBizAttachmentService;
 import com.company.modules.common.utils.ZipUtil;
-
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Positions;
+import com.company.modules.system.domain.SysUploadInfo;
+import com.company.modules.system.service.ChannelPartnerService;
+import com.github.miemiedev.mybatis.paginator.domain.PageBounds;
 
 /**
  * 
@@ -59,6 +53,12 @@ public class PubBizAttachmentAction extends BaseAction {
 
     @Autowired
     private PubBizAttachmentService pubBizAttachmentService;
+
+    @Autowired
+    private ChannelPartnerService channelPartnerService;
+
+    @Autowired
+    private CustomFileUpload customFileUpload;
 
     List<PubBizAttachment> lp = null;
 
@@ -115,11 +115,12 @@ public class PubBizAttachmentAction extends BaseAction {
     			Map<String, Object> param = JsonUtil.parse(search, Map.class);
     			param.put("fields", "file_name");
                 List<PubBizAttachment> list = pubBizAttachmentService.queryAll(param);
-                String appDir=request.getRealPath("/");
+                String appDir = channelPartnerService.getUploadPath();
                 if(fileExistCheck){
                     List<File> notExists=new ArrayList<File>();
                     for (PubBizAttachment rec: list) {
-                        File file=new File(appDir,rec.getFilePath());
+                        String filePath = rec.getFilePath().replace(channelPartnerService.getUploadFileURL(), channelPartnerService.getUploadPath());
+                        File file=new File(filePath);
                         if(!file.exists())notExists.add(file);
                     }
 
@@ -141,7 +142,8 @@ public class PubBizAttachmentAction extends BaseAction {
 
                     List<File> files=new ArrayList<File>();
                     for (PubBizAttachment rec : list) {
-                        File file=new File(appDir,rec.getFilePath());
+                        String filePath = rec.getFilePath().replace(channelPartnerService.getUploadFileURL(), channelPartnerService.getUploadPath());
+                        File file=new File(filePath);
                         if(file.exists()){
                             files.add(file);
                         }
@@ -233,7 +235,37 @@ public class PubBizAttachmentAction extends BaseAction {
     	for (Integer id : idList) {
     		idL.add(id.longValue());
 		}
-        pubBizAttachmentService.deletes(idL,new File(request.getRealPath("/")));
+        pubBizAttachmentService.deletes(idL);
+        res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+        res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+        ServletUtils.writeToResponse(response, res);
+    }
+
+    @RequestMapping(value = "/translateAttachment.htm")
+    public void translateAttachment(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        Map<String, Object> res = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        List<PubBizAttachment>list = pubBizAttachmentService.queryAll(params);
+        StringBuilder stringBuilder = new StringBuilder().append(channelPartnerService.getUploadPath()).append("bak");
+        String bakDirPath = stringBuilder.toString();
+        customFileUpload.mkDirPath(bakDirPath);
+        for (PubBizAttachment rec : list) {
+            String filePath = rec.getFilePath().replace(channelPartnerService.getUploadFileURL(), channelPartnerService.getUploadPath());
+            File file=new File(filePath);
+            if((rec.getThumbnailBlob() == null) && file.exists() && (customFileUpload.isPicture(file))) {
+                StringBuilder bakFilePathBuilder = new StringBuilder().append(bakDirPath).append(File.separator).append(rec.getNewfileName());
+                String bakFilePath = bakFilePathBuilder.toString();
+                File newFile = new File(bakFilePath);
+                byte[] fileByteArray = new byte[1024];
+                fileByteArray = customFileUpload.getFileByteArray(file, newFile);
+                newFile.delete();
+                if (fileByteArray.length != 0) {
+                    rec.setThumbnailBlob(fileByteArray);
+                }
+                pubBizAttachmentService.update(rec);
+            }
+        }
         res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
         res.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
         ServletUtils.writeToResponse(response, res);
@@ -252,69 +284,45 @@ public class PubBizAttachmentAction extends BaseAction {
 	@RequestMapping(value = "/upload.htm")
     public void upload3(final HttpServletRequest request, final HttpServletResponse response) throws Exception{
         // 设置上传文件的大小，超过这个大小 将抛出IOException异常，默认大小是1M。
-        int inmaxPostSize = 200 * 1024 * 1024;
-        MultipartRequest multirequest = null;
-        RenamePolicyCos myRenamePolicyCos = new RenamePolicyCos();
-        HttpServletRequestProxy srp = new HttpServletRequestProxy(request);
-        multirequest = new MultipartRequest(srp, getSaveDir(request).getAbsolutePath(), inmaxPostSize, "utf8", myRenamePolicyCos);
 
-        Enumeration<String> filedFileNames = multirequest.getFileNames();
-        logger.info("        upload:");
-        logger.info(JsonUtil.toString(multirequest));
-
-        //返回数据
+        // 返回数据
         Map<String, Object> result = new HashMap<String, Object>();
+        List<SysUploadInfo> sysUploadInfos = customFileUpload.doFileUpload(request, channelPartnerService.getUploadPath(), channelPartnerService.getUploadFileURL(), true);
+        if (sysUploadInfos!=null && sysUploadInfos.size()>0) {
+            for (int i = 0; i < sysUploadInfos.size(); i++) {
+                PubBizAttachment attachment = new PubBizAttachment();
+                attachment.setState(1);
+                attachment.setFilePath(sysUploadInfos.get(i).getUrl());
+                attachment.setFileName(sysUploadInfos.get(i).getOriginaName());
+                attachment.setNewfileName(sysUploadInfos.get(i).getName());
+                attachment.setFileSize(sysUploadInfos.get(i).getFileSize());
+                attachment.setOperatorId(getLoginUser(request).getId());
+                attachment.setBizType(customFileUpload.getUploadReqData().get("bizType").toString());
+                attachment.setRelationId(Long.valueOf(customFileUpload.getUploadReqData().get("relationId").toString()));
+                if ((sysUploadInfos.get(i).getZipFileBytes() != null) && (sysUploadInfos.get(i).getZipFileBytes().length != 0)) {
+                    attachment.setThumbnailBlob(sysUploadInfos.get(i).getZipFileBytes());//(thumbnailBlob);
+                }
+                Long id = pubBizAttachmentService.insert(attachment);
 
-        if (null != filedFileNames && filedFileNames.hasMoreElements()) {
-            String fieldName = filedFileNames.nextElement();
-
-            File uploadFile = multirequest.getFile(fieldName);
-            String uploadFilePath = uploadFile.getPath();
-            File compressFile = new File(uploadFile.getParent() + "/thum_" + uploadFile.getName());
-            compressFile.createNewFile();
-
-            //图片压缩保存
-            Thumbnails.of(uploadFile.getPath()).scale(0.5f).outputQuality(0.25f) .toFile(compressFile.getPath());
-            String uri = com.company.common.utils.StringUtil.getRelativePath(compressFile, new File(request.	getRealPath("/")));
-
-            uploadFile.delete();
-            compressFile.renameTo(new File(uploadFilePath));
-            //String uri= com.company.common.utils.StringUtil.getRelativePath(uploadFile,new File(request.getRealPath("/")));
-
-            Map<String, Object> data=JSONObject.parseObject(multirequest.getParameter("data"),Map.class);
-
-            PubBizAttachment attachment = new PubBizAttachment();
-            attachment.setState(1);
-            attachment.setFilePath(uri);
-            attachment.setFileName(multirequest.getOriginalFileName(fieldName));
-            attachment.setNewfileName(compressFile.getName());
-            attachment.setFileSize(new BigDecimal(compressFile.length()).divide(new BigDecimal(1024)).setScale(0, RoundingMode.CEILING).longValue());
-            attachment.setOperatorId(getLoginUser(request).getId());
-            attachment.setBizType(data.get("bizType").toString());
-            attachment.setRelationId(Long.valueOf(data.get("relationId").toString()));
-//            attachment.setProcessInstanceId(Long.valueOf(data.get("processInstanceId").toString()));
-//            attachment.setProjectId(Long.valueOf(data.get("projectId").toString()));
-//            attachment.setBtype(data.get("processInstanceId").toString());
-            Long id = pubBizAttachmentService.insert(attachment);
-
-            result.put("id",attachment.getId());
-            result.put("createtime",new Date());
-            result.put("uri",uri);
-        }else{
+                result.put("id", attachment.getId());
+                result.put("createtime", new Date());
+                result.put("uri", sysUploadInfos.get(i).getUrl());
+            }
+        } else {
             throw new RuntimeException("没有文件可上传");
         }
-        
         Map<String, Object> res = new HashMap<String, Object>();
         res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
         res.put(Constant.RESPONSE_DATA, result);
-        res.put("success", true);
+        res.put("success", "true");
         ServletUtils.writeToResponse(response, res);
     }
 
     @SuppressWarnings("deprecation")
 	private File getSaveDir(String dirName,HttpServletRequest request){
         if(dirName==null)dirName=new SimpleDateFormat("yyyy-MM").format(new Date());
-        final File fileDir = new File(request.getRealPath("/FileUploadDir/"+dirName));
+		final File fileDir = new File(
+				request.getSession().getServletContext().getRealPath("/FileUploadDir/" + dirName));
         if (!fileDir.exists()) {
             fileDir.mkdirs();
         }
@@ -331,12 +339,12 @@ public class PubBizAttachmentAction extends BaseAction {
     		String filename, 
     		HttpServletRequest request, HttpServletResponse response
     		) throws Exception{
-    	logger.info("        "+request.getRealPath("/"));
+		logger.info("        " + request.getSession().getServletContext().getRealPath("/"));
         Map<String, Object> res = new HashMap<String, Object>();
         String name=filename.replaceFirst("^/FileUploadDir","");
         name="/FileUploadDir/"+name;
 
-        File file=new File(request.getRealPath("/"), name);
+		File file = new File(request.getSession().getServletContext().getRealPath("/"), name);
         boolean exists = file.exists();
         res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
         res.put("exists", exists);
@@ -356,7 +364,8 @@ public class PubBizAttachmentAction extends BaseAction {
         java.io.BufferedOutputStream bos = null;
         String separator = File.separator;
 
-        String webRoot = request.getRealPath("/FileUploadDir").replaceAll(separator + "$", "");
+		String webRoot = request.getSession().getServletContext().getRealPath("/FileUploadDir")
+				.replaceAll(separator + "$", "");
 
         File downLoadFile = new File(webRoot + separator + dir + separator + fileName);
         if (!downLoadFile.exists()) {
@@ -414,7 +423,7 @@ public class PubBizAttachmentAction extends BaseAction {
                 for (int i = 0; i < lp.size(); i++) {
                     PubBizAttachment pubBizAttachment = lp.get(i);
                     String path = pubBizAttachment.getFilePath();
-                    File file = new File(request.getRealPath("/") + "/" + path);
+					File file = new File(request.getSession().getServletContext().getRealPath("/") + "/" + path);
                     if (!file.exists()) {
                         //pubAttachment.setPath("/resources/img/s.gif");
                         lp.clear();

@@ -1,9 +1,21 @@
 package com.company.modules.system.service.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.company.common.context.Constant;
+import com.company.common.dao.BaseDao;
+import com.company.common.service.impl.BaseServiceImpl;
+import com.company.common.spring.security.authentication.encoding.PasswordEncoder;
+import com.company.modules.common.exception.RDRuntimeException;
+import com.company.modules.common.exception.ServiceException;
+import com.company.modules.common.utils.ApplicationContextHelperBean;
+import com.company.modules.system.dao.SysRoleDao;
+import com.company.modules.system.dao.SysUserDao;
+import com.company.modules.system.dao.SysUserRoleDao;
+import com.company.modules.system.domain.SysOffice;
+import com.company.modules.system.domain.SysRole;
+import com.company.modules.system.domain.SysUser;
+import com.company.modules.system.domain.SysUserRole;
+import com.company.modules.system.service.SysOfficeService;
+import com.company.modules.system.service.SysUserService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
@@ -15,21 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.common.context.Constant;
-import com.company.common.dao.BaseDao;
-import com.company.common.service.impl.BaseServiceImpl;
-import com.company.common.spring.security.authentication.encoding.PasswordEncoder;
-import com.company.modules.common.exception.RDRuntimeException;
-import com.company.modules.common.exception.ServiceException;
-import com.company.modules.system.dao.SysRoleDao;
-import com.company.modules.system.dao.SysUserDao;
-import com.company.modules.system.dao.SysUserRoleDao;
-import com.company.modules.system.domain.SysOffice;
-import com.company.modules.system.domain.SysRole;
-import com.company.modules.system.domain.SysUser;
-import com.company.modules.system.domain.SysUserRole;
-import com.company.modules.system.service.SysOfficeService;
-import com.company.modules.system.service.SysUserService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("rawtypes")
 @Service(value = "sysUserServiceImpl")
@@ -138,6 +138,14 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
 		}
 	}
+
+	public List<Map<String, Object>> getCoveredUserList(Map<String, Object> mapdata) throws ServiceException{
+		try {
+			return sysUserDao.getCoveredUserList(mapdata);
+		} catch (Exception e) {
+			throw new ServiceException(e.getMessage(),e,Constant.FAIL_CODE_VALUE);
+		}
+	};
 
 	@Override
 	public int getUserSum(Map<String, Object> map) throws ServiceException {
@@ -255,7 +263,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 	 * 更新工作流用户以及角色
 	 * @param user
 	 *            用户对象
-	 * @param groupList
+	 * @param roleList
 	 *            用户拥有的角色集合
 	 */
 	private void updateActivitiData(SysUser user, List<SysRole> roleList,
@@ -293,9 +301,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
 	/**
 	 * 添加工作流用户以及角色
-	 * @param user
+	 * @param u
 	 *            用户对象
-	 * @param groupList
+	 * @param roleList
 	 *            用户拥有的角色集合
 	 */
 	private void newActivitiUser(SysUser u, List<SysRole> roleList) {
@@ -308,7 +316,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
 	/**
 	 * 添加一个用户到Activiti
-	 * @param user
+	 * @param u
 	 *            用户对象, {@link User}
 	 */
 	private void saveActivitiUser(SysUser u) {
@@ -339,7 +347,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 	public SysUser queryTheLeastBusyUserByRoleName(String roleName,
 			String officeId, String processInstanceId, String taskDefinition) throws ServiceException {
 		//根据部门id（主键），从sys_office（部门表），拿到该部门的详细信息
-		SysOffice sysOffice = sysOfficeService.getBusinessHallByOrganizationId(officeId);
+		SysOfficeService sysOfficeService1 = ApplicationContextHelperBean.getBean(SysOfficeService.class);
+		SysOffice sysOffice = sysOfficeService1.getBusinessHallByOrganizationId(officeId);
 		//从部门里面随机指定人，where条件officeID是 or或判断，所以下面传参，传入了不止一种officeid
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("roleName", roleName);
@@ -348,6 +357,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 		params.put("userOfficeId", officeId);
         params.put("status", NORMAL);
         params.put("isDelete", NOT_DELETED);
+
         if(sysOffice!=null){
         	params.put("officeId", sysOffice.getId());
             params.put("length", sysOffice.getId().length());
@@ -372,7 +382,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 	 * @return
 	 */
 	@Override
-	public SysUser queryTheLeastBusyUserByDepartName(String departName,
+	public SysUser getNextAssigneeByOfficeId(String departName,
 													 String officeId,
 													 String processInstanceId,
 													 String taskDefinition) {
@@ -396,7 +406,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 			params.put("officeId", sysOffice.getId());
 			params.put("length", sysOffice.getId().length());
 		}
-		// TODO FHJ
 		Map<String, Object> queryTheLeastBusyUserByMap = sysUserDao.queryTheLeastBusyUserByMap(params);
 		if(queryTheLeastBusyUserByMap==null){
 			throw new RDRuntimeException("分配任务失败，请检查人员配置");

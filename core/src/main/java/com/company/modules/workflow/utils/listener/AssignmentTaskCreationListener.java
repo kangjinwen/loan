@@ -38,6 +38,7 @@ public class AssignmentTaskCreationListener extends DefaultTaskListener {
     private static final String TASK_DEF_KEY = "usertask-organization-initialAudit";
 	private static final String TASK_XIAHU = "usertask-xiahu";
 	private static final String DEPARTMENT = "DEPART:";
+	private static final String ORGAN = "ORGAN";
 	private static Logger logger = LoggerFactory.getLogger(AssignmentTaskCreationListener.class);
 
 	public AssignmentTaskCreationListener() {
@@ -115,6 +116,8 @@ public class AssignmentTaskCreationListener extends DefaultTaskListener {
 			taskDistributer = new RoleBasedTaskDistributer();
 		}else if (assignee.contains(DEPARTMENT)){
 			taskDistributer = new DepartBasedTaskDistributer();
+		}else if(assignee.contains(ORGAN)){
+			taskDistributer = new OrganTaskDistributer();
 		}
 		else{
             taskDistributer = new EmptyTaskDistributer();

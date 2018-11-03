@@ -64,14 +64,14 @@ var AddParaModal = React.createClass({
         var url = "/modules/common/PlProductAction/saveOrUpdatePlProduct.htm";
         this.props.form.validateFields((errors, values) => {
             if (!!errors) {
-                console.log('Errors in form!!!');
                 return;
             }
             values.repaymentRate = this.props.form.getFieldsValue().repaymentRate * 100 / 10000
             values.overduePenaltyRate = this.props.form.getFieldsValue().overduePenaltyRate * 100 / 10000
-            values.aheadRepayRate = this.props.form.getFieldsValue().aheadRepayRate * 100 / 10000  
+            values.aheadRepayRate = this.props.form.getFieldsValue().aheadRepayRate * 100 / 10000
             if (values.officeIds) {
-                var officeIds = values.officeIds.join(',')
+                // var officeIds = values.officeIds.join(',')
+                var officeIds = values.officeIds
             } else {
                 var officeIds = ""
             }
@@ -198,7 +198,7 @@ var AddParaModal = React.createClass({
                             <FormItem  {...formItemLayout} label="适用机构：">
                                 <TreeSelect disabled={!props.canEdit} dropdownStyle={{ maxHeight: 400, overflow: 'auto' }} treeData={treeData}
                                     {...getFieldProps('officeIds') }
-                                    placeholder="请选择" treeDefaultExpandAll multiple={true}  treeCheckable={true}/>
+                                    placeholder="请选择" treeDefaultExpandAll />
                             </FormItem>
                         </Col>
                         <Col span="12">

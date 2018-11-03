@@ -61,20 +61,22 @@ public class FaceAuditServiceImpl extends AbstractAuditService{
 	public void audit(BasicServiceDataBean serviceDataBean, DelegateTask delegateTask) throws Exception {
 		FaceAuditDataBean faceAuditDataBean =(FaceAuditDataBean) serviceDataBean;
 		
-		if (faceAuditDataBean.getPlBorrowRequirement()!=null) {			
-			PlProduct product = productDao.getItemInfoById(faceAuditDataBean.getPlBorrowRequirement().getProductId());
-			faceAuditDataBean.setProduct(product);
-		}
+
 //		if (!faceAuditDataBean.getNextStep().equals("endReturnFee")) {			
 ////			checkIfAttachmentUpLoaded(faceAuditDataBean,HOUSEHOLD,"户口本");
 //			checkIfAttachmentUpLoaded(faceAuditDataBean,CREDIT,"征信资料");
 //			checkIfAttachmentUpLoaded(faceAuditDataBean,RISK,"风控单");
 //		}
-		
-		insertOrUpdateAuditInfo(faceAuditDataBean);
-		//更新基本信息和信息筛查信息
-		updateHousBorrowingBasics(faceAuditDataBean);
-		updateHousEnquiryInstitution(faceAuditDataBean);
+		if(WorkFlowConstant.NEXT_STEP_PASS.equals(faceAuditDataBean.getNextStep())) {
+			if (faceAuditDataBean.getPlBorrowRequirement()!=null) {
+				PlProduct product = productDao.getItemInfoById(faceAuditDataBean.getPlBorrowRequirement().getProductId());
+				faceAuditDataBean.setProduct(product);
+			}
+			insertOrUpdateAuditInfo(faceAuditDataBean);
+			//更新基本信息和信息筛查信息
+			updateHousBorrowingBasics(faceAuditDataBean);
+			updateHousEnquiryInstitution(faceAuditDataBean);
+		}
 		//if(WorkFlowConstant.NEXT_STEP_PASS.equals(faceAuditDataBean.getNextStep())){
 		//	createOrUpdateBorrowInfo(faceAuditDataBean);//插入或更新borrow表
 //			createOrUpdatePlBorrowRequirement(faceAuditDataBean);//插入或更新借款需求表

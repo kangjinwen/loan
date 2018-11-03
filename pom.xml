@@ -18,6 +18,7 @@
 		<spring.security.version>3.2.3.RELEASE</spring.security.version>
 		<spring.mybatis.version>1.3.0</spring.mybatis.version>
 		<mybatis.version>3.4.0</mybatis.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<!-- 设定主仓库，按设定顺序进行查找。 -->
 	<repositories>
@@ -86,6 +87,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+			<dependency>
+				<groupId>net.sf.json-lib</groupId>
+				<artifactId>json-lib</artifactId>
+				<version>2.4</version>
+				<classifier>jdk15</classifier>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
@@ -100,11 +108,7 @@
 			</dependency>
 
 
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-beans</artifactId>
-				<version>${org.springframework.version}</version>
-			</dependency>
+
 
 
 			<dependency>
@@ -439,8 +443,25 @@
 				<tomcatPassword>tomcat</tomcatPassword>
 			</properties>
 		</profile>
+		<profile>
+			<id>pre</id>
+			<properties>
+				<profiles.active>pre</profiles.active>
+				<tomcatURL>http://123.206.6.152:8080/manager/text</tomcatURL>
+				<tomcatUserName>tomcat</tomcatUserName>
+				<tomcatPassword>gz2018tomcat</tomcatPassword>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<profiles.active>prod</profiles.active>
+				<tomcatURL>http://123.206.23.58:8080/manager/text</tomcatURL>
+				<tomcatUserName>tomcat</tomcatUserName>
+				<tomcatPassword>gz2018tomcat</tomcatPassword>
+			</properties>
+		</profile>
 	</profiles>
-
 
 	<build>
 		<plugins>

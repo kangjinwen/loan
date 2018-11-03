@@ -84,5 +84,5 @@ public interface PubAttachmentService {
      * @return int
      * @since  1.0.0
      */
-    void deletes(List<Long> ids,File webRoot) throws ServiceException;
+    void deletes(List<Long> ids) throws ServiceException;
 }

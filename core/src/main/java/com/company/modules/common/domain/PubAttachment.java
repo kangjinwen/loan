@@ -1,6 +1,7 @@
 package com.company.modules.common.domain;
 
 import java.io.Serializable;
+import java.sql.Blob;
 import java.util.Date;
 
 /**
@@ -83,6 +84,9 @@ public class PubAttachment implements Serializable {
     * 项目编号
     */
     private Long projectId;
+
+
+    private byte[] thumbnailBlob;
 
     public Long getId() {
 		return id;
@@ -316,7 +320,15 @@ public class PubAttachment implements Serializable {
         this.projectId = projectId;
     }
 
-	@Override
+    public byte[] getThumbnailBlob() {
+        return thumbnailBlob;
+    }
+
+    public void setThumbnailBlob(byte[] thumbnailBlob) {
+        this.thumbnailBlob = thumbnailBlob;
+    }
+
+    @Override
 	public String toString() {
 		return "PubAttachment [id=" + id + ", state=" + state + ", createTime="
 				+ createTime + ", fileName=" + fileName + ", newfileName="

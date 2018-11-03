@@ -49,6 +49,13 @@ public interface SysRoleService {
 	 */
 	List<SysRole> getListByMap(Map<String, Object> arg)throws ServiceException;
 
+
+	/**
+	 * 角色查询 只获取自己有的角色
+	 * @return 角色List
+	 */
+	List<SysRole> getRoleListByUsername(String username)throws ServiceException;
+
 	/**
 	 * 角色删除
 	 * @param id

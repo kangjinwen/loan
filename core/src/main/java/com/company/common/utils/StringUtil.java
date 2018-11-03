@@ -1,12 +1,13 @@
 package com.company.common.utils;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 工具类-字符串处理
@@ -207,7 +208,7 @@ public final class StringUtil extends StringUtils {
         return file.getAbsolutePath().replaceFirst(Pattern.quote(parentFile.getAbsolutePath()),"").replace("\\","/");
     }
     public static String getFileUri(HttpServletRequest request,File file){
-        String pre=request.getRealPath("/");
+		String pre = request.getSession().getServletContext().getRealPath("/");
         String fullpath=file.getAbsolutePath();
         return fullpath.replace(pre.replaceFirst("[\\\\/]$",""),"").replace("\\","/");
     };

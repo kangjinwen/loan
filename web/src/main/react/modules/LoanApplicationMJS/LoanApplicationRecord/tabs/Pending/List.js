@@ -96,7 +96,8 @@ export default React.createClass({
       var params = {};
       params = {
         pageSize: 10,
-        currentPage: 1
+        currentPage: 1,
+        userName:window.roleId
       }
     }
     var url = '/modules/common/action/plConsultAction/getPlconsultList.htm';
@@ -128,7 +129,8 @@ export default React.createClass({
     var pagination = this.state.pagination;
     var params = objectAssign({}, this.props.params, {
       currentPage: pagination.current,
-      pageSize: pagination.pageSize
+      pageSize: pagination.pageSize,
+      userName:window.roleId
     });
     this.fetch(params);
     this.clearSelectedList();

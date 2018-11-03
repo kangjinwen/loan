@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.company.modules.instance.dao.HousPropertyInformationDao;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -58,62 +59,75 @@ import com.company.modules.system.service.SysOfficeService;
 import com.company.modules.workflow.utils.observation.TaskAssignerCenter;
 
 /**
-* User:    wulb
-* DateTime:2016-08-08 01:01:45
-* details: 咨询信息,Service实现层
-* source:  代码生成器
-*/
+ * User: wulb DateTime:2016-08-08 01:01:45 details: 咨询信息,Service实现层 source:
+ * 代码生成器
+ */
 @Service(value = "zZJFPlCreditconsultServiceImpl")
 public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJFPlConsultService {
-    private static final Logger logger = LoggerFactory.getLogger(ZZJFPlConsultServiceImpl.class);
-    private String USERTASK_COLLATERALASSESS = "usertask-collateralAssess";
+	private static final Logger logger = LoggerFactory.getLogger(ZZJFPlConsultServiceImpl.class);
+	private String USERTASK_COLLATERALASSESS = "usertask-collateralAssess";
 	private String USERTASK_XIAHU = "usertask-xiahu";
-    private Double SECONDARY_AUDIT_AMOUNT_THRESHOLD = null;
-    private Double SECONDARY_FINANCIAL_CONFIRMATION_AMOUNT_THRESHOLD = null;
-    private Double MANAGER_CONFIRMATION_AMOUNT_THRESHOLD = null;
-    private static final long IS_DELETE_NO = 0;
-    @Autowired
-    private PlConsultDao plCreditconsultDao;
-    @Autowired
-   	private RuntimeService runtimeService;
-   	@Autowired
-   	private IdentityService identityService;
-   	@Autowired
-    private RepositoryService repositoryService;
-   	@Autowired
-   	private SysOfficeService sysOfficeService;
-   	@Autowired
-   	private PubProjectService pubProjectService;
-   	@Autowired
-   	private PubProjectProcessService pubProjectProcessService;
-   	@Autowired
-   	private HousAssessmentAgenciesService housAssessmentAgenciesService;
-   	@Autowired
-   	private HousBorrowingBasicsService housBorrowingBasicsService;
-   	@Autowired
-   	private HousPropertyInformationService housPropertyInformationService;
-   	@Autowired
-   	private PlBorrowRequirementService plBorrowRequirementService;
-   	@Autowired
-   	private PlFeeinfoService plFeeinfoService;
-   	@Autowired
-   	private PlProductService plProductService;
-   	@Autowired
-   	private HousPersonTypeService housPersonTypeService;
-   	@Autowired
-   	private PubBizAttachmentDao pubBizAttachmentDao;
-   	@Autowired
-   	private PubCustomerService pubCustomerService;
+	private String USERTASK_UPLOADING = "usertask-uploading";
+	private Double SECONDARY_AUDIT_AMOUNT_THRESHOLD = null;
+	private Double SECONDARY_FINANCIAL_CONFIRMATION_AMOUNT_THRESHOLD = null;
+	private Double MANAGER_CONFIRMATION_AMOUNT_THRESHOLD = null;
+	private static final long IS_DELETE_NO = 0;
+	@Autowired
+	private PlConsultDao plCreditconsultDao;
+	@Autowired
+	private RuntimeService runtimeService;
+	@Autowired
+	private IdentityService identityService;
+	@Autowired
+	private RepositoryService repositoryService;
+	@Autowired
+	private SysOfficeService sysOfficeService;
+	@Autowired
+	private PubProjectService pubProjectService;
+	@Autowired
+	private PubProjectProcessService pubProjectProcessService;
+	@Autowired
+	private HousAssessmentAgenciesService housAssessmentAgenciesService;
+	@Autowired
+	private HousBorrowingBasicsService housBorrowingBasicsService;
+	@Autowired
+	private HousPropertyInformationService housPropertyInformationService;
+	@Autowired
+	private PlBorrowRequirementService plBorrowRequirementService;
+	@Autowired
+	private PlFeeinfoService plFeeinfoService;
+	@Autowired
+	private PlProductService plProductService;
+	@Autowired
+	private HousPersonTypeService housPersonTypeService;
+	@Autowired
+	private PubBizAttachmentDao pubBizAttachmentDao;
+	@Autowired
+	private PubCustomerService pubCustomerService;
 
-    /**
-     * 新增咨询
-     * @throws Exception
-     */
+	@Autowired
+	HousPropertyInformationDao housPropertyInformationDao;
+
 	@Override
-	@Transactional(rollbackFor=Exception.class)
-	public Map<String, Object> addPlConsult(SysRole sysRole,PreliminaryEvaluationDataBean newConsult) throws Exception {
+	public Map<String, Object> getWhetherLoanByHomeNum(String homeNum) {
+		Map<String,Object> houseInfo = housPropertyInformationDao.getWhetherLoanByHomeNum(homeNum);
+		if (houseInfo!=null){
+			return houseInfo;
+		}
+		return null;
+	}
+
+	/**
+	 * 新增咨询
+	 * 
+	 * @throws Exception
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> addPlConsult(SysRole sysRole, PreliminaryEvaluationDataBean newConsult, String creditConsultFrom)
+			throws Exception {
 		logger.info("新增咨询...");
-		if(logger.isDebugEnabled()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("传入参数：" + newConsult);
 		}
 		// 点击返回只保存数据不启动流程，点击提交启动流程
@@ -123,19 +137,18 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 			preCheckWorkflowParams(newConsult);
 
 			if (newConsult.getConsultId() == null) {
-				Long insertCreditConsultId = createCreditConsult(sysRole,newConsult);
+				Long insertCreditConsultId = createCreditConsult(sysRole, newConsult);
 				// 把刚刚新插入的id放入VO供后续的数据库表作逻辑“外键”使用
 				newConsult.setConsultId(insertCreditConsultId);
-			}else {
-				updateCreditConsult(sysRole,newConsult);
+			} else {
+				updateCreditConsult(sysRole, newConsult);
 			}
 			PubCustomer cus = pubCustomerService.getItemInfoById(Long.parseLong(newConsult.getCustomerId()));
-			cus.setLoans((cus.getLoans()+1));
+			cus.setLoans((cus.getLoans() + 1));
 			pubCustomerService.update(cus);
-			//当nextStep=1，启动流程
-			if(SystemConstant.FLOW_STATE_APPLY_DOCUMENTING.equals(newConsult.getNextStep())) {
-				startProject(newConsult);
-
+			// 当nextStep=1，启动流程
+			if (SystemConstant.FLOW_STATE_APPLY_DOCUMENTING.equals(newConsult.getNextStep())) {
+				startProject(newConsult,creditConsultFrom);
 
 				HousPropertyInformation housPropertyInformation = newConsult.getHousPropertyInformation();
 
@@ -144,19 +157,20 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 				housPropertyInformation.setConsultId(newConsult.getConsultId());
 				housPropertyInformation.setCreateTime(new Date());
 				housPropertyInformation.setCreator(newConsult.getLoginUserId());
-				HousPropertyInformation dbhousPropertyInformation = housPropertyInformationService.getItemInfoByConsultId(newConsult.getConsultId());
-				if(dbhousPropertyInformation != null){
+				HousPropertyInformation dbhousPropertyInformation = housPropertyInformationService
+						.getItemInfoByConsultId(newConsult.getConsultId());
+				if (dbhousPropertyInformation != null) {
 					housPropertyInformation.setId(dbhousPropertyInformation.getId());
 					housPropertyInformationService.update(housPropertyInformation);
-				}else{
+				} else {
 					housPropertyInformationService.insert(housPropertyInformation);
 				}
-				//把新增申请的房屋附件pub_biz_attachment-relation_id字段更新成ProcessInstanceId
+				// 把新增申请的房屋附件pub_biz_attachment-relation_id字段更新成ProcessInstanceId
 				Map<String, Object> param = new HashMap<String, Object>();
-				if (dbhousPropertyInformation!=null) {
+				if (dbhousPropertyInformation != null) {
 					param.put("relationId", dbhousPropertyInformation.getId());
 					List<PubBizAttachment> pubBizAttachmentList = pubBizAttachmentDao.queryAll(param);
-					if (pubBizAttachmentList!=null&&pubBizAttachmentList.size()>0) {
+					if (pubBizAttachmentList != null && pubBizAttachmentList.size() > 0) {
 						for (PubBizAttachment pubBizAttachment : pubBizAttachmentList) {
 							pubBizAttachment.setRelationId(Long.parseLong(newConsult.getProcessInstanceId()));
 							pubBizAttachmentDao.update(pubBizAttachment);
@@ -164,18 +178,18 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 					}
 				}
 
-
 				PlBorrowRequirement plBorrowRequirement = newConsult.getPlBorrowRequirement();
 				plBorrowRequirement.setProcessInstanceId(newConsult.getProcessInstanceId());
 				plBorrowRequirement.setProjectId(newConsult.getProjectId());
 				plBorrowRequirement.setConsultId(newConsult.getConsultId());
 				plBorrowRequirement.setCreateTime(new Date());
 				plBorrowRequirement.setCreator(newConsult.getLoginUserId());
-				PlBorrowRequirement dbplBorrowRequirement = plBorrowRequirementService.getItemInfoByConsultId(newConsult.getConsultId());
+				PlBorrowRequirement dbplBorrowRequirement = plBorrowRequirementService
+						.getItemInfoByConsultId(newConsult.getConsultId());
 				if (dbplBorrowRequirement != null) {
 					plBorrowRequirement.setId(dbplBorrowRequirement.getId());
 					plBorrowRequirementService.update(plBorrowRequirement);
-				}else {
+				} else {
 					plBorrowRequirementService.insert(plBorrowRequirement);
 				}
 
@@ -200,11 +214,10 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 				PlFeeinfo dbPlFeeinfo = plFeeinfoService.getItemInfoByConsultId(newConsult.getConsultId());
 				if (dbPlFeeinfo == null) {
 					plFeeinfoService.insert(plFeeinfo);
-				}else {
+				} else {
 					plFeeinfo.setId(dbPlFeeinfo.getId());
 					plFeeinfoService.update(plFeeinfo);
 				}
-
 
 //				HousBorrowingBasics housBorrowingBasics = newConsult.getHousBorrowingBasics();
 //				housBorrowingBasics.setProcessInstanceId(newConsult.getProcessInstanceId());
@@ -222,9 +235,9 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 				// 将新产生的流程实例ID设置到CreditConsult中
 				updateConsultWithProcessAndProjectId(newConsult);
 
-				//新增或更新人员类型
+				// 新增或更新人员类型
 				List<HousPersonType> housPersonTypeList = newConsult.getHousPersonType();
-				if(CollectionUtils.isNotEmpty(housPersonTypeList)){
+				if (CollectionUtils.isNotEmpty(housPersonTypeList)) {
 					for (HousPersonType housPersonTypeInfo : housPersonTypeList) {
 						housPersonTypeInfo.setProcessInstanceId(newConsult.getProcessInstanceId());
 						housPersonTypeInfo.setConsultId(newConsult.getConsultId());
@@ -233,13 +246,17 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 					}
 				}
 			}
-			//保存草稿把id返回去
+			// 保存草稿把id返回去
 			Map<String, Object> result = new HashMap<String, Object>();
-			PlBorrowRequirement plBorrowRequirement = plBorrowRequirementService.getItemInfoByConsultId(newConsult.getConsultId());
-			HousBorrowingBasics housBorrowingBasics = housBorrowingBasicsService.getItemInfoByConsultId(newConsult.getConsultId());
-			HousPropertyInformation housPropertyInformation = housPropertyInformationService.getItemInfoByConsultId(newConsult.getConsultId());
-			List<HousPersonType> housPersonTypes = housPersonTypeService.getItemInfoByConsultId(newConsult.getConsultId());
-			PlFeeinfo  plFeeinfo  = plFeeinfoService.getItemInfoByConsultId(newConsult.getConsultId());
+			PlBorrowRequirement plBorrowRequirement = plBorrowRequirementService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			HousBorrowingBasics housBorrowingBasics = housBorrowingBasicsService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			HousPropertyInformation housPropertyInformation = housPropertyInformationService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			List<HousPersonType> housPersonTypes = housPersonTypeService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			PlFeeinfo plFeeinfo = plFeeinfoService.getItemInfoByConsultId(newConsult.getConsultId());
 			result.put("plBorrowRequirement", plBorrowRequirement);
 			result.put("housBorrowingBasics", housBorrowingBasics);
 			result.put("housPropertyInformation", housPropertyInformation);
@@ -251,25 +268,26 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 		} else { // 点击返回，保存临时数据
 			preCheckBasicParams(newConsult);
 			if (newConsult.getConsultId() == null) {
-				Long insertCreditConsultId = createCreditConsult(sysRole,newConsult);
+				Long insertCreditConsultId = createCreditConsult(sysRole, newConsult);
 				// 把刚刚新插入的id放入VO供后续的数据库表作逻辑“外键”使用
 				newConsult.setConsultId(insertCreditConsultId);
-			}else {
-				updateCreditConsult(sysRole,newConsult);
+			} else {
+				updateCreditConsult(sysRole, newConsult);
 			}
-			if(SystemConstant.FLOW_STATE_APPLY_DOCUMENTING.equals(newConsult.getNextStep())) {
+			if (SystemConstant.FLOW_STATE_APPLY_DOCUMENTING.equals(newConsult.getNextStep())) {
 
 				PlBorrowRequirement plBorrowRequirement = newConsult.getPlBorrowRequirement();
 				plBorrowRequirement.setConsultId(newConsult.getConsultId());
 				plBorrowRequirement.setCreateTime(new Date());
 				plBorrowRequirement.setCreator(newConsult.getLoginUserId());
-				PlBorrowRequirement dbplBorrowRequirement = plBorrowRequirementService.getItemInfoByConsultId(newConsult.getConsultId());
+				PlBorrowRequirement dbplBorrowRequirement = plBorrowRequirementService
+						.getItemInfoByConsultId(newConsult.getConsultId());
 				if (dbplBorrowRequirement != null) {
 					plBorrowRequirement.setCollectionRateUpdateNull(true);
 					plBorrowRequirement.setCollectionServiceFeeUpdateNull(true);
 					plBorrowRequirement.setId(dbplBorrowRequirement.getId());
 					plBorrowRequirementService.update(plBorrowRequirement);
-				}else {
+				} else {
 					plBorrowRequirement.setCustomerId(Long.parseLong(newConsult.getCustomerId()));
 					plBorrowRequirementService.insert(plBorrowRequirement);
 				}
@@ -284,7 +302,7 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 				plFeeinfo.setSingleRate(plBorrowRequirement.getSingleRate());
 
 				PlProduct product = null;
-				if (plBorrowRequirement.getProductId()!= null) {
+				if (plBorrowRequirement.getProductId() != null) {
 					product = plProductService.getItemInfoById(plBorrowRequirement.getProductId());
 				}
 				if (product != null) {
@@ -296,7 +314,7 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 				PlFeeinfo dbPlFeeinfo = plFeeinfoService.getItemInfoByConsultId(newConsult.getConsultId());
 				if (dbPlFeeinfo == null) {
 					plFeeinfoService.insert(plFeeinfo);
-				}else {
+				} else {
 					plFeeinfo.setId(dbPlFeeinfo.getId());
 					plFeeinfoService.update(plFeeinfo);
 				}
@@ -313,9 +331,9 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 //					housBorrowingBasicsService.insert(housBorrowingBasics);
 //				}
 
-				//新增或更新人员类型
+				// 新增或更新人员类型
 				List<HousPersonType> housPersonTypeList = newConsult.getHousPersonType();
-				if(CollectionUtils.isNotEmpty(housPersonTypeList)){
+				if (CollectionUtils.isNotEmpty(housPersonTypeList)) {
 					for (HousPersonType housPersonTypeInfo : housPersonTypeList) {
 						housPersonTypeInfo.setCreator(newConsult.getLoginUserId());
 						housPersonTypeInfo.setConsultId(newConsult.getConsultId());
@@ -323,26 +341,30 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 					}
 				}
 
-
 				HousPropertyInformation housPropertyInformation = newConsult.getHousPropertyInformation();
 				housPropertyInformation.setConsultId(newConsult.getConsultId());
 				housPropertyInformation.setCreateTime(new Date());
 				housPropertyInformation.setCreator(newConsult.getLoginUserId());
-				HousPropertyInformation dbhousPropertyInformation = housPropertyInformationService.getItemInfoByConsultId(newConsult.getConsultId());
-				if(dbhousPropertyInformation != null){
+				HousPropertyInformation dbhousPropertyInformation = housPropertyInformationService
+						.getItemInfoByConsultId(newConsult.getConsultId());
+				if (dbhousPropertyInformation != null) {
 					housPropertyInformation.setId(dbhousPropertyInformation.getId());
 					housPropertyInformationService.update(housPropertyInformation);
-				}else{
+				} else {
 					housPropertyInformationService.insert(housPropertyInformation);
 				}
 			}
-			//保存草稿把id返回去
+			// 保存草稿把id返回去
 			Map<String, Object> result = new HashMap<String, Object>();
-			PlBorrowRequirement plBorrowRequirement = plBorrowRequirementService.getItemInfoByConsultId(newConsult.getConsultId());
-			HousBorrowingBasics housBorrowingBasics = housBorrowingBasicsService.getItemInfoByConsultId(newConsult.getConsultId());
-			HousPropertyInformation housPropertyInformation = housPropertyInformationService.getItemInfoByConsultId(newConsult.getConsultId());
-			List<HousPersonType> housPersonTypes = housPersonTypeService.getItemInfoByConsultId(newConsult.getConsultId());
-			PlFeeinfo  plFeeinfo  = plFeeinfoService.getItemInfoByConsultId(newConsult.getConsultId());
+			PlBorrowRequirement plBorrowRequirement = plBorrowRequirementService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			HousBorrowingBasics housBorrowingBasics = housBorrowingBasicsService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			HousPropertyInformation housPropertyInformation = housPropertyInformationService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			List<HousPersonType> housPersonTypes = housPersonTypeService
+					.getItemInfoByConsultId(newConsult.getConsultId());
+			PlFeeinfo plFeeinfo = plFeeinfoService.getItemInfoByConsultId(newConsult.getConsultId());
 			result.put("plBorrowRequirement", plBorrowRequirement);
 			result.put("housBorrowingBasics", housBorrowingBasics);
 			result.put("housPropertyInformation", housPropertyInformation);
@@ -352,33 +374,40 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 			return result;
 		}
 
-
-
 	}
 
-	private void startProject(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean) throws Exception {
-        String processDefinitionName = "mjsProcess";
-        List<ProcessDefinition> processDefinitions = repositoryService.createProcessDefinitionQuery().processDefinitionName(processDefinitionName).orderByProcessDefinitionVersion().desc().listPage(0, 10);
-        if(logger.isDebugEnabled()) {
-        	logger.debug("流程图版本排列顺序： {}", processDefinitions.toString());
-        }
-        ProcessDefinition latestProcessDefinition = processDefinitions.get(0);
-        logger.info("咨询使用流程定义ID：{}", latestProcessDefinition.getId());
-        identityService.setAuthenticatedUserId(preliminaryEvaluationDataBean.getUserName());
+	private void startProject(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean,String creditConsultFrom) throws Exception {
+		String processDefinitionName = "mjsProcess";
+		List<ProcessDefinition> processDefinitions = repositoryService.createProcessDefinitionQuery()
+				.processDefinitionName(processDefinitionName).orderByProcessDefinitionVersion().desc().listPage(0, 10);
+		if (logger.isDebugEnabled()) {
+			logger.debug("流程图版本排列顺序： {}", processDefinitions.toString());
+		}
+		ProcessDefinition latestProcessDefinition = processDefinitions.get(0);
+		logger.info("咨询使用流程定义ID：{}", latestProcessDefinition.getId());
+		identityService.setAuthenticatedUserId(preliminaryEvaluationDataBean.getUserName());
 		Long projectId;
-        ProcessInstance processInstance;
+		ProcessInstance processInstance;
 		try {
 			Map<String, Object> processGlobalMap = new HashMap<String, Object>();
 			processGlobalMap.put(SystemConstant.PROCESS_LAUNCHER, preliminaryEvaluationDataBean.getUserName());
-			processGlobalMap.put(SystemConstant.PROCESS_LAUNCHER_ROLEID, preliminaryEvaluationDataBean.getLoginUserRoleId());
+			processGlobalMap.put(SystemConstant.PROCESS_LAUNCHER_ROLEID,
+					preliminaryEvaluationDataBean.getLoginUserRoleId());
 			processGlobalMap.put(SystemConstant.SECONDARY_AUDIT_AMOUNT_THRESHOLD, SECONDARY_AUDIT_AMOUNT_THRESHOLD);
-			processGlobalMap.put(SystemConstant.SECONDARY_FINANCIAL_CONFIRMATION_AMOUNT_THRESHOLD, SECONDARY_FINANCIAL_CONFIRMATION_AMOUNT_THRESHOLD);
-			processGlobalMap.put(SystemConstant.MANAGER_CONFIRMATION_AMOUNT_THRESHOLD, MANAGER_CONFIRMATION_AMOUNT_THRESHOLD);
-            // TODO FHJ just for testing
-            TaskAssignerCenter.processDefinitionId = latestProcessDefinition.getId();
-            processInstance = runtimeService.startProcessInstanceById(latestProcessDefinition.getId(), latestProcessDefinition.getId() + ":" + preliminaryEvaluationDataBean.getCustomerId(), processGlobalMap);
-            projectId = createProject(preliminaryEvaluationDataBean, processInstance);
-        } catch (RDRuntimeException e) {
+			processGlobalMap.put(SystemConstant.SECONDARY_FINANCIAL_CONFIRMATION_AMOUNT_THRESHOLD,
+					SECONDARY_FINANCIAL_CONFIRMATION_AMOUNT_THRESHOLD);
+			processGlobalMap.put(SystemConstant.MANAGER_CONFIRMATION_AMOUNT_THRESHOLD,
+					MANAGER_CONFIRMATION_AMOUNT_THRESHOLD);
+			processGlobalMap.put("creditConsultFrom",creditConsultFrom);
+
+
+			// TODO FHJ just for testing
+			TaskAssignerCenter.processDefinitionId = latestProcessDefinition.getId();
+			processInstance = runtimeService.startProcessInstanceById(latestProcessDefinition.getId(),
+					latestProcessDefinition.getId() + ":" + preliminaryEvaluationDataBean.getCustomerId(),
+					processGlobalMap);
+			projectId = createProject(preliminaryEvaluationDataBean, processInstance);
+		} catch (RDRuntimeException e) {
 			// 在这里捕获所有在监听器中throw的runtime异常，并且统一把它们包装成ServiceException从Service层抛出去
 			throw new ServiceException(e.getMessage(), e);
 		}
@@ -386,64 +415,73 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 		preliminaryEvaluationDataBean.setProcessInstanceId(processInstance.getProcessInstanceId());
 	}
 
-    private Long createProject(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean, ProcessInstance processInstance) throws Exception {
-        Long projectId = null;
-        PubProject project = new PubProject();
-        project.setModifier(preliminaryEvaluationDataBean.getLoginUserId());
-        project.setModifyTime(DateUtil.now());
-        project.setCreator(preliminaryEvaluationDataBean.getLoginUserId());
-        project.setCreateTime(new Date());
-        project.setIsDelete(IS_DELETE_NO);
-        NOGenerator noGenerator = new ProjectNOGenerator();
-        Map<String,Object> params = new HashMap<String,Object>();
-        params.put("sysOfficeService", sysOfficeService);
-        params.put("pubProjectService", pubProjectService);
-        params.put("preliminaryEvaluationDataBean", preliminaryEvaluationDataBean);
-        project.setCode(noGenerator.generateName(params));
-        PubCustomer cus = pubCustomerService.getItemInfoById(Long.parseLong(preliminaryEvaluationDataBean.getCustomerId()));
+	private Long createProject(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean,
+			ProcessInstance processInstance) throws Exception {
+		Long projectId = null;
+		PubProject project = new PubProject();
+		project.setModifier(preliminaryEvaluationDataBean.getLoginUserId());
+		project.setModifyTime(DateUtil.now());
+		project.setCreator(preliminaryEvaluationDataBean.getLoginUserId());
+		project.setCreateTime(new Date());
+		project.setIsDelete(IS_DELETE_NO);
+		NOGenerator noGenerator = new ProjectNOGenerator();
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("sysOfficeService", sysOfficeService);
+		params.put("pubProjectService", pubProjectService);
+		params.put("preliminaryEvaluationDataBean", preliminaryEvaluationDataBean);
+		project.setCode(noGenerator.generateName(params));
+		PubCustomer cus = pubCustomerService
+				.getItemInfoById(Long.parseLong(preliminaryEvaluationDataBean.getCustomerId()));
 
-        project.setProjectName("客户" + cus.getName() + "借款");
-        try {
-            projectId = pubProjectService.insert(project);
-            projectId = project.getId();
-            PubProjectProcess projectProcessRelation = new PubProjectProcess();
-            projectProcessRelation.setProcessInstanceId(processInstance.getProcessInstanceId());
-            projectProcessRelation.setProjectId(projectId);
-            projectProcessRelation.setExtensionNumber(SystemConstant.PUB_PROCESS_TYPE_NOT_EXTENSION);
+		project.setProjectName("客户" + cus.getName() + "借款");
+		try {
+			projectId = pubProjectService.insert(project);
+			projectId = project.getId();
+			PubProjectProcess projectProcessRelation = new PubProjectProcess();
+			projectProcessRelation.setProcessInstanceId(processInstance.getProcessInstanceId());
+			projectProcessRelation.setProjectId(projectId);
+			projectProcessRelation.setExtensionNumber(SystemConstant.PUB_PROCESS_TYPE_NOT_EXTENSION);
 			projectProcessRelation.setProcessType(SystemConstant.NORMAL_PROCESS_TYPE);
 			pubProjectProcessService.insert(projectProcessRelation);
-        } catch (PersistentDataException e) {
-            throwServiceExceptionAndLog(logger, "数据库操作失败", e, e.getCode());
-        }
-        return projectId;
-    }
+		} catch (PersistentDataException e) {
+			throwServiceExceptionAndLog(logger, "数据库操作失败", e, e.getCode());
+		}
+		return projectId;
+	}
 
-	private void updateConsultWithProcessAndProjectId(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean) throws Exception {
+	/**
+	 * 如果流程开始的地方变了，那么此处的 常量USERTASK_UPLOADING需要修改
+	 * @param preliminaryEvaluationDataBean
+	 * @throws Exception
+	 */
+	private void updateConsultWithProcessAndProjectId(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean)
+			throws Exception {
 		Long consultId = preliminaryEvaluationDataBean.getConsultId();
 		String processInstanceId = preliminaryEvaluationDataBean.getProcessInstanceId();
 		Long projectId = preliminaryEvaluationDataBean.getProjectId();
 		PlConsult plCreditconsult = plCreditconsultDao.getItemInfoById(consultId);
 		plCreditconsult.setProcessInstanceId(processInstanceId);
 		plCreditconsult.setProjectId(projectId);
-		plCreditconsult.setStatus(USERTASK_XIAHU);
+		plCreditconsult.setStatus(USERTASK_UPLOADING);
 		plCreditconsult.setCustomerId(preliminaryEvaluationDataBean.getCustomerId());
 		plCreditconsultDao.update(plCreditconsult);
 	}
 
-	public void updatePlCreditconsultById(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean) throws Exception{
-    	CreditConsultModelConverter<PlConsult> creditConsultModelConverter = new CreditConsultModelConverter<PlConsult>();
+	public void updatePlCreditconsultById(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean)
+			throws Exception {
+		CreditConsultModelConverter<PlConsult> creditConsultModelConverter = new CreditConsultModelConverter<PlConsult>();
 		PlConsult plCreditconsult = creditConsultModelConverter.convert(preliminaryEvaluationDataBean);
 		updateConsult(preliminaryEvaluationDataBean, plCreditconsult);
 		plCreditconsultDao.update(plCreditconsult);
 	}
 
-    private void updateConsult(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean, PlConsult plCreditconsult) {
-        plCreditconsult.setStatus(preliminaryEvaluationDataBean.getNextStep());
-        plCreditconsult.setModifyTime(DateUtil.now());
-        plCreditconsult.setModifier(preliminaryEvaluationDataBean.getLoginUserId());
-    }
-
-	private Long createCreditConsult(SysRole sysRole,PreliminaryEvaluationDataBean preliminaryEvaluationDataBean) throws Exception {
+	private void updateConsult(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean, PlConsult plCreditconsult) {
+		plCreditconsult.setStatus(preliminaryEvaluationDataBean.getNextStep());
+		plCreditconsult.setModifyTime(DateUtil.now());
+		plCreditconsult.setModifier(preliminaryEvaluationDataBean.getLoginUserId());
+	}
+	private Long createCreditConsult(SysRole sysRole, PreliminaryEvaluationDataBean preliminaryEvaluationDataBean)
+			throws Exception {
 		CreditConsultModelConverter<PlConsult> creditConsultModelConverter = new CreditConsultModelConverter<PlConsult>();
 		PlConsult plCreditconsult = creditConsultModelConverter.convert(preliminaryEvaluationDataBean);
 		// 初始化咨询的状态
@@ -460,13 +498,14 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 			plCreditconsult.setBusinessOrigin(CommonConstant.BUSINESS_ORIGIN_APP_VALUE);
 			break;
 		}
-		plCreditconsult.setAdvanceApply((byte)1);
+		plCreditconsult.setAdvanceApply((byte) 1);
 		plCreditconsult.setCustomerId(preliminaryEvaluationDataBean.getCustomerId());
 		plCreditconsultDao.insert(plCreditconsult);
 		return plCreditconsult.getId();
 	}
 
-	private Long updateCreditConsult(SysRole sysRole,PreliminaryEvaluationDataBean preliminaryEvaluationDataBean) throws Exception {
+	private Long updateCreditConsult(SysRole sysRole, PreliminaryEvaluationDataBean preliminaryEvaluationDataBean)
+			throws Exception {
 		CreditConsultModelConverter<PlConsult> creditConsultModelConverter = new CreditConsultModelConverter<PlConsult>();
 		PlConsult plCreditconsult = creditConsultModelConverter.convert(preliminaryEvaluationDataBean);
 		// 初始化咨询的状态
@@ -484,15 +523,15 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 			break;
 		}
 		plCreditconsult.setId(preliminaryEvaluationDataBean.getConsultId());
-		plCreditconsult.setAdvanceApply((byte)1);
+		plCreditconsult.setAdvanceApply((byte) 1);
 		plCreditconsultDao.update(plCreditconsult);
 		return plCreditconsult.getId();
 	}
 
-    private void initConsult(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean, PlConsult plCreditconsult) {
-        plCreditconsult.setStatus(preliminaryEvaluationDataBean.getNextStep());
-        plCreditconsult.setCreator(preliminaryEvaluationDataBean.getLoginUserId());
-    }
+	private void initConsult(PreliminaryEvaluationDataBean preliminaryEvaluationDataBean, PlConsult plCreditconsult) {
+		plCreditconsult.setStatus(preliminaryEvaluationDataBean.getNextStep());
+		plCreditconsult.setCreator(preliminaryEvaluationDataBean.getLoginUserId());
+	}
 
 	@Override
 	protected void preCheckCurrentWorkflowState(ProjectWorkflowDataBean projectWorkflowDataBean)
@@ -502,5 +541,7 @@ public class ZZJFPlConsultServiceImpl extends BusinessBaseService implements ZZJ
 	}
 
 	@Override
-	protected void preCheckWorkflowParams(ProjectWorkflowDataBean projectWorkflowDataBean) throws ServiceException {}
+	protected void preCheckWorkflowParams(ProjectWorkflowDataBean projectWorkflowDataBean) throws ServiceException {
+	}
+
 }

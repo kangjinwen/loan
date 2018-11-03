@@ -5,10 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.company.common.utils.ListUtil;
-import com.company.common.utils.MapUtil;
-import com.company.common.utils.StringUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.company.common.dao.BaseDao;
 import com.company.common.service.impl.BaseServiceImpl;
+import com.company.common.utils.ListUtil;
+import com.company.common.utils.MapUtil;
+import com.company.common.utils.StringUtil;
 import com.company.modules.common.exception.PersistentDataException;
 import com.company.modules.common.exception.ServiceException;
 import com.company.modules.system.dao.SysMenuDao;
@@ -348,7 +347,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<Map<String, Object>> fetchRoleMenus(String sysType, Long... roleids)
+	public List<Map<String, Object>> fetchRoleMenus(String sysType, Object... roleids)
 			throws ServiceException {
 		try {
 			String roleIds= StringUtil.toStringArray(roleids);
@@ -416,4 +415,13 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements
 		return sysMenuDao.fetchAllMenu();
 	}
 
+	@Override
+	public Map<String, Object> getRouteInfoByScriptid(String scriptid) throws ServiceException {
+		return sysMenuDao.getRouteInfoByScriptid(scriptid);
+	}
+
+	@Override
+	public Map<String, Object> getRouteInfoByProcessState(String processsState) throws ServiceException {
+		return sysMenuDao.getRouteInfoByProcessState(processsState);
+	}
 }

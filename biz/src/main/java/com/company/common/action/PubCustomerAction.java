@@ -22,6 +22,7 @@ import com.company.common.domain.PubCustomer;
 import com.company.common.service.PubCustomerService;
 import com.company.common.utils.JsonUtil;
 import com.company.common.utils.ServletUtils;
+import com.company.common.utils.ValidateUtils;
 import com.company.common.web.action.BaseAction;
 import com.company.modules.system.domain.SysUserRole;
 import com.company.modules.system.service.SysUserRoleService;
@@ -44,6 +45,69 @@ public class PubCustomerAction extends BaseAction {
 	@Autowired
 	private SysUserRoleService sysUserRoleService;
 
+
+	private String checkCustomerInfoValid(PubCustomer pubCustomer) throws Exception {
+
+		String errInfo = "";
+
+		if (ValidateUtils.isEmpty(pubCustomer.getCertNumber())) {
+			errInfo = "证件号码不允许为空";
+			return errInfo;
+		}
+		if (!ValidateUtils.isInteger(pubCustomer.getEducation())) {
+			errInfo = "教育程度不允许为空";
+			return errInfo;
+		}
+		if (!ValidateUtils.isInteger(pubCustomer.getMarryStatus())) {
+			errInfo = "婚姻状况不允许为空";
+			return errInfo;
+		}
+		if (ValidateUtils.isEmpty(pubCustomer.getHouseholdAddress())) {
+			errInfo = "户口地址不允许为空";
+			return errInfo;
+		}
+		if (ValidateUtils.isEmpty(pubCustomer.getLiveAddress())) {
+			errInfo = "现居住地不允许为空";
+			return errInfo;
+		}
+		if (ValidateUtils.isEmpty(pubCustomer.getMobile())) {
+			errInfo = "联系号码不允许为空";
+			return errInfo;
+		}
+		if (ValidateUtils.isEmpty(pubCustomer.getCompany())) {
+			errInfo = "公司名称不允许为空";
+			return errInfo;
+		}
+		if (pubCustomer.getMarryStatus() == 1) {
+
+			if (ValidateUtils.isEmpty(pubCustomer.getSpouseName())) {
+				errInfo = "配偶名称不允许为空";
+				return errInfo;
+			}
+			if (ValidateUtils.isEmpty(pubCustomer.getSpouseIdNumber())) {
+				errInfo = "配偶证件号不允许为空";
+				return errInfo;
+			}
+			if (ValidateUtils.isEmpty(pubCustomer.getSpouseMobile())) {
+				errInfo = "配偶联系电话不允许为空";
+				return errInfo;
+			}
+		}
+		if (ValidateUtils.isEmpty(pubCustomer.getFamiliesName())) {
+			errInfo = "家庭成员不允许为空";
+			return errInfo;
+		}
+		if (ValidateUtils.isEmpty(pubCustomer.getFamiliesMobile())) {
+			errInfo = "家庭成员联系电话不允许为空";
+			return errInfo;
+		}
+		if (ValidateUtils.isEmpty(pubCustomer.getFamiliesRelationship())) {
+			errInfo = "家庭成员与借款人关系不允许为空";
+			return errInfo;
+		}
+		return errInfo;
+	}
+
     /**
      * 客户管理表,插入数据
      * @param request	页面的request
@@ -62,26 +126,33 @@ public class PubCustomerAction extends BaseAction {
 		if (!StringUtils.isEmpty(pubCustomer)) {
 			pubCustomerInfo = JsonUtil.parse(pubCustomer, PubCustomer.class);
 		}
-		if (pubCustomerInfo.getId() == null) {
-			//如果表中有创建者   取当前登录人
-			pubCustomerInfo.setLoans(0);
-			pubCustomerInfo.setRefusings(0);
-			pubCustomerInfo.setCreateTime(new Date());
-			pubCustomerInfo.setStatus((byte)0);
-			pubCustomerInfo.setCertType((byte)1);
-			pubCustomerInfo.setCreator(sysUser.getId().intValue());
-			influence = pubCustomerService.insert(pubCustomerInfo);
-		} else {
-			//如果表中有修改者   取当前登录人
-			influence = pubCustomerService.update(pubCustomerInfo);
-		}
-		if (influence > 0) {
-			returnMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
-			returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+		String errInfo = checkCustomerInfoValid(pubCustomerInfo);
+		if (errInfo.length() == 0) {
+			if (pubCustomerInfo.getId() == null) {
+				//如果表中有创建者   取当前登录人
+				pubCustomerInfo.setLoans(0);
+				pubCustomerInfo.setRefusings(0);
+				pubCustomerInfo.setCreateTime(new Date());
+				pubCustomerInfo.setStatus((byte) 0);
+				pubCustomerInfo.setCertType((byte) 1);
+				pubCustomerInfo.setCreator(sysUser.getId().intValue());
+				influence = pubCustomerService.insert(pubCustomerInfo);
+			} else {
+				//如果表中有修改者   取当前登录人
+				influence = pubCustomerService.update(pubCustomerInfo);
+			}
+			if (influence > 0) {
+				returnMap.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
+				returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_SUCCESS);
+			} else {
+				returnMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
+				returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_FAIL);
+			}
 		} else {
 			returnMap.put(Constant.RESPONSE_CODE, Constant.FAIL_CODE_VALUE);
-			returnMap.put(Constant.RESPONSE_CODE_MSG, Constant.OPERATION_FAIL);
+			returnMap.put(Constant.RESPONSE_CODE_MSG, errInfo);
 		}
+
 		ServletUtils.writeToResponse(response, returnMap);
     }
 

@@ -12,6 +12,7 @@ import com.company.modules.workflow.utils.distributer.TaskDistributer;
 import com.company.modules.workflow.utils.distributer.TaskWrapper;
 
 /**
+ * [其实是从历史任务中选人去执行，wdx]
  * 选定用户 任务分配器
  * @author FHJ
  *

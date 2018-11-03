@@ -182,7 +182,7 @@
 		<include refid="householdInvestigateBaseWhere"/>
 		order by task.CREATE_TIME_ ASC) consult
 		<include refid="listQuerySql5"/>
-		order by consult.createTime ASC
+		order by consult.createTime DESC
 	</select>
 	
 	<select id="queryDoneHouseholdInvestigateTasks" parameterType="map" resultType="java.util.HashMap">

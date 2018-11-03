@@ -123,6 +123,43 @@ public class HousPropertyInformation implements Serializable {
         *
         * @return 规划用途
         */
+
+       private BigDecimal againstOneRemainder;
+
+       private BigDecimal againstTwoRemainder;
+
+       private String propertyOwner;
+
+       private String provinces;
+
+       private String cities;
+
+       private String districtAndCounty;
+
+       private String neighbourhoods;
+
+       private String buildingNumber;
+
+       private String totalFloor;
+
+       private String floor;
+
+       private String roomNumber;
+
+       private String orientation;
+
+       private Date dateOfIssuing;
+
+       private byte whetherOnlyHouse;
+
+       private byte houseType;
+
+       private byte houseAcquisitionMode;
+
+       private byte landSource;
+
+       private String ageOfCompletion;
+
         public Byte getPlanningPurposes(){
             return planningPurposes;
         }
@@ -546,5 +583,149 @@ public class HousPropertyInformation implements Serializable {
      */
     public void setKeyDiskQuery(Byte keyDiskQuery){
         this.keyDiskQuery = keyDiskQuery;
+    }
+
+    public BigDecimal getAgainstOneRemainder() {
+        return againstOneRemainder;
+    }
+
+    public BigDecimal getAgainstTwoRemainder() {
+        return againstTwoRemainder;
+    }
+
+    public void setAgainstOneRemainder(BigDecimal againstOneRemainder) {
+        this.againstOneRemainder = againstOneRemainder;
+    }
+
+    public void setAgainstTwoRemainder(BigDecimal againstTwoRemainder) {
+        this.againstTwoRemainder = againstTwoRemainder;
+    }
+
+    public String getPropertyOwner() {
+        return propertyOwner;
+    }
+
+    public void setPropertyOwner(String propertyOwner) {
+        this.propertyOwner = propertyOwner;
+    }
+
+    public String getProvinces() {
+        return provinces;
+    }
+
+    public void setProvinces(String provinces) {
+        this.provinces = provinces;
+    }
+
+    public String getCities() {
+        return cities;
+    }
+
+    public void setCities(String cities) {
+        this.cities = cities;
+    }
+
+    public String getDistrictAndCounty() {
+        return districtAndCounty;
+    }
+
+    public void setDistrictAndCounty(String districtAndCounty) {
+        this.districtAndCounty = districtAndCounty;
+    }
+
+    public String getNeighbourhoods() {
+        return neighbourhoods;
+    }
+
+    public void setNeighbourhoods(String neighbourhoods) {
+        this.neighbourhoods = neighbourhoods;
+    }
+
+    public String getBuildingNumber() {
+        return buildingNumber;
+    }
+
+    public void setBuildingNumber(String buildingNumber) {
+        this.buildingNumber = buildingNumber;
+    }
+
+    public String getTotalFloor() {
+        return totalFloor;
+    }
+
+    public void setTotalFloor(String totalFloor) {
+        this.totalFloor = totalFloor;
+    }
+
+    public String getFloor() {
+        return floor;
+    }
+
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
+
+    public String getRoomNumber() {
+        return roomNumber;
+    }
+
+    public void setRoomNumber(String roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
+
+    public Date getDateOfIssuing() {
+        return dateOfIssuing;
+    }
+
+    public void setDateOfIssuing(Date dateOfIssuing) {
+        this.dateOfIssuing = dateOfIssuing;
+    }
+
+    public byte getWhetherOnlyHouse() {
+        return whetherOnlyHouse;
+    }
+
+    public void setWhetherOnlyHouse(byte whetherOnlyHouse) {
+        this.whetherOnlyHouse = whetherOnlyHouse;
+    }
+
+    public byte getHouseType() {
+        return houseType;
+    }
+
+    public void setHouseType(byte houseType) {
+        this.houseType = houseType;
+    }
+
+    public byte getHouseAcquisitionMode() {
+        return houseAcquisitionMode;
+    }
+
+    public void setHouseAcquisitionMode(byte houseAcquisitionMode) {
+        this.houseAcquisitionMode = houseAcquisitionMode;
+    }
+
+    public byte getLandSource() {
+        return landSource;
+    }
+
+    public void setLandSource(byte landSource) {
+        this.landSource = landSource;
+    }
+
+    public String getAgeOfCompletion() {
+        return ageOfCompletion;
+    }
+
+    public void setAgeOfCompletion(String ageOfCompletion) {
+        this.ageOfCompletion = ageOfCompletion;
     }
 }

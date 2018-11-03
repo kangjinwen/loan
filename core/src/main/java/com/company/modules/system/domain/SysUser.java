@@ -1,12 +1,12 @@
 package com.company.modules.system.domain;
 
-
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * 
  * 系统用户表
+ * 
  * @version 1.0
  * @author 吴国成
  * @created 2014年9月22日 下午4:39:52
@@ -29,6 +29,11 @@ public class SysUser implements Serializable {
 	 * 用户登陆名
 	 */
 	private String userName;
+	/**
+	 * 主键标示
+	 */
+	private String channelPartnerId;
+
 	/**
 	 * 登陆密码
 	 */
@@ -101,143 +106,194 @@ public class SysUser implements Serializable {
 	 * 管辖机构
 	 */
 	private String officeOver;
-	
+
 	/**
 	 * 是否接单
 	 */
 	private String isReceiveOrder;
-	
+
 	public String getIsReceiveOrder() {
 		return isReceiveOrder;
 	}
+
 	public void setIsReceiveOrder(String isReceiveOrder) {
 		this.isReceiveOrder = isReceiveOrder;
 	}
+
 	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public String getUserName() {
 		return userName;
 	}
+
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
+
 	public String getPassword() {
 		return password;
 	}
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
 	public String getNumber() {
 		return number;
 	}
+
 	public void setNumber(String number) {
 		this.number = number;
 	}
+
 	public String getOfficeId() {
 		return officeId;
 	}
+
 	public void setOfficeId(String officeId) {
 		this.officeId = officeId;
 	}
+
 	public String getCompanyId() {
 		return companyId;
 	}
+
 	public void setCompanyId(String companyId) {
 		this.companyId = companyId;
 	}
+
 	public String getEmail() {
 		return email;
 	}
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
 	public String getPhone() {
 		return phone;
 	}
+
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+
 	public String getMobile() {
 		return mobile;
 	}
+
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
 	}
+
 	public Byte getStatus() {
 		return status;
 	}
+
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
+
 	public Byte getIsDelete() {
 		return isDelete;
 	}
+
 	public void setIsDelete(Byte isDelete) {
 		this.isDelete = isDelete;
 	}
+
 	public String getLoginIp() {
 		return loginIp;
 	}
+
 	public void setLoginIp(String loginIp) {
 		this.loginIp = loginIp;
 	}
+
 	public Date getLoginTime() {
 		return loginTime;
 	}
+
 	public void setLoginTime(Date loginTime) {
 		this.loginTime = loginTime;
 	}
+
 	public Date getAddTime() {
 		return addTime;
 	}
+
 	public void setAddTime(Date addTime) {
 		this.addTime = addTime;
 	}
+
 	public String getAddUser() {
 		return addUser;
 	}
+
 	public void setAddUser(String addUser) {
 		this.addUser = addUser;
 	}
+
 	public Date getUpdateTime() {
 		return updateTime;
 	}
+
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
 	}
+
 	public String getUpdateUser() {
 		return updateUser;
 	}
+
 	public void setUpdateUser(String updateUser) {
 		this.updateUser = updateUser;
 	}
+
 	public String getRemark() {
 		return remark;
 	}
+
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
+
 	public Byte getPosition() {
 		return position;
 	}
+
 	public void setPosition(Byte position) {
 		this.position = position;
 	}
+
 	public String getOfficeOver() {
 		return officeOver;
 	}
+
 	public void setOfficeOver(String officeOver) {
 		this.officeOver = officeOver;
 	}
-	
+
+	public String getChannelPartnerId() {
+		return channelPartnerId;
+	}
+
+	public void setChannelPartnerId(String channelPartnerId) {
+		this.channelPartnerId = channelPartnerId;
+	}
+
 }

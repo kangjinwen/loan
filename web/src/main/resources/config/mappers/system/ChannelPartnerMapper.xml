@@ -6,6 +6,8 @@
     <result column="PARTNER_NAME" property="partnerName" />
     <result column="LOGO" property="logo" />
     <result column="TITLE" property="title" />
+    <result column="SALESMAN" property="salesman" />
+    <result column="LOCALITY" property="locality" />
     <result column="CREATE_TIME" property="createTime" />
     <result column="IS_DELETE" property="isDelete" />
     <result column="REMARK" property="remark" />
@@ -16,6 +18,8 @@
 			PARTNER_NAME,
         	LOGO,
         	TITLE,
+        	SALESMAN,
+        	LOCALITY,
         	CREATE_TIME,
         	IS_DELETE,
         	REMARK
@@ -34,6 +38,12 @@
             </if>
             <if test="title!= null">
                 TITLE = #{title},
+            </if>
+            <if test="salesman!= null">
+                SALESMAN = #{salesman},
+            </if>
+            <if test="locality!= null">
+                LOCALITY = #{locality},
             </if>
             <if test="createTime!= null">
                 CREATE_TIME = #{createTime},
@@ -58,8 +68,14 @@
             <if test="logo !='' and logo !=null">
                 and LOGO = #{logo}
             </if>
-            <if test="Title !='' and Title !=null">
-                and TITLE = #{Title}
+            <if test="title !='' and title !=null">
+                and TITLE = #{title}
+            </if>
+            <if test="salesman !='' and salesman !=null">
+                and SALESMAN = #{salesman}
+            </if>
+            <if test="locality !='' and locality !=null">
+                and LOCALITY = #{locality}
             </if>
             <if test="createTime !='' and createTime !=null">
                 and CREATE_TIME = #{createTime}
@@ -77,7 +93,9 @@
 	<select id="getLogoInfoByName" resultType="java.util.HashMap" parameterType="java.lang.String" >
 		select 
 		  partner.LOGO as logo,
-		  partner.TITLE as title
+		  partner.TITLE as title,
+		  partner.SALESMAN as salesman,
+		  partner.LOCALITY as locality
 		from channel_partner partner
 		where partner.PARTNER_NAME = #{partnerName}
 	</select>
@@ -88,6 +106,8 @@
         PARTNER_NAME,
         LOGO,
         TITLE,
+        SALESMAN,
+        LOCALITY,
         CREATE_TIME,
         IS_DELETE,
         REMARK
@@ -97,6 +117,8 @@
         #{partnerName},
         #{logo},
         #{title},
+        #{salesman},
+        #{locality},
         #{createTime},
         #{isDelete},
         #{remark}
@@ -132,12 +154,24 @@
         where ID = #{id}
     </select>
 
-    <select id="getPartnerList" resultMap="ChannelPartnerMap" >
+    <select id="getPartnerList" resultMap="ChannelPartnerMap" parameterType="java.util.HashMap" >
         select
         <include refid="searchSql"/>
         from channel_partner
         <include refid="searchByPo"/>
         order by id desc
     </select>
-
+    
+   <select id="getPubPartnerlistForUser" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+        select
+        id as id,
+        title as title
+        from channel_partner
+        where 
+        1=1
+        <if test="channelPartnerId !='' and channelPartnerId !=null">
+        and  id = #{channelPartnerId}
+        </if>
+        order by id desc
+    </select>
 </mapper>

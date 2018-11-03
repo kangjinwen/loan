@@ -172,17 +172,20 @@ export default React.createClass({
         title: '所属机构',
         dataIndex: "officeIds",
         render(value, record) {
-          if (value == '') {
+          console.log(value);
+          if (value) {
+            var arr = value;
+            if (typeof value == 'string') {
+                arr = value && value.split(',')
+            }
+            var newArr = arr.map((item) => {
+                return officeIdsObj[item]
+            });
+            return newArr.join(',')
+          }else{
             return ''
           }
-          var arr = value;
-          if (typeof value == 'string') {
-            arr = value && value.split(',')
-          }
-          var newArr = arr.map((item) => {
-            return officeIdsObj[item]
-          });
-          return newArr.join(',')
+
         }
       }, {
         title: '创建日期',
@@ -235,4 +238,4 @@ export default React.createClass({
       </div>
     );
   }
-})  
+})

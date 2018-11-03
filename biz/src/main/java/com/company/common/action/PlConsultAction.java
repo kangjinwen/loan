@@ -1,23 +1,5 @@
 package com.company.common.action;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.company.common.context.Constant;
 import com.company.common.domain.PlBorrowRequirement;
 import com.company.common.service.PlBorrowRequirementService;
@@ -28,24 +10,32 @@ import com.company.common.utils.ValidateUtils;
 import com.company.common.web.action.BaseAction;
 import com.company.modules.advance.domain.HousAdvanceApply;
 import com.company.modules.common.domain.PlConsultAdvanceApply;
-import com.company.modules.common.domain.PlConsultFee;
 import com.company.modules.common.exception.ServiceException;
 import com.company.modules.common.service.PlConsultService;
 import com.company.modules.common.utils.databean.BasicDataBean;
-import com.company.modules.instance.domain.HousAssessmentAgencies;
-import com.company.modules.instance.domain.HousBorrowingBasics;
-import com.company.modules.instance.domain.HousEnquiryInstitution;
-import com.company.modules.instance.domain.HousPersonType;
-import com.company.modules.instance.domain.HousPropertyInformation;
-import com.company.modules.instance.service.HousAssessmentAgenciesService;
-import com.company.modules.instance.service.HousBorrowingBasicsService;
-import com.company.modules.instance.service.HousEnquiryInstitutionService;
-import com.company.modules.instance.service.HousPersonTypeService;
-import com.company.modules.instance.service.HousPropertyInformationService;
+import com.company.modules.instance.domain.*;
+import com.company.modules.instance.service.*;
 import com.company.modules.instance.utils.databean.PreliminaryEvaluationDataBean;
 import com.company.modules.system.domain.SysUser;
-import com.company.modules.warrant.domain.HousOritoInformation;
 import com.company.modules.warrant.service.HousOritoInformationService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import net.sf.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 新增咨询
@@ -56,7 +46,9 @@ import com.company.modules.warrant.service.HousOritoInformationService;
 @RequestMapping("/modules/common/action/plConsultAction")
 public class PlConsultAction extends BaseAction {
 	private static final Logger logger = LoggerFactory.getLogger(PlConsultAction.class);
-	@Autowired
+	//										  2592000000
+	//private static final long DATE_LIMIT = 86400000;
+	@Resource
 	private ZZJFPlConsultService zZJFPlConsultService;
 	@Autowired
 	private HousAssessmentAgenciesService housAssessmentAgenciesService;
@@ -75,10 +67,143 @@ public class PlConsultAction extends BaseAction {
 	@Autowired
 	private HousOritoInformationService housOritoInformationService;
 
+	@Value("#{applyLoan}")
+	Properties properties;
+
+    /**
+     *根据房产证号查询是否可以贷款申请的（当前业务为一个房产证号一个月可以申请一次）
+     * @param houseNum
+     * @param response
+     * @param request
+     */
+    @RequestMapping("/getWhetherLoanByHomeNum.htm")
+	public void getWhetherLoanByHomeNum(@RequestParam(required = true) String houseNum,
+	                                    HttpServletResponse response,
+                                        HttpServletRequest request){
+        Map<String, Object> res = new HashMap<String, Object>();
+
+        Map<String,Object> map =  zZJFPlConsultService.getWhetherLoanByHomeNum(houseNum);
+        if (map==null){
+            res.put(Constant.RESPONSE_CODE, 200);
+            res.put(Constant.RESPONSE_CODE_MSG, "true");
+            ServletUtils.writeToResponse(response, res);
+        }else {
+            long createTime = ((Date) map.get("createTime")).getTime();
+            String dateLimit = properties.getProperty("dateLimit");
+            long nowTime = System.currentTimeMillis();
+            if (((nowTime-createTime))<Long.valueOf(dateLimit)){
+                res.put(Constant.RESPONSE_CODE, 200);
+                res.put(Constant.RESPONSE_CODE_MSG, "false");
+                ServletUtils.writeToResponse(response, res);
+            }
+        }
+
+    }
+
+	protected String checkBorrowRequirement(PlBorrowRequirement plBorrowRequirement) throws Exception {
+
+		String errorMsg = "";
+		if (ValidateUtils.isAmount(plBorrowRequirement.getAccount()) == false) {
+			errorMsg = "提交申请失败！金额格式错误";
+			return errorMsg;
+		}
+
+		if (!ValidateUtils.isInteger(plBorrowRequirement.getTimeLimit())) {
+			errorMsg = "申请期限不允许为空";
+			return errorMsg;
+		}
+
+		if (!ValidateUtils.isInteger(plBorrowRequirement.getProductId())) {
+			errorMsg = "产品不允许为空";
+			return errorMsg;
+		}
+
+		if (!ValidateUtils.isInteger(plBorrowRequirement.getProjectBelongs())) {
+			errorMsg = "项目来源不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(plBorrowRequirement.getBorrowUse())) {
+			errorMsg = "借款用途不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(plBorrowRequirement.getRepaymentSource())) {
+			errorMsg = "还款来源不允许为";
+			return errorMsg;
+		}
+		return errorMsg;
+	}
+
+	protected String checkHousPropertyInformation(HousPropertyInformation housPropertyInformation) throws Exception {
+
+		String errorMsg = "";
+		if (!ValidateUtils.isInteger(housPropertyInformation.getPlanningPurposes())) {
+			errorMsg = "土地用途不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getPropertyOwner())) {
+			errorMsg = "产权人姓名不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getDistrictAndCounty())) {
+			errorMsg = "区县 不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getPropertyAddress())) {
+			errorMsg = "所在地址不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getBuildingNumber())) {
+			errorMsg = "楼栋号不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getTotalFloor())) {
+			errorMsg = "总楼层不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getFloor())) {
+			errorMsg = "楼层不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getRoomNumber())) {
+			errorMsg = "室号不允许为空";
+			return errorMsg;
+		}
+
+		if (housPropertyInformation.getPropertyArea() == null) {
+			errorMsg = "面积不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getHouseNumber())) {
+			errorMsg = "房产编号不允许为空";
+			return errorMsg;
+		}
+
+		if (housPropertyInformation.getDateOfIssuing() == null) {
+			errorMsg = "土地用途不允许为空";
+			return errorMsg;
+		}
+
+		if (ValidateUtils.isEmpty(housPropertyInformation.getAgeOfCompletion())) {
+			errorMsg = "建成年代不允许为空";
+			return errorMsg;
+		}
+		return errorMsg;
+	}
+
 	/**
 	 * 新增申请
 	 * 【工作台】-》【客户管理】-》【新增申请】
-	    addConsult.htm接口，发起请求后，会把记录添加到下户，并且开启工作流
+	    addConsult.htm接口，发起请求后，会把记录添加到资料上传，并且开启工作流
 	 * @param request
 	 * @throws ServiceException
 	 * @author FHJ
@@ -86,8 +211,7 @@ public class PlConsultAction extends BaseAction {
 	@RequestMapping("/addConsult.htm")
 	public void addConsult(@RequestParam(required = true) String creditConsultFrom,
 			HttpServletResponse response,
-			HttpServletRequest request) throws Exception {
-		PreliminaryEvaluationDataBean preliminaryEvaluationDataBean = null;
+			HttpServletRequest request) throws Exception { PreliminaryEvaluationDataBean preliminaryEvaluationDataBean = null;
 		Map<String, Object> res = new HashMap<String, Object>();
 		try {
 			preliminaryEvaluationDataBean = JsonUtil.parseWithOnlyYMDDate(creditConsultFrom,
@@ -99,15 +223,52 @@ public class PlConsultAction extends BaseAction {
 			if (preliminaryEvaluationDataBean.getCommit() != 0) {
 				PlBorrowRequirement plBorrowRequirement = preliminaryEvaluationDataBean.getPlBorrowRequirement();
 
-				if (ValidateUtils.isAmount(plBorrowRequirement.getAccount()) == false) {
-					res.put(Constant.RESPONSE_CODE, Constant.OPERATION_PARAM_ERROR);
-					res.put(Constant.RESPONSE_CODE_MSG, "提交申请失败！金额格式错误");
-					ServletUtils.writeToResponse(response, res);
-					return;
+				if (plBorrowRequirement != null) {
+					String info = checkBorrowRequirement(plBorrowRequirement);
+					if (info != null && info.length() != 0) {
+						res.put(Constant.RESPONSE_CODE, Constant.OTHER_CODE_VALUE);
+						res.put(Constant.RESPONSE_CODE_MSG, info);
+						ServletUtils.writeToResponse(response, res);
+						return;
+					}
+				}
+
+				HousPropertyInformation housPropertyInformation = preliminaryEvaluationDataBean.getHousPropertyInformation();
+				if (housPropertyInformation != null) {
+					String info = checkHousPropertyInformation(housPropertyInformation);
+					if (info != null && info.length() != 0) {
+						res.put(Constant.RESPONSE_CODE, Constant.OTHER_CODE_VALUE);
+						res.put(Constant.RESPONSE_CODE_MSG, info);
+						ServletUtils.writeToResponse(response, res);
+						return;
+					}
 				}
 			}
+			//新增判断，一个月内一个房产证只能申请一次
+			/*JSONObject json1 = JSONObject.fromObject(creditConsultFrom);
+			String housPropertyInformation = json1.getString("housPropertyInformation");
+			JSONObject json2 = JSONObject.fromObject(housPropertyInformation);
+			if (!json2.toString().contains("houseNumber")){
+				res.put(Constant.RESPONSE_CODE, Constant.OPERATION_PARAM_ERROR);
+				res.put(Constant.RESPONSE_CODE_MSG, "房产证号不能为空");
+				ServletUtils.writeToResponse(response, res);
+				return;
+			}
+			String homeNum = json2.getString("houseNumber");
 
-			Map<String, Object> result = zZJFPlConsultService.addPlConsult(getRoleForLoginUser(request),preliminaryEvaluationDataBean);
+			Map<String,Object> map =  zZJFPlConsultService.getWhetherLoanByHomeNum(homeNum);
+
+			long createTime = ((Date) map.get("createTime")).getTime();
+			String dateLimit = properties.getProperty("dateLimit");
+			long nowTime = System.currentTimeMillis();
+			if (((nowTime-createTime))<Long.valueOf(dateLimit)){
+				res.put(Constant.RESPONSE_CODE, Constant.OPERATION_PARAM_ERROR);
+				res.put(Constant.RESPONSE_CODE_MSG, "提交申请失败！一个房产证一个月只能申请一次");
+				ServletUtils.writeToResponse(response, res);
+				return;
+			}*/
+			//执行新增申请操作
+			Map<String, Object> result = zZJFPlConsultService.addPlConsult(getRoleForLoginUser(request),preliminaryEvaluationDataBean,creditConsultFrom);
 			if ((Long)result.get("consultId")>0) {
 				res.put("result", result);
 				res.put(Constant.RESPONSE_CODE, Constant.SUCCEED_CODE_VALUE);
@@ -126,6 +287,13 @@ public class PlConsultAction extends BaseAction {
 			return;
 		}
 		ServletUtils.writeToResponse(response, res);
+	}
+
+
+	public static void main(String[] args) {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		System.out.println(df.format(new Date()));
+		System.out.println(System.currentTimeMillis());
 	}
 
 
@@ -231,6 +399,14 @@ public class PlConsultAction extends BaseAction {
          	paramap = JsonUtil.parse(searchParams, Map.class);
         }
         PageHelper.startPage(currentPage, pageSize);
+
+
+		SysUser loginUser = getLoginUser(request);
+		String userName = loginUser.getUserName();
+		paramap.put("userName", userName);
+		List<String> coveredOffices = getCoverdOffices(loginUser);
+		paramap.put("coveredOffices", coveredOffices);
+
         result = plConsultService.getPlConsultList(paramap);
         PageInfo<Map<String,Object>> page = new PageInfo<Map<String,Object>>(result);
 		returnMap.put(Constant.RESPONSE_DATA, page.getList());

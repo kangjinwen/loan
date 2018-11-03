@@ -1,8 +1,5 @@
 package com.company.modules.collateral.workflow.controller;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,24 +7,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.github.pagehelper.PageInfo;
 //import com.company.contract.util.ContractUtil;
 import com.company.common.context.Constant;
 import com.company.common.utils.JsonUtil;
 import com.company.common.utils.ServletUtils;
+import com.company.modules.collateral.workflow.service.CollateralTaskService;
 import com.company.modules.common.domain.ExportHousMortgageRegistration;
 import com.company.modules.common.exception.ServiceException;
 import com.company.modules.common.utils.ExportExcel;
 import com.company.modules.instance.service.HousPropertyInformationService;
-import com.company.modules.collateral.workflow.service.CollateralTaskService;
 import com.company.modules.system.domain.SysUser;
 import com.company.modules.workflow.controller.WorkflowBaseController;
+import com.github.pagehelper.PageInfo;
 
 /**
  * User:    mcwang
@@ -138,7 +138,7 @@ public class CollateralProcessTaskController extends WorkflowBaseController{
         response.setContentType("octets/stream");
     	Map<String, Object> result = new HashMap<>();
     	String sep = File.separator;
-    	String rootDir = request.getRealPath("/");// 文件根目录
+		String rootDir = request.getSession().getServletContext().getRealPath("/");// 文件根目录
     	String dirName = new SimpleDateFormat("yyyy-MM").format(new Date());
     	String baseDestDir = new StringBuilder(rootDir).append(sep).append("siliandan").append(sep).append(dirName).toString();
     	File baseDestDirFile =  new File(baseDestDir);

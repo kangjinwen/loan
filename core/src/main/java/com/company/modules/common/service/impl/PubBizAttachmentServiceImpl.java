@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import com.company.modules.system.service.ChannelPartnerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ public class PubBizAttachmentServiceImpl extends BaseServiceImpl implements PubB
 	 */
     @Autowired
     private PubBizAttachmentDao pubBizAttachmentDao;
+	@Autowired
+	private ChannelPartnerService channelPartnerService;
 
 	/**
 	 * 业务附件表表,插入数据
@@ -131,13 +134,13 @@ public class PubBizAttachmentServiceImpl extends BaseServiceImpl implements PubB
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void deletes(List<Long> idList, File webRoot) throws Exception {
+	public void deletes(List<Long> idList) throws Exception {
 		for (Long id : idList) {
-			PubBizAttachment file = pubBizAttachmentDao.getByPrimary(id);
+			PubBizAttachment pubBizAttachment = pubBizAttachmentDao.getByPrimary(id);
 			pubBizAttachmentDao.deleteById(id);
-			String path= file.getFilePath();
-            if(path!=null){
-                File f=new File(webRoot,path.toString());
+			String filePath = pubBizAttachment.getFilePath().replace(channelPartnerService.getUploadFileURL(), channelPartnerService.getUploadPath());
+            if(filePath!=null){
+                File f=new File(filePath);
                 if(f.exists())f.delete();
             }
 		}

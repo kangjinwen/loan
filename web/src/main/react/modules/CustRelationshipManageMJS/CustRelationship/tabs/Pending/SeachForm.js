@@ -39,12 +39,12 @@ let SeachForm = React.createClass({
     } = this.props.form;
     return (
       <Form inline >
-        <FormItem label="客户姓名：">
-          <Input  {...getFieldProps('customerName') } />
-        </FormItem>
-        <FormItem label="联系电话">
-          <Input  {...getFieldProps('mobile') } />
-        </FormItem>
+          <FormItem label="客户名称：">
+              <Input  {...getFieldProps('customerName')} />
+          </FormItem>
+          <FormItem label="联系电话：">
+              <Input  {...getFieldProps('mobile')} />
+          </FormItem>
         <FormItem><Button type="primary" onClick={this.handleQuery}>查询</Button></FormItem>
         <FormItem><Button type="reset" onClick={this.handleReset}>重置</Button></FormItem>
       </Form>

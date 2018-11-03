@@ -6,6 +6,8 @@ import java.util.Map;
 import com.company.common.utils.annotation.RDBatisDao;
 import com.company.modules.common.domain.ExportHousOritoInformation;
 import com.company.modules.common.domain.HouseCheckBank;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.security.access.method.P;
 
 /**
  *	@Description 
@@ -113,4 +115,10 @@ public interface RDZZTaskDao {
 	Map<String, Object> queryHistoryIdentityLinkByMap(Map<String,Object> paramMap);
 
 	Map<String, Object> queryHistoryTaskInfo(Map<String, Object> paramMap);
+
+    int modifyTaskAssigneeByAnyKey(@Param("taskId") String taskId, @Param("userId") String userId);
+
+    int modifyHisTaskAssigneeByAnyKey(@Param("taskId") String taskId, @Param("userId") String userId);
+
+    Map<String,Object> getHisTaskInfoByTaskId(@Param("taskId") String taskId);
 }

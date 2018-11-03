@@ -124,60 +124,122 @@ var ReviewWin = React.createClass({
         return formData;
     },
 
-    handleOk() {//新增申请提交
+    handleOk() {
+
         var me = this;
         var selectRecord = this.props.record;
-        if (this.validateTab1()) {
-            var ProcessInformation = this.refs.ProcessInformation;
-            if (!ProcessInformation) {
-                me.handleTabClick("3");
-                return;
-            }
-            var validation3 = this.refs.ProcessInformation.validateFields;
-            validation3((errors, values) => {
-                if (!!errors) {
+        let ProcessInformationEl = this.refs.ProcessInformation;
+        // 只有审批意见为通过时候执行校验,否则全部提交
+        var validateResultApprove = this.validateResultApprove()
+        if (!validateResultApprove) {
+            return;
+        }
+        me.handleTabClick("3");
+
+        if (!ProcessInformationEl) {
+            return;
+        }
+        let nextStep = this.refs.ProcessInformation.getFieldsValue().nextStep
+        if (nextStep === "pass") {
+            // ######################业务逻辑###################
+
+            if (this.validateTab1()) {
+                var ProcessInformation = this.refs.ProcessInformation;
+                if (!ProcessInformation) {
                     me.handleTabClick("3");
-                    return
-                } else {
-                    var state = this.state;
-                    var props = this.props;
-                    var creditConsultFrom = {};
-                    var housPropertyInformation = this.refs.HousingInformation.getFieldsValue();
-                    var plBorrowRequirement = this.refs.BorrowingNeeds.getFieldsValue();
-                    var commentData = {};
-                    var remarkData = this.refs.ProcessInformation.getFieldsValue();
-                    housPropertyInformation.id = this.state.idData;
-                    creditConsultFrom.housPropertyInformation = housPropertyInformation;
-                    plBorrowRequirement.repaymentRate = plBorrowRequirement.repaymentRate * 100 / 10000;//底点利率
-                    plBorrowRequirement.singleRate = plBorrowRequirement.singleRate * 100 / 10000;//成单利率
-                    var repaymentRate = plBorrowRequirement.repaymentRate;
-                    var singleRate = plBorrowRequirement.singleRate;
-                    if (singleRate < repaymentRate) {
-                        Modal.error({
-                            title: '成单利率要大于等于底点利率',
-                            onOk: () => {
-                                this.handleTabClick("1");
+                    return;
+                }
+                var validation3 = this.refs.ProcessInformation.validateFields;
+                validation3((errors, values) => {
+                    if (!!errors) {
+                        me.handleTabClick("3");
+                        return
+                    } else {
+                        var state = this.state;
+                        var props = this.props;
+                        var creditConsultFrom = {};
+                        var housPropertyInformation = this.refs.HousingInformation.getFieldsValue();
+                        var plBorrowRequirement = this.refs.BorrowingNeeds.getFieldsValue();
+                        var commentData = {};
+                        var remarkData = this.refs.ProcessInformation.getFieldsValue();
+                        housPropertyInformation.id = this.state.idData;
+                        creditConsultFrom.housPropertyInformation = housPropertyInformation;
+                        plBorrowRequirement.repaymentRate = plBorrowRequirement.repaymentRate * 100 / 10000;//底点利率
+                        plBorrowRequirement.singleRate = plBorrowRequirement.singleRate * 100 / 10000;//成单利率
+                        var repaymentRate = plBorrowRequirement.repaymentRate;
+                        var singleRate = plBorrowRequirement.singleRate;
+                        if (singleRate < repaymentRate) {
+                            Modal.error({
+                                title: '成单利率要大于等于底点利率',
+                                onOk: () => {
+                                    this.handleTabClick("1");
+                                }
+                            });
+                            return;
+                        }
+                        var ResultApprove = this.refs.ResultApprove.getFieldsValue();
+                        ResultApprove.processInstanceId = this.props.record.processInstanceId
+                        ResultApprove.customerId = 1234
+                        creditConsultFrom.consultId = selectRecord.consultId
+                        creditConsultFrom.processStateCode = selectRecord.processStateCode;
+                        creditConsultFrom.projectId = selectRecord.projectId;
+                        creditConsultFrom.processInstanceId = selectRecord.processInstanceId;
+                        creditConsultFrom.nextStep = remarkData.nextStep;
+                        creditConsultFrom.remarkComment = remarkData.remarkComment;
+                        creditConsultFrom.plBorrowRequirement = plBorrowRequirement;
+                        creditConsultFrom.customerId = this.props.record.id;
+                        creditConsultFrom.plApprovalResults = ResultApprove;
+                        commentData.comment = remarkData.nextStep;
+                        Utils.ajaxSubmit({
+                            me: this,
+                            url: '/modules/workflow/controller/ProcessTaskController/completeTask.htm',
+                            method: 'post',
+                            data: {
+                                taskId: this.props.record.taskId,
+                                serviceVariables: JSON.stringify(creditConsultFrom),
+                                processVariables: JSON.stringify(commentData)
+                            },
+                            type: 'json',
+                            callback: (result) => {
+                                if (result.code == 200) {
+                                    Modal.success({
+                                        title: result.msg,
+                                        onOk: () => {
+                                            this.handleCancel();
+                                        }
+                                    });
+                                } else {
+                                    Modal.error({
+                                        title: result.msg,
+                                    });
+                                }
                             }
                         });
-                        return;
                     }
-                    creditConsultFrom.consultId = selectRecord.consultId
-                    creditConsultFrom.processStateCode = selectRecord.processStateCode;
-                    creditConsultFrom.projectId = selectRecord.projectId;
-                    creditConsultFrom.processInstanceId = selectRecord.processInstanceId;
-                    creditConsultFrom.nextStep = remarkData.nextStep;
-                    creditConsultFrom.remarkComment = remarkData.remarkComment;
-                    creditConsultFrom.plBorrowRequirement = plBorrowRequirement;
-                    creditConsultFrom.customerId = this.props.record.id;
-                    commentData.comment = remarkData.nextStep;
+                });
+            }
+            // ######################业务逻辑###################
+        } else {
+            this.refs.ProcessInformation.validateFields(errors => {
+                if (!!errors) {
+
+                } else {
+                    let serviceVariables = {
+                        remarkComment: this.refs.ProcessInformation.getFieldsValue().remarkComment,
+                        nextStep,
+                        consultId: selectRecord.consultId,
+                        processStateCode: selectRecord.processStateCode,
+                        projectId: selectRecord.projectId,
+                        processInstanceId: selectRecord.processInstanceId,
+                    }
                     Utils.ajaxSubmit({
                         me: this,
                         url: '/modules/workflow/controller/ProcessTaskController/completeTask.htm',
                         method: 'post',
                         data: {
                             taskId: this.props.record.taskId,
-                            serviceVariables: JSON.stringify(creditConsultFrom),
-                            processVariables: JSON.stringify(commentData)
+                            serviceVariables: JSON.stringify(serviceVariables),
+                            processVariables: JSON.stringify({comment: nextStep})
                         },
                         type: 'json',
                         callback: (result) => {
@@ -196,8 +258,9 @@ var ReviewWin = React.createClass({
                         }
                     });
                 }
-            });
+            })
         }
+
     },
     handleTabClick(key) {
         var selectedrecord = this.props.record;
@@ -302,11 +365,11 @@ var ReviewWin = React.createClass({
                                 <div className="col-22 navLine-wrap-left" >
                                     <div id="s1">
                                         <h2>房产信息</h2>
-                                        <HousingInformation ref="HousingInformation" canEdit={props.canEdit} record={props.record} title={props.title}/>
+                                        <HousingInformation ref="HousingInformation" canEdit={false} record={props.record} title={props.title}/>
                                     </div>
                                     <div id="s3">
                                         <h2>借款需求</h2>
-                                        <BorrowingNeeds ref="BorrowingNeeds" canEdit={props.canEdit} record={props.record} title={props.title}/>
+                                        <BorrowingNeeds ref="BorrowingNeeds" canEdit={false} record={props.record} title={props.title}/>
                                     </div>
                                 </div>
                                 <div className="navLine-wrap-right" >

@@ -31,11 +31,11 @@ let SeachForm = React.createClass({
   handleReset() {
     this.props.form.resetFields();
   },
-  componentDidMount() { 
+  componentDidMount() {
     var me = this ;
     Utils.ajaxData({
         url: '/modules/paramconfig/ProductParamAction/getOfficeCombo.htm',
-        method: 'get', 
+        method: 'get',
         type: 'json',
         callback: (result) => {
           var items  = result.data.map((item)=>{
@@ -46,7 +46,7 @@ let SeachForm = React.createClass({
       });
       Utils.ajaxData({
         url: '/getDicts.htm?type=GUARANTEE_TYPE',
-        method: 'get', 
+        method: 'get',
         type: 'json',
         callback: (result) => {
           var items  = result.data.map((item)=>{
@@ -69,25 +69,25 @@ let SeachForm = React.createClass({
           </FormItem>
           <FormItem label="产品名称：">
             <Input  {...getFieldProps('name', { initialValue: ''})} />
-          </FormItem> 
+          </FormItem>
           <FormItem label="所属机构：">
             <Select style={{ width: 250 }} placeholder="请选择"  {...getFieldProps('officeIds', { initialValue: ''})}>
-              {this.state.officeIdsList}    
-            </Select> 
-          </FormItem> 
+              {this.state.officeIdsList}
+            </Select>
+          </FormItem>
           <FormItem label="担保类型：">
             <Select style={{ width: 100 }} placeholder="请选择"  {...getFieldProps('ptype', { initialValue: ''})}>
-              {this.state.ptypeList}    
+              {this.state.ptypeList}
             </Select>
-          </FormItem>   
+          </FormItem>
           <FormItem label="是否启用：">
             <Select style={{ width: 100 }}  placeholder="请选择"  {...getFieldProps('isRun', { initialValue: ''})}>
                 <Option  value={0}>是</Option>
                 <Option  value={1}>否</Option>
             </Select>
-          </FormItem>          
+          </FormItem>
            <FormItem><Button type="primary" onClick={this.handleQuery}>查询</Button></FormItem>
-           <FormItem><Button type="reset" onClick={this.handleReset}>重置</Button></FormItem> 
+           <FormItem><Button type="reset" onClick={this.handleReset}>重置</Button></FormItem>
       </Form>
     );
   }

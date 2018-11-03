@@ -63,6 +63,11 @@ public class RepositoryController extends WorkflowBaseController {
 		List<Map<String, String>> queryButtonNameList = (List<Map<String, String>>) repositoryService
 				.queryButtonNameListByTaskId(taskId);
 		Task task1 = taskService.createTaskQuery().taskId(taskId).singleResult();
+
+		// TODO: 2018/9/29 此处函数可以新加参数，根绝产品id判断是不是渠道，如果是，移除选择节点非渠道标志 
+		
+
+		//判断是否为退费操作（此处和小贷无关）
 		if(!USERTASK_REUTRNFEE.equals(task1.getTaskDefinitionKey())){
 			for (int i = 0; i < queryButtonNameList.size(); i++) {
 				if(ENDRETURNFEE.equals(queryButtonNameList.get(i).get("value"))){//不是退费操作，去掉退费审批意见
@@ -70,6 +75,7 @@ public class RepositoryController extends WorkflowBaseController {
 				}
 			}
 		}
+		//类似判断是否有房产证明，和小贷无关
 		if (USERTASK_HOUSEHOLDCONFIRM.equals(task1.getTaskDefinitionKey())) {
 			List<Map<String, Object>> list = taskDao.queryHouseCheckBankList(processInstanceId);
 			if (list==null || list.size()==0) {				
@@ -80,6 +86,7 @@ public class RepositoryController extends WorkflowBaseController {
 				}
 			}
 		}
+		//和小贷无关
 		if (USERTASK_HOUSEHOLDCONFIRM.equals(task1.getTaskDefinitionKey())) {
 			List<Map<String, Object>> list = taskDao.queryHouseCheckBankList(processInstanceId);
 			if (list==null || list.size()==0) {				

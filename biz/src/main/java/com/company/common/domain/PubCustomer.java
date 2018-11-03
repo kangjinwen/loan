@@ -350,6 +350,278 @@ public class PubCustomer implements Serializable {
     * 团队经理
     */
     private String teamManager;
+
+    private byte idType;
+
+    private byte residentialAddress;
+
+    private String houseTel;
+
+    private String mail;
+
+    private String wechatId;
+
+    private byte workType;
+
+    private byte natureOfWork;
+
+    public void setSpouseName(String spouseName) {
+        this.spouseName = spouseName;
+    }
+
+    public void setSpouseSex(String spouseSex) {
+        this.spouseSex = spouseSex;
+    }
+
+    public void setSpouseIdType(String spouseIdType) {
+        this.spouseIdType = spouseIdType;
+    }
+
+    public void setSpouseIdNumber(String spouseIdNumber) {
+        this.spouseIdNumber = spouseIdNumber;
+    }
+
+    public void setSpouseEducation(String spouseEducation) {
+        this.spouseEducation = spouseEducation;
+    }
+
+    public void setSpouseRegAddr(String spouseRegAddr) {
+        this.spouseRegAddr = spouseRegAddr;
+    }
+
+    public void setSpouseMobile(String spouseMobile) {
+        this.spouseMobile = spouseMobile;
+    }
+
+    public void setSpouseWorkType(String spouseWorkType) {
+        this.spouseWorkType = spouseWorkType;
+    }
+
+    public void setSpouseCompanyName(String spouseCompanyName) {
+        this.spouseCompanyName = spouseCompanyName;
+    }
+
+    public void setFamiliesName(String familiesName) {
+        this.familiesName = familiesName;
+    }
+
+    public void setFamiliesMobile(String familiesMobile) {
+        this.familiesMobile = familiesMobile;
+    }
+
+    public void setFamiliesRelationship(String familiesRelationship) {
+        this.familiesRelationship = familiesRelationship;
+    }
+
+    public void setContactsName(String contactsName) {
+        this.contactsName = contactsName;
+    }
+
+    public void setContactsMobile(String contactsMobile) {
+        this.contactsMobile = contactsMobile;
+    }
+
+    public void setContactsRelatonship(String contactsRelatonship) {
+        this.contactsRelatonship = contactsRelatonship;
+    }
+
+    public void setContactsCompanyName(String contactsCompanyName) {
+        this.contactsCompanyName = contactsCompanyName;
+    }
+
+    public void setGuaranteeName(String guaranteeName) {
+        this.guaranteeName = guaranteeName;
+    }
+
+    public void setGuaranteeSex(String guaranteeSex) {
+        this.guaranteeSex = guaranteeSex;
+    }
+
+    public void setGuaranteeIdType(String guaranteeIdType) {
+        this.guaranteeIdType = guaranteeIdType;
+    }
+
+    public void setGuaranteeIdNumber(String guaranteeIdNumber) {
+        this.guaranteeIdNumber = guaranteeIdNumber;
+    }
+
+    public void setGuaranteeEducation(String guaranteeEducation) {
+        this.guaranteeEducation = guaranteeEducation;
+    }
+
+    public void setGuaranteeRelationship(String guaranteeRelationship) {
+        this.guaranteeRelationship = guaranteeRelationship;
+    }
+
+    public void setGuaranteeMarriage(String guaranteeMarriage) {
+        this.guaranteeMarriage = guaranteeMarriage;
+    }
+
+    public void setGuaranteeMobile(String guaranteeMobile) {
+        this.guaranteeMobile = guaranteeMobile;
+    }
+
+    public void setGuaranteeHouseTel(String guaranteeHouseTel) {
+        this.guaranteeHouseTel = guaranteeHouseTel;
+    }
+
+    private String whetherPaySecurity;
+
+    private String paySecurityTerm;
+
+    public String getSpouseName() {
+        return spouseName;
+    }
+
+    public String getSpouseSex() {
+        return spouseSex;
+    }
+
+    public String getSpouseIdType() {
+        return spouseIdType;
+    }
+
+    public String getSpouseIdNumber() {
+        return spouseIdNumber;
+    }
+
+    public String getSpouseEducation() {
+        return spouseEducation;
+    }
+
+    public String getSpouseRegAddr() {
+        return spouseRegAddr;
+    }
+
+    public String getSpouseMobile() {
+        return spouseMobile;
+    }
+
+    public String getSpouseWorkType() {
+        return spouseWorkType;
+    }
+
+    public String getSpouseCompanyName() {
+        return spouseCompanyName;
+    }
+
+    public String getFamiliesName() {
+        return familiesName;
+    }
+
+    public String getFamiliesMobile() {
+        return familiesMobile;
+    }
+
+    public String getFamiliesRelationship() {
+        return familiesRelationship;
+    }
+
+    public String getContactsName() {
+        return contactsName;
+    }
+
+    public String getContactsMobile() {
+        return contactsMobile;
+    }
+
+    public String getContactsRelatonship() {
+        return contactsRelatonship;
+    }
+
+    public String getContactsCompanyName() {
+        return contactsCompanyName;
+    }
+
+    public String getGuaranteeName() {
+        return guaranteeName;
+    }
+
+    public String getGuaranteeSex() {
+        return guaranteeSex;
+    }
+
+    public String getGuaranteeIdType() {
+        return guaranteeIdType;
+    }
+
+    public String getGuaranteeIdNumber() {
+        return guaranteeIdNumber;
+    }
+
+    public String getGuaranteeEducation() {
+        return guaranteeEducation;
+    }
+
+    public String getGuaranteeRelationship() {
+        return guaranteeRelationship;
+    }
+
+    public String getGuaranteeMarriage() {
+        return guaranteeMarriage;
+    }
+
+    public String getGuaranteeMobile() {
+        return guaranteeMobile;
+    }
+
+    public String getGuaranteeHouseTel() {
+        return guaranteeHouseTel;
+    }
+
+    private String userAnnualIncome;
+
+    private String familyAnnualIncome;
+
+    private String spouseName;
+
+    private String spouseSex;
+
+    private String spouseIdType;
+
+    private String spouseIdNumber;
+
+    private String spouseEducation;
+
+    private String spouseRegAddr;
+
+    private String spouseMobile;
+
+    private String spouseWorkType;
+
+    private String spouseCompanyName;
+
+    private String familiesName;
+
+    private String familiesMobile;
+
+    private String familiesRelationship;
+
+    private String contactsName;
+
+    private String contactsMobile;
+
+    private String contactsRelatonship;
+
+    private String contactsCompanyName;
+
+    private String guaranteeName;
+
+    private String guaranteeSex;
+
+    private String guaranteeIdType;
+
+    private String guaranteeIdNumber;
+
+    private String guaranteeEducation;
+
+    private String guaranteeRelationship;
+
+    private String guaranteeMarriage;
+
+    private String guaranteeMobile;
+
+    private String guaranteeHouseTel;
     
     
     /**
@@ -1855,4 +2127,91 @@ public class PubCustomer implements Serializable {
 		this.id = id;
 	}
 
+    public byte getIdType() {
+        return idType;
+    }
+
+    public void setIdType(byte idType) {
+        this.idType = idType;
+    }
+
+    public byte getResidentialAddress() {
+        return residentialAddress;
+    }
+
+    public void setResidentialAddress(byte residentialAddress) {
+        this.residentialAddress = residentialAddress;
+    }
+
+    public String getHouseTel() {
+        return houseTel;
+    }
+
+    public void setHouseTel(String houseTel) {
+        this.houseTel = houseTel;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
+    public String getWechatId() {
+        return wechatId;
+    }
+
+    public void setWechatId(String wechatId) {
+        this.wechatId = wechatId;
+    }
+
+    public byte getWorkType() {
+        return workType;
+    }
+
+    public void setWorkType(byte workType) {
+        this.workType = workType;
+    }
+
+    public byte getNatureOfWork() {
+        return natureOfWork;
+    }
+
+    public void setNatureOfWork(byte natureOfWork) {
+        this.natureOfWork = natureOfWork;
+    }
+
+    public String getWhetherPaySecurity() {
+        return whetherPaySecurity;
+    }
+
+    public void setWhetherPaySecurity(String whetherPaySecurity) {
+        this.whetherPaySecurity = whetherPaySecurity;
+    }
+
+    public String getPaySecurityTerm() {
+        return paySecurityTerm;
+    }
+
+    public void setPaySecurityTerm(String paySecurityTerm) {
+        this.paySecurityTerm = paySecurityTerm;
+    }
+
+    public String getUserAnnualIncome() {
+        return userAnnualIncome;
+    }
+
+    public void setUserAnnualIncome(String userAnnualIncome) {
+        this.userAnnualIncome = userAnnualIncome;
+    }
+
+    public String getFamilyAnnualIncome() {
+        return familyAnnualIncome;
+    }
+
+    public void setFamilyAnnualIncome(String familyAnnualIncome) {
+        this.familyAnnualIncome = familyAnnualIncome;
+    }
 }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.modules.common.dao.DataStatisticsDao">
+	
+	<select id="queryBorrowInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT
+			MONTH (borrow.create_time) AS month,
+			count(*) AS count,
+			SUM(borrow.account) AS account
+		FROM
+			pl_borrow_requirement borrow
+		LEFT JOIN sys_user sysuser ON sysuser.id = borrow.creator
+		LEFT JOIN sys_office office ON sysuser.office_id = office.id
+		LEFT JOIN pl_product product ON product.id = borrow.product_id
+		<if test="isPass !='' and isPass !=null">
+			LEFT JOIN ACT_HI_TASKINST task ON task.PROC_INST_ID_ = borrow.process_instance_id
+		</if>
+		WHERE
+			<if test="isPass !='' and isPass !=null">
+				task.END_TIME_ is not NULL AND (task.TASK_DEF_KEY_ = 'usertask-loan' OR task.TASK_DEF_KEY_ = 'usertask-channel-loaned') AND
+			</if>
+			<if test="isOpen !='' and isOpen !=null">
+				product.isopen = #{isOpen} AND
+			</if>
+			<if test="officeId !='' and officeId !=null">
+				office.id = #{officeId} AND
+			</if>
+			<if test="coveredOffices != null">
+				office.id in
+				<foreach item="coveredOffices" collection="coveredOffices" open="(" separator="," close=")">
+					#{coveredOffices}
+				</foreach> AND
+			</if>
+			<if test="productId !='' and productId !=null">
+				borrow.product_id = #{productId} AND
+			</if>
+			<if test="productIds != null">
+				borrow.product_id in
+				<foreach item="productIds" collection="productIds" open="(" separator="," close=")">
+					#{productIds}
+				</foreach> AND
+			</if>
+			YEAR (borrow.create_time) = #{year}
+		GROUP BY
+			MONTH (borrow.create_time)
+	</select>
+
+	<select id="queryHouseAssessmentInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT
+			MONTH (assessment.create_time) AS month,
+			count(*) AS count
+		FROM
+			hous_property_assessment assessment
+		LEFT JOIN sys_user sysuser ON sysuser.id = assessment.CREATOR_ID
+		LEFT JOIN channel_partner channel ON sysuser.channel_partner_id = channel.ID
+		WHERE
+			YEAR (assessment.create_time) = #{year}
+			<if test="channelId !='' and channelId !=null">
+				AND channel.ID= #{channelId}
+			</if>
+			<if test="isComplete !='' and isComplete !=null">
+				AND assessment.STATUS = 1
+			</if>
+			AND assessment.IS_DELETE = 0
+		GROUP BY
+			MONTH (assessment.create_time)
+	</select>
+
+</mapper>

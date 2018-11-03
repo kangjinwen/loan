@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.company.modules.repay.dao.RpRepayDetailDao">
+
+	<resultMap id="BaseResultMap"
+		type="com.company.modules.repay.domain.RpRepayDetail">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="project_id" property="projectId"
+			jdbcType="INTEGER" />
+		<result column="repay_setting_id" property="repaySettingId"
+			jdbcType="INTEGER" />
+		<result column="term" property="term" jdbcType="INTEGER" />
+		<result column="date" property="date" jdbcType="DATE" />
+		<result column="capital" property="capital" jdbcType="DOUBLE" />
+		<result column="interest" property="interest" jdbcType="DOUBLE" />
+		<result column="service_fee" property="serviceFee"
+			jdbcType="DOUBLE" />
+		<result column="total_amount" property="totalAmount"
+			jdbcType="DOUBLE" />
+		<result column="repay_interm" property="repayInterm"
+			jdbcType="DOUBLE" />
+		<result column="penalty_amount" property="penaltyAmount"
+			jdbcType="DOUBLE" />
+		<result column="actual_date" property="actualDate"
+			jdbcType="DATE" />
+		<result column="repay_status_type" property="repayStatusType"
+			jdbcType="VARCHAR" />
+		<result column="is_payoff" property="isPayoff" jdbcType="BIT" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, project_id, repay_setting_id, term, date, capital,
+		interest,
+		service_fee, total_amount,
+		repay_interm, penalty_amount,
+		actual_date, repay_status_type, is_payoff
+	</sql>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from rp_repay_detail
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<delete id="deleteByPrimaryKey"
+		parameterType="java.lang.Integer">
+		delete from rp_repay_detail
+		where id =
+		#{id,jdbcType=INTEGER}
+	</delete>
+
+	<insert id="insert"
+		parameterType="com.company.modules.repay.domain.RpRepayDetail">
+		insert into rp_repay_detail (id, project_id,
+		repay_setting_id,
+		term, date, capital,
+		interest, service_fee,
+		total_amount,
+		repay_interm, penalty_amount, actual_date,
+		repay_status_type, is_payoff)
+		values (#{id,jdbcType=INTEGER},
+		#{projectId,jdbcType=INTEGER},
+		#{repaySettingId,jdbcType=INTEGER},
+		#{term,jdbcType=INTEGER}, #{date,jdbcType=DATE},
+		#{capital,jdbcType=DOUBLE},
+		#{interest,jdbcType=DOUBLE},
+		#{serviceFee,jdbcType=DOUBLE},
+		#{totalAmount,jdbcType=DOUBLE},
+		#{repayInterm,jdbcType=DOUBLE}, #{penaltyAmount,jdbcType=DOUBLE},
+		#{actualDate,jdbcType=DATE},
+		#{repayStatusType,jdbcType=VARCHAR},
+		#{isPayoff,jdbcType=BIT})
+	</insert>
+
+	<insert id="insertSelective"
+		parameterType="com.company.modules.repay.domain.RpRepayDetail">
+		insert into rp_repay_detail
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="projectId != null">
+				project_id,
+			</if>
+			<if test="repaySettingId != null">
+				repay_setting_id,
+			</if>
+			<if test="term != null">
+				term,
+			</if>
+			<if test="date != null">
+				date,
+			</if>
+			<if test="capital != null">
+				capital,
+			</if>
+			<if test="interest != null">
+				interest,
+			</if>
+			<if test="serviceFee != null">
+				service_fee,
+			</if>
+			<if test="totalAmount != null">
+				total_amount,
+			</if>
+			<if test="repayInterm != null">
+				repay_interm,
+			</if>
+			<if test="penaltyAmount != null">
+				penalty_amount,
+			</if>
+			<if test="actualDate != null">
+				actual_date,
+			</if>
+			<if test="repayStatusType != null">
+				repay_status_type,
+			</if>
+			<if test="isPayoff != null">
+				is_payoff,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="projectId != null">
+				#{projectId,jdbcType=INTEGER},
+			</if>
+			<if test="repaySettingId != null">
+				#{repaySettingId,jdbcType=INTEGER},
+			</if>
+			<if test="term != null">
+				#{term,jdbcType=INTEGER},
+			</if>
+			<if test="date != null">
+				#{date,jdbcType=DATE},
+			</if>
+			<if test="capital != null">
+				#{capital,jdbcType=DOUBLE},
+			</if>
+			<if test="interest != null">
+				#{interest,jdbcType=DOUBLE},
+			</if>
+			<if test="serviceFee != null">
+				#{serviceFee,jdbcType=DOUBLE},
+			</if>
+			<if test="totalAmount != null">
+				#{totalAmount,jdbcType=DOUBLE},
+			</if>
+			<if test="repayInterm != null">
+				#{repayInterm,jdbcType=DOUBLE},
+			</if>
+			<if test="penaltyAmount != null">
+				#{penaltyAmount,jdbcType=DOUBLE},
+			</if>
+			<if test="actualDate != null">
+				#{actualDate,jdbcType=DATE},
+			</if>
+			<if test="repayStatusType != null">
+				#{repayStatusType,jdbcType=VARCHAR},
+			</if>
+			<if test="isPayoff != null">
+				#{isPayoff,jdbcType=BIT},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.company.modules.repay.domain.RpRepayDetail">
+		update rp_repay_detail
+		<set>
+			<if test="projectId != null">
+				project_id = #{projectId,jdbcType=INTEGER},
+			</if>
+			<if test="repaySettingId != null">
+				repay_setting_id = #{repaySettingId,jdbcType=INTEGER},
+			</if>
+			<if test="term != null">
+				term = #{term,jdbcType=INTEGER},
+			</if>
+			<if test="date != null">
+				date = #{date,jdbcType=DATE},
+			</if>
+			<if test="capital != null">
+				capital = #{capital,jdbcType=DOUBLE},
+			</if>
+			<if test="interest != null">
+				interest = #{interest,jdbcType=DOUBLE},
+			</if>
+			<if test="serviceFee != null">
+				service_fee = #{serviceFee,jdbcType=DOUBLE},
+			</if>
+			<if test="totalAmount != null">
+				total_amount = #{totalAmount,jdbcType=DOUBLE},
+			</if>
+			<if test="repayInterm != null">
+				repay_interm = #{repayInterm,jdbcType=DOUBLE},
+			</if>
+			<if test="penaltyAmount != null">
+				penalty_amount = #{penaltyAmount,jdbcType=DOUBLE},
+			</if>
+			<if test="actualDate != null">
+				actual_date = #{actualDate,jdbcType=DATE},
+			</if>
+			<if test="repayStatusType != null">
+				repay_status_type = #{repayStatusType,jdbcType=VARCHAR},
+			</if>
+			<if test="isPayoff != null">
+				is_payoff = #{isPayoff,jdbcType=BIT},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<update id="updateByPrimaryKey"
+		parameterType="com.company.modules.repay.domain.RpRepayDetail">
+		update rp_repay_detail
+		set project_id =
+		#{projectId,jdbcType=INTEGER},
+		repay_setting_id =
+		#{repaySettingId,jdbcType=INTEGER},
+		term = #{term,jdbcType=INTEGER},
+		date = #{date,jdbcType=DATE},
+		capital = #{capital,jdbcType=DOUBLE},
+		interest = #{interest,jdbcType=DOUBLE},
+		service_fee =
+		#{serviceFee,jdbcType=DOUBLE},
+		total_amount =
+		#{totalAmount,jdbcType=DOUBLE},
+		repay_interm =
+		#{repayInterm,jdbcType=DOUBLE},
+		penalty_amount =
+		#{penaltyAmount,jdbcType=DOUBLE},
+		actual_date =
+		#{actualDate,jdbcType=DATE},
+		repay_status_type =
+		#{repayStatusType,jdbcType=VARCHAR},
+		is_payoff =
+		#{isPayoff,jdbcType=BIT}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+
+	<insert id="insertRepayDetails">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into rp_repay_detail
+		( project_id,repay_setting_id, term,
+		date,
+		capital, interest,
+		service_fee, total_amount, repay_interm,
+		penalty_amount, actual_date, repay_status_type,
+		is_payoff)
+		values
+		<foreach collection="list" item="repayDetails" index="index"
+			separator=",">
+			(#{projectId},
+			#{repaySettingId}, #{repayDetails.term},
+			#{repayDetails.date},
+			#{repayDetails.capital},
+			#{repayDetails.interest}, #{repayDetails.serviceFee},
+			#{repayDetails.totalAmount}, #{repayDetails.repayInterm},
+			#{repayDetails.penaltyAmount},
+			#{repayDetails.actualDate},
+			#{repayDetails.repayStatusType}, #{repayDetails.isPayoff}
+			)
+		</foreach>
+	</insert>
+
+	<select id="getCountOfRepayDetailByProjectId"
+		parameterType="long" resultType="Integer">
+
+		SELECT COUNT(*) FROM rp_repay_detail
+		WHERE project_id = #{projectId}
+
+	</select>
+
+	<select id="getListOfRepayDetailByProjectId"
+		resultType="java.util.HashMap">
+
+		SELECT
+		id AS id,
+		project_id AS projectId,
+		repay_setting_id AS
+		repaySettingId,
+		term AS term,
+		DATE AS DATE,
+		capital AS capital,
+		interest
+		AS interest,
+		service_fee AS serviceFee,
+		total_amount AS totalAmount,
+		repay_interm AS repayInterm,
+		penalty_amount AS penaltyAmount,
+		actual_date AS actualDate,
+		repay_status_type AS repayStatusType,
+		is_payoff AS isPayoff
+		FROM
+		rp_repay_detail
+		WHERE project_id =
+		#{projectId}
+		LIMIT ${(bb.pageNum-1)*bb.pageSize}, #{bb.pageSize}
+	</select>
+	<select id="selectByProjectIdAndTerm" resultMap="BaseResultMap"
+		parameterType="com.company.modules.repay.domain.RpRepayDetail">
+		select
+		<include refid="Base_Column_List" />
+		from rp_repay_detail
+		where project_id = #{projectId}
+		and term = #{term}
+	</select>
+	
+		<insert id="insertRepayDetailsBylistAndProjectId">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into rp_repay_detail
+		( project_id,repay_setting_id, term,
+		date,
+		capital, interest,
+		service_fee, total_amount, repay_interm,
+		penalty_amount, actual_date, repay_status_type,
+		is_payoff)
+		values
+		<foreach collection="list" item="repayDetails" index="index"
+			separator=",">
+			(#{projectId},
+			(SELECT id FROM rp_repay_setting WHERE project_id = #{projectId}),
+	        #{repayDetails.term},
+			#{repayDetails.date},
+			#{repayDetails.capital},
+			#{repayDetails.interest}, #{repayDetails.serviceFee},
+			#{repayDetails.totalAmount}, #{repayDetails.repayInterm},
+			#{repayDetails.penaltyAmount},
+			#{repayDetails.actualDate},
+			#{repayDetails.repayStatusType}, #{repayDetails.isPayoff}
+			)
+		</foreach>
+	</insert>
+</mapper>

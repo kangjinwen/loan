@@ -68,6 +68,13 @@ public interface SysUserService {
      * @return
      */
     List<Map<String, Object>> getUserPageList(Map<String, Object> mapdata) throws ServiceException;
+
+	/**
+	 * 查询管辖区域下的所有用户列表
+	 * @param mapdata
+	 * @return
+	 */
+	List<Map<String, Object>> getCoveredUserList(Map<String, Object> mapdata) throws ServiceException;
     
     /**
      * 获取用户总记录数
@@ -108,5 +115,5 @@ public interface SysUserService {
 
 	List<Map<String, Object>> getUserInfo(Map<String, Object> params) throws ServiceException;
 
-	SysUser queryTheLeastBusyUserByDepartName(String departName, String newOfficeId, String processInstanceId, String taskDefinition);
+	SysUser getNextAssigneeByOfficeId(String departName, String newOfficeId, String processInstanceId, String taskDefinition);
 }

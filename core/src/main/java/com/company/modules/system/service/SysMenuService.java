@@ -146,7 +146,7 @@ public interface SysMenuService {
 	List<SysMenu> getMenuList(Map<String, Object> param);
 
 
-	List<Map<String, Object>> fetchRoleMenus(String sysType,Long... roleids) throws ServiceException;
+	List<Map<String, Object>> fetchRoleMenus(String sysType, Object... roleids) throws ServiceException;
 
 	void saveOrUpdateMenuss(long roleId,List<Long> list) throws ServiceException;
 
@@ -167,4 +167,8 @@ public interface SysMenuService {
 	List<Map<String, Object>> fetchRoleMenuHas(Long roleId) throws ServiceException;
 	
 	List<Map<String, Object>> fetchAllMenu() throws ServiceException;
+
+	Map<String, Object> getRouteInfoByScriptid(String scriptid) throws ServiceException;
+
+	Map<String, Object> getRouteInfoByProcessState(String processsState) throws ServiceException;
 }
